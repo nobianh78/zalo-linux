@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <title>Zalo Call</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: #0d1117;
+      color: #fff;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+
+    #callContainer {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 20px 20px;
+      position: relative;
+      z-index: 10;
+      background: linear-gradient(180deg, rgba(22, 27, 34, 0.92) 0%, rgba(13, 17, 23, 0.98) 100%);
+      transition: background 0.3s;
+    }
+
+    /* Remote Video Canvas */
+    #remoteCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #000;
+      z-index: 1;
+      display: none;
+    }
+
+    /* Local Video Picture-in-Picture */
+    #localVideo {
+      position: absolute;
+      bottom: 105px;
+      right: 18px;
+      width: 140px;
+      height: 190px;
+      object-fit: cover;
+      border-radius: 12px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+      background: #21262d;
+      z-index: 20;
+      display: none;
+      transform: scaleX(-1);
+    }
+
+    body.in-video-mode #callContainer {
+      background: linear-gradient(180deg, rgba(13, 17, 23, 0.75) 0%, rgba(13, 17, 23, 0.1) 35%, rgba(13, 17, 23, 0.1) 65%, rgba(13, 17, 23, 0.85) 100%);
+    }
+
+    body.in-video-mode .avatar-wrap {
+      display: none;
+    }
+
+    .header {
+      text-align: center;
+      margin-top: 12px;
+      width: 100%;
+      position: relative;
+    }
+
+    .avatar-wrap {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      border: 3px solid rgba(0, 104, 255, 0.6);
+      padding: 3px;
+      margin: 0 auto 14px;
+      box-shadow: 0 0 20px rgba(0, 104, 255, 0.4);
+      animation: pulse 2.2s infinite;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(0, 104, 255, 0.6); }
+      70% { box-shadow: 0 0 0 16px rgba(0, 104, 255, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(0, 104, 255, 0); }
+    }
+    .avatar {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #30363d;
+    }
+
+    .name { font-size: 20px; font-weight: 600; margin-bottom: 6px; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+    .status { font-size: 14px; color: #8b949e; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
+    .timer { font-size: 16px; font-weight: 500; color: #58a6ff; margin-top: 6px; display: none; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
+
+    /* Action buttons bar */
+    .actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      margin-bottom: 8px;
+      z-index: 25;
+    }
+    .btn-action-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-label {
+      font-size: 11px;
+      color: #8b949e;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+    }
+
+    .btn {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.15s, background-color 0.15s;
+      background: rgba(255, 255, 255, 0.14);
+      color: #fff;
+      backdrop-filter: blur(10px);
+    }
+    .btn:hover { transform: scale(1.08); background: rgba(255, 255, 255, 0.24); }
+    .btn:active { transform: scale(0.95); }
+    .btn.active { background: #f85149; }
+    .btn-cam.active { background: #238636; }
+    .btn-end { background: #ea3943; color: #fff; width: 56px; height: 56px; }
+    .btn-answer { background: #2da44e; color: #fff; width: 58px; height: 58px; box-shadow: 0 0 16px rgba(46, 160, 67, 0.6); }
+
+    #incomingActions { display: none; gap: 36px; }
+    #activeActions { display: flex; gap: 16px; }
+
+    /* Settings Modal */
+    #settingsModal {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.72);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-content {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 14px;
+      width: 100%;
+      max-width: 440px;
+      max-height: 92vh;
+      overflow-y: auto;
+      padding: 18px;
+      color: #c9d1d9;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.85);
+    }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #30363d;
+      padding-bottom: 10px;
+      margin-bottom: 14px;
+    }
+    .modal-title { font-size: 15px; font-weight: 600; color: #fff; }
+    .modal-close {
+      background: none;
+      border: none;
+      color: #8b949e;
+      font-size: 20px;
+      cursor: pointer;
+      line-height: 1;
+      padding: 2px 6px;
+    }
+    .modal-close:hover { color: #fff; }
+
+    .setting-group {
+      margin-bottom: 14px;
+    }
+    .setting-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #58a6ff;
+      margin-bottom: 6px;
+    }
+    .setting-select {
+      width: 100%;
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      color: #c9d1d9;
+      padding: 8px 10px;
+      font-size: 13px;
+      outline: none;
+      margin-bottom: 6px;
+    }
+    .setting-select:focus { border-color: #58a6ff; }
+
+    .meter-container {
+      width: 100%;
+      height: 6px;
+      background: #21262d;
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+    .meter-bar {
+      height: 100%;
+      width: 0%;
+      background: #3fb950;
+      transition: width 0.05s ease;
+    }
+
+    .btn-test-sound {
+      background: #21262d;
+      border: 1px solid #30363d;
+      color: #c9d1d9;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 12px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: 0.15s;
+    }
+    .btn-test-sound:hover { background: #30363d; color: #fff; }
+
+    .preview-box {
+      width: 100%;
+      height: 140px;
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      object-fit: cover;
+      margin-top: 6px;
+      transform: scaleX(-1);
+    }
+  </style>
+</head>
+<body>
+  <!-- Remote Video Canvas -->
+  <canvas id="remoteCanvas"></canvas>
+
+  <!-- Local Video PIP -->
+  <video id="localVideo" autoplay playsinline muted></video>
+
+  <div id="callContainer">
+    <div class="header">
+      <div class="avatar-wrap">
+        <img class="avatar" id="partnerAvatar" src="https://s160-ava-talk.zadn.vn/default" onerror="this.src='https://s160-ava-talk.zadn.vn/default'" />
+      </div>
+      <div class="name" id="partnerName">Người dùng Zalo</div>
+      <div class="status" id="callStatus">Đang gọi...</div>
+      <div class="timer" id="callTimer">00:00</div>
+    </div>
+
+    <!-- INCOMING CALL BUTTONS -->
+    <div class="actions" id="incomingActions">
+      <div class="btn-action-col">
+        <button class="btn btn-end" id="declineBtn" title="Từ chối">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08a.996.996 0 0 1 0-1.41C3.28 8.78 7.39 7 12 7c4.61 0 8.72 1.78 11.71 4.67.39.39.39 1.02 0 1.41l-2.48 2.48c-.18.18-.43.29-.71.29s-.52-.11-.7-.28c-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/>
+          </svg>
+        </button>
+        <span class="btn-label">Từ chối</span>
+      </div>
+      <div class="btn-action-col">
+        <button class="btn btn-answer" id="answerBtn" title="Bắt máy">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 0 0-1.01.24l-2.2 2.2a15.053 15.053 0 0 1-6.59-6.59l2.2-2.21a.96.96 0 0 0 .25-1.01A11.36 11.36 0 0 1 8.5 3.99c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1 0 9.39 7.61 17 17 17 .55 0 1-.45 1-1v-3.5c0-.55-.45-1-1-1z"/>
+          </svg>
+        </button>
+        <span class="btn-label" style="color: #3fb950; font-weight: 500;">Bắt máy</span>
+      </div>
+    </div>
+
+    <!-- ACTIVE CALL CONTROLS -->
+    <div class="actions" id="activeActions">
+      <div class="btn-action-col">
+        <button class="btn" id="muteBtn" title="Bật/Tắt Micro">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+            <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+          </svg>
+        </button>
+        <span class="btn-label" id="muteLabel">Tắt mic</span>
+      </div>
+
+      <div class="btn-action-col">
+        <button class="btn btn-cam" id="camBtn" title="Bật/Tắt Camera">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>
+          </svg>
+        </button>
+        <span class="btn-label" id="camLabel">Bật Cam</span>
+      </div>
+
+      <div class="btn-action-col">
+        <button class="btn" id="btnOpenSettings" title="Cài đặt">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+          </svg>
+        </button>
+        <span class="btn-label">Cài đặt</span>
+      </div>
+
+      <div class="btn-action-col">
+        <button class="btn btn-end" id="endBtn" title="Kết thúc">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08a.996.996 0 0 1 0-1.41C3.28 8.78 7.39 7 12 7c4.61 0 8.72 1.78 11.71 4.67.39.39.39 1.02 0 1.41l-2.48 2.48c-.18.18-.43.29-.71.29s-.52-.11-.7-.28c-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/>
+          </svg>
+        </button>
+        <span class="btn-label">Kết thúc</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS MODAL -->
+  <div id="settingsModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">Cài đặt Âm thanh & Video</div>
+        <button class="modal-close" id="btnCloseSettings">&times;</button>
+      </div>
+
+      <!-- Microphone Selection -->
+      <div class="setting-group">
+        <div class="setting-label">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+          Microphone (Đầu vào)
+        </div>
+        <select class="setting-select" id="micSelect"></select>
+        <div style="font-size: 11px; color: #8b949e; margin-bottom: 2px;">Mức âm lượng mic thu vào:</div>
+        <div class="meter-container"><div class="meter-bar" id="micMeterBar"></div></div>
+      </div>
+
+      <!-- Speaker Selection -->
+      <div class="setting-group">
+        <div class="setting-label">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+          Loa / Tai nghe (Đầu ra)
+        </div>
+        <select class="setting-select" id="speakerSelect"></select>
+        <button class="btn-test-sound" id="btnTestSound">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          Thử âm thanh loa
+        </button>
+      </div>
+
+      <!-- Camera Selection -->
+      <div class="setting-group" style="margin-bottom: 4px;">
+        <div class="setting-label">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
+          Camera (Video)
+        </div>
+        <select class="setting-select" id="cameraSelect"></select>
+        <video class="preview-box" id="previewVideo" autoplay playsinline muted></video>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const { ipcRenderer } = require('electron');
+
+    const params = new URLSearchParams(window.location.search);
+    let partnerNameText = params.get('name') || "Người dùng Zalo";
+    let partnerAvatarUrl = params.get('avatar') || "https://s160-ava-talk.zadn.vn/default";
+    let initialStatusText = params.get('status') || "Đang gọi...";
+    let isIncomingCall = params.get('incoming') === '1';
+    let isVideoCallMode = params.get('video') === '1';
+
+    const partnerNameEl = document.getElementById('partnerName');
+    const partnerAvatarEl = document.getElementById('partnerAvatar');
+    const statusEl = document.getElementById('callStatus');
+    const timerEl = document.getElementById('callTimer');
+    const incomingActions = document.getElementById('incomingActions');
+    const activeActions = document.getElementById('activeActions');
+    const muteBtn = document.getElementById('muteBtn');
+    const muteLabel = document.getElementById('muteLabel');
+    const camBtn = document.getElementById('camBtn');
+    const camLabel = document.getElementById('camLabel');
+    const endBtn = document.getElementById('endBtn');
+    const answerBtn = document.getElementById('answerBtn');
+    const declineBtn = document.getElementById('declineBtn');
+    const remoteCanvas = document.getElementById('remoteCanvas');
+    const remoteCtx = remoteCanvas.getContext('2d');
+    const localVideo = document.getElementById('localVideo');
+
+    // Settings elements
+    const settingsModal = document.getElementById('settingsModal');
+    const btnOpenSettings = document.getElementById('btnOpenSettings');
+    const btnCloseSettings = document.getElementById('btnCloseSettings');
+    const micSelect = document.getElementById('micSelect');
+    const speakerSelect = document.getElementById('speakerSelect');
+    const cameraSelect = document.getElementById('cameraSelect');
+    const micMeterBar = document.getElementById('micMeterBar');
+    const btnTestSound = document.getElementById('btnTestSound');
+    const previewVideo = document.getElementById('previewVideo');
+
+    partnerNameEl.innerText = partnerNameText;
+    partnerAvatarEl.src = partnerAvatarUrl;
+    statusEl.innerText = initialStatusText;
+
+    if (isIncomingCall) {
+      incomingActions.style.display = 'flex';
+      activeActions.style.display = 'none';
+    } else {
+      incomingActions.style.display = 'none';
+      activeActions.style.display = 'flex';
+    }
+
+    if (isVideoCallMode) {
+      document.body.classList.add('in-video-mode');
+    }
+
+    ipcRenderer.on('init-call-data', (e, data) => {
+      if (data.partner) {
+        if (data.partner.name) partnerNameEl.innerText = data.partner.name;
+        if (data.partner.avatar) partnerAvatarEl.src = data.partner.avatar;
+      }
+      if (data.initialStatus) statusEl.innerText = data.initialStatus;
+      if (data.isIncoming) {
+        incomingActions.style.display = 'flex';
+        activeActions.style.display = 'none';
+      } else {
+        incomingActions.style.display = 'none';
+        activeActions.style.display = 'flex';
+      }
+      if (data.isVideoCall) {
+        document.body.classList.add('in-video-mode');
+        ipcRenderer.send('call-action-expand-video');
+        startCamera();
+      }
+    });
+
+    let startTime = null;
+    let timerInterval = null;
+    let isMuted = false;
+    let isCamOn = false;
+    let localStream = null;
+    let previewStream = null;
+    let trackReader = null;
+    let videoEncoder = null;
+    let videoDecoder = null;
+    let forceKeyFrame = false;
+
+    // Mic meter
+    let audioMeterCtx = null;
+    let meterStream = null;
+    let meterInterval = null;
+
+    function startTimer() {
+      if (timerInterval) return;
+      startTime = Date.now();
+      timerEl.style.display = 'block';
+      timerInterval = setInterval(() => {
+        const delta = Math.floor((Date.now() - startTime) / 1000);
+        const m = String(Math.floor(delta / 60)).padStart(2, '0');
+        const s = String(delta % 60).padStart(2, '0');
+        timerEl.innerText = `${m}:${s}`;
+      }, 1000);
+    }
+
+    // Call Action Listeners
+    answerBtn.addEventListener('click', () => {
+      incomingActions.style.display = 'none';
+      activeActions.style.display = 'flex';
+      statusEl.innerText = 'Đang kết nối...';
+      ipcRenderer.send('call-action-answer');
+      if (isVideoCallMode) {
+        startCamera();
+      }
+    });
+
+    declineBtn.addEventListener('click', () => {
+      ipcRenderer.send('call-action-decline');
+    });
+
+    endBtn.addEventListener('click', () => {
+      stopCamera();
+      ipcRenderer.send('call-action-end');
+    });
+
+    muteBtn.addEventListener('click', () => {
+      isMuted = !isMuted;
+      muteBtn.classList.toggle('active', isMuted);
+      muteLabel.innerText = isMuted ? 'Bật mic' : 'Tắt mic';
+      ipcRenderer.send('call-action-mute', isMuted);
+    });
+
+    camBtn.addEventListener('click', () => {
+      if (!isCamOn) {
+        startCamera(cameraSelect.value);
+      } else {
+        stopCamera();
+      }
+    });
+
+    // Remote Video Decoder
+    function initVideoDecoder(codec) {
+      if (videoDecoder) {
+        try { videoDecoder.close(); } catch(e) {}
+      }
+      if (!window.VideoDecoder) return;
+
+      videoDecoder = new VideoDecoder({
+        output: (frame) => {
+          if (remoteCanvas.width !== frame.displayWidth || remoteCanvas.height !== frame.displayHeight) {
+            remoteCanvas.width = frame.displayWidth;
+            remoteCanvas.height = frame.displayHeight;
+          }
+          remoteCtx.drawImage(frame, 0, 0, remoteCanvas.width, remoteCanvas.height);
+          frame.close();
+          if (remoteCanvas.style.display !== 'block') {
+            remoteCanvas.style.display = 'block';
+            document.body.classList.add('in-video-mode');
+            ipcRenderer.send('call-action-expand-video');
+          }
+        },
+        error: (e) => {
+          console.warn('[VideoDecoder] error:', e);
+          ipcRenderer.send('call-action-need-key');
+        }
+      });
+
+      try {
+        videoDecoder.configure({
+          codec: codec,
+          optimizeForLatency: true
+        });
+      } catch(err) {
+        console.warn('[VideoDecoder] configure failed:', err);
+      }
+    }
+
+    ipcRenderer.on('remote-video-frame', (e, { key, codec, data }) => {
+      if (!videoDecoder || videoDecoder.state !== 'configured') {
+        initVideoDecoder(codec || 'avc1.64001e');
+      }
+      if (videoDecoder && videoDecoder.state === 'configured') {
+        try {
+          videoDecoder.decode(new EncodedVideoChunk({
+            type: key ? 'key' : 'delta',
+            timestamp: performance.now() * 1000,
+            data: (data instanceof Uint8Array ? data : new Uint8Array(data))
+          }));
+        } catch (err) {
+          console.warn('[VideoDecoder] decode error:', err);
+          ipcRenderer.send('call-action-need-key');
+        }
+      }
+    });
+
+    ipcRenderer.on('request-keyframe', () => {
+      forceKeyFrame = true;
+    });
+
+    ipcRenderer.on('peer-state', (e, state) => {
+      if (state && state.camOff) {
+        remoteCanvas.style.display = 'none';
+        if (!isCamOn) {
+          document.body.classList.remove('in-video-mode');
+        }
+      }
+    });
+
+    // Local Camera Video Encoding (WebCodecs)
+    async function startCamera(deviceId = null) {
+      try {
+        stopCamera();
+        const constraints = {
+          video: deviceId && deviceId !== 'default' ? { deviceId: { exact: deviceId } } : { width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: 20 } },
+          audio: false
+        };
+        localStream = await navigator.mediaDevices.getUserMedia(constraints);
+        localVideo.srcObject = localStream;
+        localVideo.style.display = 'block';
+        isCamOn = true;
+        camBtn.classList.add('active');
+        camLabel.innerText = 'Tắt Cam';
+        document.body.classList.add('in-video-mode');
+        ipcRenderer.send('call-action-expand-video');
+        ipcRenderer.send('call-action-camera', true);
+
+        const track = localStream.getVideoTracks()[0];
+        const settings = track.getSettings();
+        const w = settings.width || 640;
+        const h = settings.height || 480;
+
+        if (window.VideoEncoder) {
+          videoEncoder = new VideoEncoder({
+            output: (chunk) => {
+              const buf = new Uint8Array(chunk.byteLength);
+              chunk.copyTo(buf);
+              ipcRenderer.send('call-action-video-frame', {
+                key: chunk.type === 'key',
+                data: buf,
+                w: w,
+                h: h
+              });
+            },
+            error: (e) => console.warn('[VideoEncoder] error:', e)
+          });
+
+          videoEncoder.configure({
+            codec: 'avc1.64001e',
+            width: w,
+            height: h,
+            bitrate: 450_000,
+            framerate: 20,
+            avc: { format: 'annexb' }
+          });
+
+          if (window.MediaStreamTrackProcessor) {
+            const processor = new MediaStreamTrackProcessor({ track });
+            trackReader = processor.readable.getReader();
+            let fIdx = 0;
+            (async () => {
+              while (isCamOn) {
+                const { done, value: vFrame } = await trackReader.read();
+                if (done || !vFrame) break;
+                if (videoEncoder && videoEncoder.state === 'configured') {
+                  const reqKey = (fIdx++ % 40 === 0) || forceKeyFrame;
+                  forceKeyFrame = false;
+                  videoEncoder.encode(vFrame, { keyFrame: reqKey });
+                }
+                vFrame.close();
+              }
+            })().catch(() => {});
+          }
+        }
+      } catch(e) {
+        console.warn('[startCamera] error:', e);
+      }
+    }
+
+    function stopCamera() {
+      isCamOn = false;
+      camBtn.classList.remove('active');
+      camLabel.innerText = 'Bật Cam';
+      if (trackReader) {
+        try { trackReader.cancel(); } catch(e) {}
+        trackReader = null;
+      }
+      if (localStream) {
+        localStream.getTracks().forEach(t => t.stop());
+        localStream = null;
+      }
+      localVideo.style.display = 'none';
+      localVideo.srcObject = null;
+      if (videoEncoder && videoEncoder.state !== 'closed') {
+        try { videoEncoder.close(); } catch(e) {}
+        videoEncoder = null;
+      }
+      if (remoteCanvas.style.display !== 'block') {
+        document.body.classList.remove('in-video-mode');
+      }
+      ipcRenderer.send('call-action-camera', false);
+    }
+
+    // Settings Modal & Device Enumeration
+    async function openSettingsModal() {
+      settingsModal.style.display = 'flex';
+      if (!micSelect.children.length || !cameraSelect.children.length) {
+        await loadDevices();
+      } else {
+        startCameraPreview(cameraSelect.value);
+        startMicMeter(micSelect.value);
+      }
+    }
+
+    function closeSettingsModal() {
+      settingsModal.style.display = 'none';
+      stopMicMeter();
+      if (previewStream) {
+        previewStream.getTracks().forEach(t => t.stop());
+        previewStream = null;
+      }
+    }
+
+    btnOpenSettings.addEventListener('click', openSettingsModal);
+    btnCloseSettings.addEventListener('click', closeSettingsModal);
+    settingsModal.addEventListener('click', (e) => {
+      if (e.target === settingsModal) closeSettingsModal();
+    });
+
+    async function loadDevices() {
+      try {
+        // Probe permissions to ensure labels are populated
+        try {
+          const probe = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+          probe.getTracks().forEach(t => t.stop());
+        } catch (e1) {
+          try {
+            const probeAudio = await navigator.mediaDevices.getUserMedia({ audio: true });
+            probeAudio.getTracks().forEach(t => t.stop());
+          } catch(e2) {}
+        }
+
+        const list = await navigator.mediaDevices.enumerateDevices();
+        micSelect.innerHTML = '';
+        speakerSelect.innerHTML = '';
+        cameraSelect.innerHTML = '';
+
+        let mC = 0, sC = 0, cC = 0;
+        list.forEach(d => {
+          const opt = document.createElement('option');
+          opt.value = d.deviceId;
+          opt.dataset.label = d.label;
+          if (d.kind === 'audioinput') {
+            opt.text = d.label || ('Microphone ' + ++mC);
+            micSelect.appendChild(opt);
+          } else if (d.kind === 'audiooutput') {
+            opt.text = d.label || ('Loa / Tai nghe ' + ++sC);
+            speakerSelect.appendChild(opt);
+          } else if (d.kind === 'videoinput') {
+            opt.text = d.label || ('Camera ' + ++cC);
+            cameraSelect.appendChild(opt);
+          }
+        });
+
+        if (!micSelect.children.length) {
+          micSelect.innerHTML = '<option value="default">Mặc định (Microphone)</option>';
+        }
+        if (!speakerSelect.children.length) {
+          speakerSelect.innerHTML = '<option value="default">Mặc định (Loa)</option>';
+        }
+        if (!cameraSelect.children.length) {
+          cameraSelect.innerHTML = '<option value="default">Không tìm thấy Camera</option>';
+        }
+
+        if (settingsModal.style.display === 'flex') {
+          startCameraPreview(cameraSelect.value);
+          startMicMeter(micSelect.value);
+        }
+      } catch(e) {
+        console.error("loadDevices error:", e);
+      }
+    }
+
+    // Preload devices in background on startup
+    loadDevices();
+
+    async function startCameraPreview(devId) {
+      try {
+        if (previewStream) {
+          previewStream.getTracks().forEach(t => t.stop());
+        }
+        const constraints = {
+          video: devId && devId !== 'default' ? { deviceId: { exact: devId } } : true,
+          audio: false
+        };
+        previewStream = await navigator.mediaDevices.getUserMedia(constraints);
+        previewVideo.srcObject = previewStream;
+      } catch(e) {
+        console.warn("startCameraPreview error:", e);
+      }
+    }
+
+    cameraSelect.addEventListener('change', () => {
+      startCameraPreview(cameraSelect.value);
+      if (isCamOn) {
+        startCamera(cameraSelect.value);
+      }
+    });
+
+    micSelect.addEventListener('change', () => {
+      const opt = micSelect.options[micSelect.selectedIndex];
+      const name = (opt && opt.dataset.label) || '';
+      ipcRenderer.send('call-action-device', { kind: 'mic', name: name });
+      startMicMeter(micSelect.value);
+    });
+
+    speakerSelect.addEventListener('change', () => {
+      const opt = speakerSelect.options[speakerSelect.selectedIndex];
+      const name = (opt && opt.dataset.label) || '';
+      ipcRenderer.send('call-action-device', { kind: 'speaker', name: name });
+    });
+
+    // Test Speaker chime
+    btnTestSound.addEventListener('click', () => {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+        osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.15);
+        osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.3);
+        gain.gain.setValueAtTime(0.18, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.6);
+      } catch(e) {}
+    });
+
+    // Mic Visualizer Meter
+    async function startMicMeter(devId = null) {
+      try {
+        stopMicMeter();
+        audioMeterCtx = new (window.AudioContext || window.webkitAudioContext)();
+        meterStream = await navigator.mediaDevices.getUserMedia({
+          audio: devId && devId !== 'default' ? { deviceId: { exact: devId } } : true,
+          video: false
+        });
+        const src = audioMeterCtx.createMediaStreamSource(meterStream);
+        const analyser = audioMeterCtx.createAnalyser();
+        analyser.fftSize = 64;
+        src.connect(analyser);
+        const dataArr = new Uint8Array(analyser.frequencyBinCount);
+        meterInterval = setInterval(() => {
+          analyser.getByteFrequencyData(dataArr);
+          let sum = 0;
+          for (let i = 0; i < dataArr.length; i++) sum += dataArr[i];
+          const avg = sum / dataArr.length;
+          const pct = Math.min(100, Math.round((avg / 128) * 100));
+          micMeterBar.style.width = pct + '%';
+        }, 50);
+      } catch(e) {
+        console.warn("startMicMeter error:", e);
+      }
+    }
+
+    function stopMicMeter() {
+      if (meterInterval) {
+        clearInterval(meterInterval);
+        meterInterval = null;
+      }
+      if (meterStream) {
+        meterStream.getTracks().forEach(t => t.stop());
+        meterStream = null;
+      }
+      if (audioMeterCtx) {
+        try { audioMeterCtx.close(); } catch(e) {}
+        audioMeterCtx = null;
+      }
+      micMeterBar.style.width = '0%';
+    }
+
+    // Call window updates from daemon
+    ipcRenderer.on('call-status', (e, text) => {
+      statusEl.innerText = text;
+    });
+
+    ipcRenderer.on('call-connected', () => {
+      statusEl.innerText = 'Đã kết nối';
+      startTimer();
+    });
+  </script>
+</body>
+</html>
