@@ -1,6 +1,6 @@
 # Zalo PC Native for Linux 🐧
 
-Bản port chạy Native Zalo PC trên Linux (sử dụng Electron + Native Modules thay thế cho Wine).
+Bản port chạy Native Zalo PC trên Linux (sử dụng Electron + Native Modules).
 
 ## Tính năng
 - ⚡ **Chạy trực tiếp native**: Không cần Wine, không overhead giả lập Windows.
