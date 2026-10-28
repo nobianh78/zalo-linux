@@ -1,0 +1,8 @@
+node_modules/
+dist/
+build/
+*.AppImage
+*.deb
+*.rpm
+package-lock.json
+*.log

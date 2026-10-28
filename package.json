@@ -1,0 +1,50 @@
+{
+  "name": "zalo-linux",
+  "version": "26.10.10",
+  "description": "Zalo PC Native Linux",
+  "homepage": "https://github.com/nobianh78/zalo-linux",
+  "author": {
+    "name": "nobianh78",
+    "email": "nobianh78@users.noreply.github.com"
+  },
+  "main": "zalo_source/bootstrap.js",
+  "scripts": {
+    "start": "./start_zalo.sh",
+    "dev": "./start_zalo.sh --dev",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder --linux AppImage deb",
+    "dist:appimage": "electron-builder --linux AppImage",
+    "dist:deb": "electron-builder --linux deb"
+  },
+  "build": {
+    "appId": "com.vng.zalo.linux",
+    "productName": "Zalo",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "zalo_source/**/*",
+      "!zalo_source/native/nativelibs/**/*.node",
+      "zalo_source/native/nativelibs/sqlite3/binding/napi-v6-linux-x64/**/*",
+      "package.json"
+    ],
+    "asar": false,
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "maintainer": "nobianh78 <nobianh78@users.noreply.github.com>",
+      "category": "Network",
+      "icon": "zalo_source/pc-dist/android-icon-192x192.png"
+    }
+  },
+  "devDependencies": {
+    "electron": "22.3.9",
+    "electron-builder": "^26.18.0"
+  },
+  "dependencies": {
+    "@ffmpeg-installer/ffmpeg": "^1.1.0",
+    "sharp": "^0.35.5"
+  }
+}
