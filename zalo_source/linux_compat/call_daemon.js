@@ -1,6 +1,6 @@
 /**
  * Native Linux Call Daemon for Zalo PC
- * Emulates ZaloCall native engine over Unix domain sockets.
+ * Emulates ZaloCall native engine over Unix domain sockets with full Incoming & Outgoing Call UI.
  */
 
 const net = require("net");
@@ -72,6 +72,23 @@ class ZaloCallDaemon {
     this.currentCall = null;
     this.callWindow = null;
     this.localUser = null;
+    this.setupIpcMain();
+  }
+
+  setupIpcMain() {
+    if (!electron || !electron.ipcMain) return;
+
+    electron.ipcMain.on("call-action-answer", () => {
+      this.answerIncomingCall();
+    });
+
+    electron.ipcMain.on("call-action-decline", () => {
+      this.declineIncomingCall();
+    });
+
+    electron.ipcMain.on("call-action-end", () => {
+      this.endCall(true);
+    });
   }
 
   start() {
@@ -181,14 +198,12 @@ class ZaloCallDaemon {
         startTime: Date.now()
       };
 
-      // Set callState incall
       this.send({
         type: "update",
         command: "callState",
         data: { state: "incall" }
       });
 
-      // Send 401 signal to ask Zalo server for call endpoints
       this.send({
         type: "sendSignal",
         command: 401,
@@ -200,8 +215,7 @@ class ZaloCallDaemon {
         }
       });
 
-      // Show call UI window
-      this.openCallWindow(partner, "Đang gọi...");
+      this.openCallWindow(partner, "Đang gọi...", false);
       return;
     }
 
@@ -212,7 +226,6 @@ class ZaloCallDaemon {
         const rtpAddr = res.rtpAddress || (res.servers && res.servers[0] ? res.servers[0].rtpaddr : "");
         const session = res.session || res.sessId || "";
 
-        // Send 416 request
         this.send({
           type: "sendSignal",
           command: 416,
@@ -234,23 +247,30 @@ class ZaloCallDaemon {
 
     if (msg.type === "control") {
       const ctrl = msg.data || {};
-      if (ctrl.act === "request" && ctrl.act_type === "voip") {
+      if ((ctrl.act === "request" || ctrl.act === "group_request") && ctrl.act_type === "voip") {
         const callData = ctrl.data || {};
+        const callerId = callData.callerId || callData.uidN || "0";
+        const callId = callData.callId || Math.floor(Date.now() / 1000);
+
         this.currentCall = {
-          callId: callData.callId,
-          calleeId: callData.callerId,
+          callId: callId,
+          calleeId: callerId,
+          callerId: callerId,
           partner: {
-            id: callData.callerId,
-            name: callData.name || "Cuộc gọi đến",
+            id: callerId,
+            name: callData.name || callData.dName || "Cuộc gọi đến",
             avatar: callData.avatar || ""
           },
           type: callData.callType || 3,
-          isCaller: false
+          isCaller: false,
+          rtcpAddress: callData.rtcpAddress || "",
+          rtpAddress: callData.rtpAddress || "",
+          session: callData.session || callData.sessId || ""
         };
 
-        this.openIncomingCallWindow(this.currentCall.partner);
+        this.openCallWindow(this.currentCall.partner, "Cuộc gọi đến...", true);
       } else if (ctrl.act === "answer") {
-        this.updateCallWindowStatus("Đã kết nối");
+        this.updateCallWindowConnected();
       } else if (ctrl.act === "cancel" || ctrl.act === "end") {
         this.endCall(false);
       }
@@ -260,6 +280,71 @@ class ZaloCallDaemon {
     if (msg.type === "request" && (msg.command === "endCall" || msg.command === "cancelCall")) {
       this.endCall(true);
       return;
+    }
+  }
+
+  answerIncomingCall() {
+    if (!this.currentCall) return;
+
+    // Send 402 answer call signal to Zalo backend
+    this.send({
+      type: "sendSignal",
+      command: 402,
+      data: {
+        callerId: this.currentCall.calleeId,
+        callId: this.currentCall.callId,
+        status: 0,
+        codec: 1,
+        extendData: "",
+        rtcpAddress: this.currentCall.rtcpAddress || "",
+        rtpAddress: this.currentCall.rtpAddress || "",
+        session: this.currentCall.session || ""
+      }
+    });
+
+    // Send 408 answer ACK
+    this.send({
+      type: "sendSignal",
+      command: 408,
+      data: {
+        calleeId: this.currentCall.calleeId,
+        callId: this.currentCall.callId
+      }
+    });
+
+    // Update state to in-call
+    this.send({
+      type: "update",
+      command: "callState",
+      data: { state: "incall" }
+    });
+
+    this.updateCallWindowConnected();
+  }
+
+  declineIncomingCall() {
+    if (!this.currentCall) return;
+
+    this.send({
+      type: "sendSignal",
+      command: 405,
+      data: {
+        toId: this.currentCall.calleeId,
+        callId: this.currentCall.callId,
+        callType: this.currentCall.type || 3
+      }
+    });
+
+    this.send({
+      type: "update",
+      command: "callState",
+      data: { state: "free" }
+    });
+
+    this.currentCall = null;
+    if (this.callWindow && !this.callWindow.isDestroyed()) {
+      this.callWindow.close();
+      this.callWindow = null;
     }
   }
 
@@ -288,7 +373,7 @@ class ZaloCallDaemon {
     }
   }
 
-  openCallWindow(partner, initialStatus) {
+  openCallWindow(partner, initialStatus, isIncoming = false) {
     if (!electron || !electron.BrowserWindow) return;
 
     if (this.callWindow && !this.callWindow.isDestroyed()) {
@@ -298,10 +383,11 @@ class ZaloCallDaemon {
 
     this.callWindow = new electron.BrowserWindow({
       width: 360,
-      height: 540,
+      height: 560,
       resizable: false,
-      title: "Zalo Call",
+      title: isIncoming ? "Cuộc gọi đến - Zalo" : "Zalo Call",
       frame: true,
+      alwaysOnTop: isIncoming,
       backgroundColor: "#161b22",
       webPreferences: {
         nodeIntegration: true,
@@ -309,6 +395,7 @@ class ZaloCallDaemon {
       }
     });
 
+    const isIncomingFlag = !!isIncoming;
     const htmlContent = `
     <!DOCTYPE html>
     <html>
@@ -327,7 +414,7 @@ class ZaloCallDaemon {
           justify-content: space-between;
           padding: 40px 20px;
         }
-        .header { text-align: center; margin-top: 20px; }
+        .header { text-align: center; margin-top: 20px; width: 100%; }
         .avatar-wrap {
           width: 110px;
           height: 110px;
@@ -353,10 +440,14 @@ class ZaloCallDaemon {
         .name { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
         .status { font-size: 14px; color: #8b949e; }
         .timer { font-size: 16px; font-weight: 500; color: #58a6ff; margin-top: 8px; display: none; }
-        .actions { display: flex; gap: 24px; align-items: center; margin-bottom: 20px; }
+        
+        .actions { display: flex; gap: 32px; align-items: center; margin-bottom: 24px; }
+        .btn-action-col { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .btn-label { font-size: 12px; color: #8b949e; }
+        
         .btn {
-          width: 56px;
-          height: 56px;
+          width: 58px;
+          height: 58px;
           border-radius: 50%;
           border: none;
           outline: none;
@@ -370,7 +461,11 @@ class ZaloCallDaemon {
         .btn:active { transform: scale(0.95); }
         .btn-mute { background: rgba(255, 255, 255, 0.15); color: #fff; }
         .btn-mute.active { background: #f85149; }
-        .btn-end { background: #ea3943; color: #fff; width: 64px; height: 64px; }
+        .btn-end { background: #ea3943; color: #fff; width: 62px; height: 62px; }
+        .btn-answer { background: #2da44e; color: #fff; width: 64px; height: 64px; box-shadow: 0 0 16px rgba(46, 160, 67, 0.6); }
+
+        #incomingActions { display: ${isIncomingFlag ? 'flex' : 'none'}; gap: 40px; }
+        #activeActions { display: ${isIncomingFlag ? 'none' : 'flex'}; gap: 28px; }
       </style>
     </head>
     <body>
@@ -383,54 +478,143 @@ class ZaloCallDaemon {
         <div class="timer" id="callTimer">00:00</div>
       </div>
 
-      <div class="actions">
-        <button class="btn btn-mute" id="muteBtn" title="Bật/Tắt Micro">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
-            <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
-          </svg>
-        </button>
-        <button class="btn btn-end" id="endBtn" title="Kết thúc">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08a.996.996 0 0 1 0-1.41C3.28 8.78 7.39 7 12 7c4.61 0 8.72 1.78 11.71 4.67.39.39.39 1.02 0 1.41l-2.48 2.48c-.18.18-.43.29-.71.29s-.52-.11-.7-.28c-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/>
-          </svg>
-        </button>
+      <!-- INCOMING CALL BUTTONS -->
+      <div class="actions" id="incomingActions">
+        <div class="btn-action-col">
+          <button class="btn btn-end" id="declineBtn" title="Từ chối">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08a.996.996 0 0 1 0-1.41C3.28 8.78 7.39 7 12 7c4.61 0 8.72 1.78 11.71 4.67.39.39.39 1.02 0 1.41l-2.48 2.48c-.18.18-.43.29-.71.29s-.52-.11-.7-.28c-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/>
+            </svg>
+          </button>
+          <span class="btn-label">Từ chối</span>
+        </div>
+        <div class="btn-action-col">
+          <button class="btn btn-answer" id="answerBtn" title="Bắt máy">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 0 0-1.01.24l-2.2 2.2a15.053 15.053 0 0 1-6.59-6.59l2.2-2.21a.96.96 0 0 0 .25-1.01A11.36 11.36 0 0 1 8.5 3.99c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1 0 9.39 7.61 17 17 17 .55 0 1-.45 1-1v-3.5c0-.55-.45-1-1-1z"/>
+            </svg>
+          </button>
+          <span class="btn-label" style="color: #3fb950; font-weight: 500;">Bắt máy</span>
+        </div>
+      </div>
+
+      <!-- ACTIVE / OUTGOING CALL BUTTONS -->
+      <div class="actions" id="activeActions">
+        <div class="btn-action-col">
+          <button class="btn btn-mute" id="muteBtn" title="Bật/Tắt Micro">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+              <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+            </svg>
+          </button>
+          <span class="btn-label">Tắt mic</span>
+        </div>
+        <div class="btn-action-col">
+          <button class="btn btn-end" id="endBtn" title="Kết thúc">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08a.996.996 0 0 1 0-1.41C3.28 8.78 7.39 7 12 7c4.61 0 8.72 1.78 11.71 4.67.39.39.39 1.02 0 1.41l-2.48 2.48c-.18.18-.43.29-.71.29s-.52-.11-.7-.28c-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/>
+            </svg>
+          </button>
+          <span class="btn-label">Kết thúc</span>
+        </div>
       </div>
 
       <script>
         const { ipcRenderer } = require('electron');
         const endBtn = document.getElementById('endBtn');
+        const answerBtn = document.getElementById('answerBtn');
+        const declineBtn = document.getElementById('declineBtn');
         const muteBtn = document.getElementById('muteBtn');
         const statusEl = document.getElementById('callStatus');
         const timerEl = document.getElementById('callTimer');
+        const incomingActions = document.getElementById('incomingActions');
+        const activeActions = document.getElementById('activeActions');
 
         let isMuted = false;
         let timerInterval = null;
+        let ringInterval = null;
+        let audioCtx = null;
         let seconds = 0;
+
+        function playRingtone() {
+          try {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            function ring() {
+              if (!audioCtx) return;
+              const osc1 = audioCtx.createOscillator();
+              const osc2 = audioCtx.createOscillator();
+              const gain = audioCtx.createGain();
+              osc1.frequency.value = 440;
+              osc2.frequency.value = 480;
+              gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+              gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.6);
+              osc1.connect(gain);
+              osc2.connect(gain);
+              gain.connect(audioCtx.destination);
+              osc1.start();
+              osc2.start();
+              osc1.stop(audioCtx.currentTime + 1.6);
+              osc2.stop(audioCtx.currentTime + 1.6);
+            }
+            ring();
+            ringInterval = setInterval(ring, 3000);
+          } catch (e) {}
+        }
+
+        function stopRingtone() {
+          if (ringInterval) { clearInterval(ringInterval); ringInterval = null; }
+          if (audioCtx) { audioCtx.close().catch(() => {}); audioCtx = null; }
+        }
+
+        if (${isIncomingFlag}) {
+          playRingtone();
+        }
+
+        answerBtn.addEventListener('click', () => {
+          stopRingtone();
+          incomingActions.style.display = 'none';
+          activeActions.style.display = 'flex';
+          statusEl.innerText = 'Đã kết nối';
+          startTimer();
+          ipcRenderer.send('call-action-answer');
+        });
+
+        declineBtn.addEventListener('click', () => {
+          stopRingtone();
+          ipcRenderer.send('call-action-decline');
+        });
+
+        endBtn.addEventListener('click', () => {
+          stopRingtone();
+          ipcRenderer.send('call-action-end');
+        });
 
         muteBtn.addEventListener('click', () => {
           isMuted = !isMuted;
           muteBtn.classList.toggle('active', isMuted);
         });
 
-        endBtn.addEventListener('click', () => {
-          window.close();
-        });
+        function startTimer() {
+          timerEl.style.display = 'block';
+          if (!timerInterval) {
+            timerInterval = setInterval(() => {
+              seconds++;
+              const m = String(Math.floor(seconds / 60)).padStart(2, '0');
+              const s = String(seconds % 60).padStart(2, '0');
+              timerEl.innerText = m + ':' + s;
+            }, 1000);
+          }
+        }
 
         window.addEventListener('message', (e) => {
-          if (e.data && e.data.status) {
+          if (e.data && e.data.type === 'connected') {
+            stopRingtone();
+            incomingActions.style.display = 'none';
+            activeActions.style.display = 'flex';
+            statusEl.innerText = 'Đã kết nối';
+            startTimer();
+          } else if (e.data && e.data.status) {
             statusEl.innerText = e.data.status;
-            if (e.data.status === 'Đã kết nối') {
-              timerEl.style.display = 'block';
-              if (!timerInterval) {
-                timerInterval = setInterval(() => {
-                  seconds++;
-                  const m = String(Math.floor(seconds / 60)).padStart(2, '0');
-                  const s = String(seconds % 60).padStart(2, '0');
-                  timerEl.innerText = m + ':' + s;
-                }, 1000);
-              }
-            }
           }
         });
       </script>
@@ -446,16 +630,20 @@ class ZaloCallDaemon {
     });
   }
 
+  updateCallWindowConnected() {
+    if (this.callWindow && !this.callWindow.isDestroyed()) {
+      this.callWindow.webContents.executeJavaScript(`
+        window.postMessage({ type: 'connected' }, '*');
+      `);
+    }
+  }
+
   updateCallWindowStatus(status) {
     if (this.callWindow && !this.callWindow.isDestroyed()) {
       this.callWindow.webContents.executeJavaScript(`
         window.postMessage({ status: ${JSON.stringify(status)} }, '*');
       `);
     }
-  }
-
-  openIncomingCallWindow(partner) {
-    this.openCallWindow(partner, "Cuộc gọi đến...");
   }
 }
 
@@ -473,4 +661,3 @@ if (electron && electron.app) {
   const daemon = new ZaloCallDaemon(recvSocket, sendSocket);
   daemon.start();
 }
-
