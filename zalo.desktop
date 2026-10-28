@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Zalo
+Comment=Zalo PC for Linux
+Exec=/home/tuananh/Code/zalo/start_zalo.sh
+Icon=/home/tuananh/Code/zalo/zalo_source/pc-dist/apple-icon-152x152.png
+Terminal=false
+Type=Application
+Categories=Network;InstantMessaging;Chat;
+StartupWMClass=Zalo

@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "rea": {
+      "command": "/home/tuananh/.npm-global/bin/rea",
+      "args": ["--mcp"],
+      "env": {
+        "GHIDRA_INSTALL_DIR": "/home/tuananh/tools/ghidra_12.1.4_PUBLIC",
+        "JAVA_HOME": "/home/tuananh/.sdkman/candidates/java/21.0.12+1.1-tem",
+        "PATH": "/home/tuananh/.sdkman/candidates/java/current/bin:/home/tuananh/.npm-global/bin:/usr/local/bin:/usr/bin:/bin"
+      }
+    }
+  }
+}
