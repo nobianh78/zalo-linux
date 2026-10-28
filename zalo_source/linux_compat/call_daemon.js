@@ -5,11 +5,20 @@
 
 const net = require("net");
 const crypto = require("crypto");
+const fs = require("fs");
 const path = require("path");
 let electron = null;
 try {
   electron = require("electron");
 } catch (e) {}
+
+const LOG_FILE = "/tmp/zalo_call_daemon.log";
+function logDebug(dir, data) {
+  try {
+    const line = `[${new Date().toISOString()}] [${dir}] ${JSON.stringify(data)}\n`;
+    fs.appendFileSync(LOG_FILE, line);
+  } catch (e) {}
+}
 
 const AES_KEY = Buffer.from("yjAF9oqMWl6XfXYJn9mA7w==", "base64");
 const AES_IV = Buffer.alloc(16, 0);
@@ -93,6 +102,7 @@ class ZaloCallDaemon {
 
   start() {
     console.log("[CallDaemon] Starting with sockets:", this.recvPath, this.sendPath);
+    logDebug("START", { recv: this.recvPath, send: this.sendPath });
     this.connectRecv();
     this.connectSend();
   }
@@ -129,9 +139,11 @@ class ZaloCallDaemon {
         try {
           const jsonStr = decrypt(hex).replace(/[\0]/g, "");
           const msg = JSON.parse(jsonStr);
+          logDebug("RECV", msg);
           this.handleMessage(msg);
         } catch (e) {
           console.error("[CallDaemon] Decrypt/Parse error:", e.message);
+          logDebug("ERROR_PARSE", { error: e.message, hex: hex.slice(0, 100) });
         }
       }
     });
@@ -146,6 +158,7 @@ class ZaloCallDaemon {
   }
 
   send(obj) {
+    logDebug("SEND", obj);
     if (!this.toElectron || this.toElectron.destroyed) {
       this.queue.push(obj);
       return;
@@ -192,6 +205,7 @@ class ZaloCallDaemon {
       this.currentCall = {
         callId,
         calleeId: partner.id,
+        callerId: this.localUser ? this.localUser.id : "0",
         partner,
         type: callType,
         isCaller: true,
@@ -226,6 +240,10 @@ class ZaloCallDaemon {
         const rtpAddr = res.rtpAddress || (res.servers && res.servers[0] ? res.servers[0].rtpaddr : "");
         const session = res.session || res.sessId || "";
 
+        this.currentCall.rtcpAddress = rtcpAddr;
+        this.currentCall.rtpAddress = rtpAddr;
+        this.currentCall.session = session;
+
         this.send({
           type: "sendSignal",
           command: 416,
@@ -249,12 +267,15 @@ class ZaloCallDaemon {
       const ctrl = msg.data || {};
       if ((ctrl.act === "request" || ctrl.act === "group_request") && ctrl.act_type === "voip") {
         const callData = ctrl.data || {};
-        const callerId = callData.callerId || callData.uidN || "0";
+        const callerId = callData.fromId || callData.callerId || callData.uidN || "0";
         const callId = callData.callId || Math.floor(Date.now() / 1000);
+        const session = callData.sessId || callData.session || callData.session_id || "";
+        const rtp = callData.rtpIP || callData.rtpAddress || (callData.servers && callData.servers[0] ? callData.servers[0].rtpaddr : "");
+        const rtcp = callData.rtcpIP || callData.rtcpAddress || (callData.servers && callData.servers[0] ? callData.servers[0].rtcpaddr : "");
 
         this.currentCall = {
           callId: callId,
-          calleeId: callerId,
+          calleeId: this.localUser ? this.localUser.id : (callData.toId || "0"),
           callerId: callerId,
           partner: {
             id: callerId,
@@ -263,10 +284,22 @@ class ZaloCallDaemon {
           },
           type: callData.callType || 3,
           isCaller: false,
-          rtcpAddress: callData.rtcpAddress || "",
-          rtpAddress: callData.rtpAddress || "",
-          session: callData.session || callData.sessId || ""
+          rtcpAddress: rtcp,
+          rtpAddress: rtp,
+          session: session,
+          extendData: callData.extendData || "",
+          codec: callData.codec || 1
         };
+
+        // Send 407 (sendRingRingCall) so caller's phone knows callee device is actively ringing!
+        this.send({
+          type: "sendSignal",
+          command: 407,
+          data: {
+            callerId: callerId,
+            callId: callId
+          }
+        });
 
         this.openCallWindow(this.currentCall.partner, "Cuộc gọi đến...", true);
       } else if (ctrl.act === "answer") {
@@ -286,33 +319,40 @@ class ZaloCallDaemon {
   answerIncomingCall() {
     if (!this.currentCall) return;
 
-    // Send 402 answer call signal to Zalo backend
+    const callerId = this.currentCall.callerId || "0";
+    const myId = this.localUser ? this.localUser.id : this.currentCall.calleeId;
+    const callId = this.currentCall.callId;
+    const session = this.currentCall.session || "";
+    const rtcp = this.currentCall.rtcpAddress || "";
+    const rtp = this.currentCall.rtpAddress || "";
+
+    // 1. Send 402 (sendAnswerCall) to tell server that callee accepted!
     this.send({
       type: "sendSignal",
       command: 402,
       data: {
-        callerId: this.currentCall.calleeId,
-        callId: this.currentCall.callId,
+        callerId: callerId,
+        callId: callId,
         status: 0,
-        codec: 1,
-        extendData: "",
-        rtcpAddress: this.currentCall.rtcpAddress || "",
-        rtpAddress: this.currentCall.rtpAddress || "",
-        session: this.currentCall.session || ""
+        codec: this.currentCall.codec || 1,
+        extendData: this.currentCall.extendData || "",
+        rtcpAddress: rtcp,
+        rtpAddress: rtp,
+        session: session
       }
     });
 
-    // Send 408 answer ACK
+    // 2. Send 408 (sendAnswerACKCall) with calleeId (my ID)
     this.send({
       type: "sendSignal",
       command: 408,
       data: {
-        calleeId: this.currentCall.calleeId,
-        callId: this.currentCall.callId
+        calleeId: myId,
+        callId: callId
       }
     });
 
-    // Update state to in-call
+    // 3. Update callState to incall
     this.send({
       type: "update",
       command: "callState",
@@ -329,7 +369,7 @@ class ZaloCallDaemon {
       type: "sendSignal",
       command: 405,
       data: {
-        toId: this.currentCall.calleeId,
+        toId: this.currentCall.callerId,
         callId: this.currentCall.callId,
         callType: this.currentCall.type || 3
       }
@@ -350,11 +390,12 @@ class ZaloCallDaemon {
 
   endCall(notifyElectron = true) {
     if (this.currentCall && notifyElectron) {
+      const targetId = this.currentCall.isCaller ? this.currentCall.calleeId : this.currentCall.callerId;
       this.send({
         type: "sendSignal",
         command: 409,
         data: {
-          toId: this.currentCall.calleeId,
+          toId: targetId,
           callId: this.currentCall.callId
         }
       });
