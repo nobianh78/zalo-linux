@@ -15,7 +15,7 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 echo -e "${BLUE}==========================================${NC}"
-echo -e "${GREEN}   Cài đặt Zalo PC Native cho Linux 🐧   ${NC}"
+echo -e "${GREEN}      Cai dat Zalo PC Native Linux        ${NC}"
 echo -e "${BLUE}==========================================${NC}"
 
 # Check root / sudo
@@ -74,7 +74,7 @@ rm -f "$TEMP_DEB"
 
 echo ""
 echo -e "${GREEN}====================================================${NC}"
-echo -e "${GREEN}  ✓ Cài đặt Zalo PC Native thành công! 🐧🎉        ${NC}"
+echo -e "${GREEN}  Cai dat Zalo PC Native thanh cong!               ${NC}"
 echo -e "${GREEN}====================================================${NC}"
 echo -e "Bạn có thể mở Zalo từ:"
 echo -e "  1. Menu ứng dụng của hệ thống (tìm 'Zalo')"
