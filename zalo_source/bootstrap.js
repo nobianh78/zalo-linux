@@ -26,24 +26,29 @@ try {
         electron.app.setDesktopName('zalo.desktop');
       }
       let mainAppWindow = null;
-      let lastWindowBounds = null;
-      let wasMaximized = false;
+      let isMaximizedState = false;
+      let normalBounds = { width: 1000, height: 720 };
+      let isClosingWindow = false;
 
       function isMainWindow(w) {
         if (!w || w.isDestroyed()) return false;
         try {
-          const url = w.webContents ? w.webContents.getURL() : '';
+          const url = (w.webContents ? w.webContents.getURL() : '').toLowerCase();
           if (url.includes('sqlite') || url.includes('worker') || url.includes('notification') || url.includes('call_window')) {
             return false;
           }
           const title = (w.getTitle() || '').toLowerCase();
-          if (title.includes('sqlite') || title.includes('worker') || title.includes('notification')) {
+          if (title.includes('sqlite') || title.includes('worker') || title.includes('notification') || title.includes('call_window')) {
             return false;
           }
-          if (url.includes('index.html') || url.includes('login.html') || url.includes('compact-app.html')) {
+          const bounds = w.getBounds();
+          if (bounds.width < 500 || bounds.height < 400) {
+            return false;
+          }
+          if (w.isMainWindowCandidate === true) {
             return true;
           }
-          if (title === 'zalo' || title.includes('zalo')) {
+          if (url.includes('index.html') || url.includes('login.html') || url.includes('compact-app.html')) {
             return true;
           }
         } catch (e) {}
@@ -61,36 +66,62 @@ try {
             return w;
           }
         }
+        for (const w of windows) {
+          if (w.isDestroyed()) continue;
+          try {
+            const url = (w.webContents ? w.webContents.getURL() : '').toLowerCase();
+            const title = (w.getTitle() || '').toLowerCase();
+            const b = w.getBounds();
+            if (url.includes('sqlite') || url.includes('worker') || url.includes('notification') || url.includes('call_window')) continue;
+            if (title.includes('sqlite') || title.includes('worker') || title.includes('notification') || title.includes('call_window')) continue;
+            if (b.width >= 500 && b.height >= 400) {
+              mainAppWindow = w;
+              return w;
+            }
+          } catch (e) {}
+        }
         return null;
+      }
+
+      function restoreMainWindow() {
+        try {
+          const win = getMainWindow();
+          if (!win || win.isDestroyed()) {
+            console.warn('[Bootstrap] No main window found to restore');
+            return;
+          }
+          if (win.isMinimized()) {
+            win.restore();
+          }
+          if (isMaximizedState) {
+            win.maximize();
+          } else if (normalBounds && normalBounds.width >= 500 && normalBounds.height >= 400) {
+            win.setBounds(normalBounds);
+          }
+          win.setOpacity(1);
+          win.show();
+          win.setAlwaysOnTop(true);
+          win.focus();
+          setTimeout(() => {
+            if (!win.isDestroyed()) {
+              win.setAlwaysOnTop(false);
+              win.focus();
+            }
+          }, 150);
+          try {
+            win.webContents.send('show-from-tray');
+          } catch (e) {}
+          try {
+            electron.app.emit('activate');
+          } catch (e) {}
+        } catch (e) {
+          console.error('[Bootstrap] Error in restoreMainWindow:', e.message);
+        }
       }
 
       // Handle second instance on Linux: restore ONLY the main window
       electron.app.on('second-instance', (event, commandLine, workingDirectory) => {
-        try {
-          const win = getMainWindow();
-          if (win && !win.isDestroyed()) {
-            if (win.isMinimized()) {
-              win.restore();
-            }
-            if (wasMaximized) {
-              win.maximize();
-            } else if (lastWindowBounds && lastWindowBounds.width > 200 && lastWindowBounds.height > 200) {
-              win.setBounds(lastWindowBounds);
-            }
-            win.setOpacity(1);
-            win.show();
-            win.setAlwaysOnTop(true);
-            win.focus();
-            setTimeout(() => {
-              if (!win.isDestroyed()) {
-                win.setAlwaysOnTop(false);
-                win.focus();
-              }
-            }, 150);
-          }
-        } catch (e) {
-          console.error('[Bootstrap] Error restoring main window on second-instance:', e.message);
-        }
+        restoreMainWindow();
       });
 
       electron.app.on('browser-window-created', (event, win) => {
@@ -100,32 +131,65 @@ try {
           win.autoHideMenuBar = true;
         } catch (e) {}
 
-        const updateBounds = () => {
+        const checkAndMark = () => {
           try {
-            if (isMainWindow(win) && win.isVisible()) {
+            if (!win || win.isDestroyed()) return;
+            const url = (win.webContents ? win.webContents.getURL() : '').toLowerCase();
+            if (url.includes('index.html') || url.includes('login.html') || url.includes('compact-app.html')) {
+              win.isMainWindowCandidate = true;
               mainAppWindow = win;
-              wasMaximized = win.isMaximized();
-              if (!wasMaximized) {
+              if (win.isMaximized()) {
+                isMaximizedState = true;
+              } else {
                 const b = win.getBounds();
-                if (b.width > 200 && b.height > 200) {
-                  lastWindowBounds = b;
+                if (b.width >= 500 && b.height >= 400) {
+                  normalBounds = b;
                 }
               }
             }
           } catch (e) {}
         };
 
-        win.on('resize', updateBounds);
-        win.on('move', updateBounds);
-        win.on('close', updateBounds);
         if (win.webContents) {
-          win.webContents.on('did-finish-load', () => {
-            if (isMainWindow(win)) {
-              mainAppWindow = win;
-              updateBounds();
-            }
-          });
+          win.webContents.on('did-finish-load', checkAndMark);
+          win.webContents.on('dom-ready', checkAndMark);
         }
+        checkAndMark();
+
+        win.on('maximize', () => {
+          if (isMainWindow(win)) {
+            isMaximizedState = true;
+          }
+        });
+
+        win.on('unmaximize', () => {
+          if (isMainWindow(win) && !isClosingWindow) {
+            isMaximizedState = false;
+            const b = win.getBounds();
+            if (b.width >= 500 && b.height >= 400) {
+              normalBounds = b;
+            }
+          }
+        });
+
+        win.on('resize', () => {
+          if (isMainWindow(win) && !win.isMaximized() && !isClosingWindow) {
+            const b = win.getBounds();
+            if (b.width >= 500 && b.height >= 400) {
+              normalBounds = b;
+            }
+          }
+        });
+
+        win.on('close', () => {
+          if (isMainWindow(win)) {
+            isClosingWindow = true;
+            if (win.isMaximized()) {
+              isMaximizedState = true;
+            }
+            setTimeout(() => { isClosingWindow = false; }, 500);
+          }
+        });
 
         try {
           if (win && win.webContents) {
@@ -165,6 +229,11 @@ const handleEntryCompactApp = () => {
 };
 
 function bootstrap() {
+  const hasLock = require('electron').app.requestSingleInstanceLock();
+  if (!hasLock) {
+    return require('./main-dist/second-instance');
+  }
+
   // Initialize Linux Native Auto-Updater
   try {
     const { initAutoUpdater } = require('./linux_compat/auto_updater');
@@ -189,19 +258,11 @@ function bootstrap() {
   const isCompactApp = process.argv.some(e => e.startsWith('--launch-compact-app'));
 
   if (isCompactApp) {
-		if (require('electron').app.requestSingleInstanceLock()) {
-			return handleEntryCompactApp();
-		} else {
-			require('./main-dist/second-instance');
-		}
+    return handleEntryCompactApp();
   }
 
-  if (require('electron').app.requestSingleInstanceLock()) {
-    perf.record(perf.MAIN_SCRIPT);
-    require('./main-dist/main');
-  } else {
-    require('./main-dist/second-instance');
-  }
+  perf.record(perf.MAIN_SCRIPT);
+  require('./main-dist/main');
 }
 
 bootstrap();
