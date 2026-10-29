@@ -31,6 +31,29 @@ try {
           win.setMenuBarVisibility(false);
           win.autoHideMenuBar = true;
         } catch (e) {}
+
+        try {
+          if (win && win.webContents) {
+            win.webContents.on('dom-ready', () => {
+              try {
+                const fs = require('fs');
+                const path = require('path');
+                const themeCssPath = path.join(__dirname, 'linux_compat', 'tadaza', 'tadaza_theme.css');
+                const rendererJsPath = path.join(__dirname, 'linux_compat', 'tadaza', 'tadaza_renderer.js');
+                if (fs.existsSync(themeCssPath)) {
+                  const css = fs.readFileSync(themeCssPath, 'utf8');
+                  win.webContents.insertCSS(css);
+                }
+                if (fs.existsSync(rendererJsPath)) {
+                  const js = fs.readFileSync(rendererJsPath, 'utf8');
+                  win.webContents.executeJavaScript(js);
+                }
+              } catch (err) {
+                console.warn('[TADaZa Injector] Injection error:', err.message);
+              }
+            });
+          }
+        } catch (e) {}
       });
     }
     if (electron.Menu && typeof electron.Menu.setApplicationMenu === 'function') {
@@ -38,8 +61,6 @@ try {
     }
   }
 } catch (e) {}
-
-
 
 const handleEntryCompactApp = () => {
   return require('./main-dist/compact-app');
@@ -52,6 +73,14 @@ function bootstrap() {
     initAutoUpdater();
   } catch (e) {
     console.warn('[AutoUpdater] Failed to initialize:', e.message);
+  }
+
+  // Initialize TADaZa Extension Main Process
+  try {
+    const { initTadazaMain } = require('./linux_compat/tadaza/tadaza_main');
+    initTadazaMain();
+  } catch (e) {
+    console.warn('[TADaZa] Failed to initialize main:', e.message);
   }
 
   require('./libs/perf-tracing/runtime');

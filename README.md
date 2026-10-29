@@ -46,6 +46,15 @@ Script sẽ tự động:
 - Hiển thị hộp thoại thông báo cập nhật trực tiếp trong ứng dụng khi có phiên bản mới.
 - Hỗ trợ tải và tự động cài đặt nâng cấp cho cả định dạng `.deb` (qua PolicyKit/pkexec) và `.AppImage` (tự động ghi đè in-place).
 
+### 6. Tiện ích mở rộng TADaZa (TADaZa Extension)
+- Thanh tiện ích cạnh phải: Tích hợp nút dock TADaZa và bảng điều khiển Drawer trực quan.
+- Chế độ nền tối (Dark Mode): Tùy chọn 3 trạng thái Sáng, Tối chuyên sâu và Tự động đồng bộ theo hệ thống (GNOME / KDE).
+- Tùy biến hiển thị: Tùy chỉnh kiểu phông chữ (Inter, Be Vietnam Pro, Roboto, Fira Code), thanh trượt chỉnh cỡ chữ (12px - 22px), hình nền chat tùy biến kèm thanh chỉnh độ mờ.
+- Quyền riêng tư (Privacy): Chế độ chống nhìn trộm (làm mờ tin nhắn, ảnh, tên người gửi; chỉ hiển thị khi rê chuột); Chặn tín hiệu đang soạn tin (typing), trạng thái đã xem (seen) và báo cáo đã nhận (delivered).
+- Dịch thuật nhanh: Tích hợp nút dịch trực tiếp tại chỗ ngay cạnh bong bóng tin nhắn sang nhiều ngôn ngữ (Tiếng Việt, Tiếng Anh, Tiếng Trung, Tiếng Nhật, Tiếng Hàn...).
+- Tiện ích mở rộng: Bổ sung kho 80+ biểu tượng cảm xúc Unicode hỗ trợ sao chép nhanh hoặc chèn vào khung chat.
+- Lưu trữ cấu hình: Toàn bộ thiết lập bật/tắt được lưu trữ độc lập tại `~/.config/ZaloData/tadaza_config.json`.
+
 ---
 
 ## Hướng dẫn cho nhà phát triển

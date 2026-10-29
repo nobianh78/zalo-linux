@@ -1,0 +1,750 @@
+/* ==========================================================================
+   TADaZa Extension Core Styles for Zalo PC Linux
+   ========================================================================== */
+
+/* Google Fonts Import for Vietnamese & Crisp Typography */
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Fira+Code:wght@400;500&family=Inter:wght@400;500;600;700&family=Open+Sans:wght@400;600&family=Roboto:wght@400;500;700&display=swap');
+
+/* --------------------------------------------------------------------------
+   1. Deep Dark Mode Engine (High Contrast & Modern Palette)
+   -------------------------------------------------------------------------- */
+:root body.tadaza-dark,
+:root.tadaza-dark body,
+body.tadaza-dark {
+  --surface-background: #0d1117 !important;
+  --surface-background-subtle: #161b22 !important;
+  --surface-background-overlay: #161b22 !important;
+  --surface-alt: #161b22 !important;
+  --layer-background: #161b22 !important;
+  --layer-background-subtle: #21262d !important;
+  --layer-background-hover: #30363d !important;
+  --layer-background-selected: #1f344d !important;
+  --bg-default: #0d1117 !important;
+  --title-bar: #0d1117 !important;
+  --title-ptv: #161b22 !important;
+  --divider: #30363d !important;
+  --divider-bold: #484f58 !important;
+  --border-subtle: #30363d !important;
+  --border-bold: #484f58 !important;
+  --border-hover: #58a6ff !important;
+  --text-primary: #e6edf3 !important;
+  --text-secondary: #8b949e !important;
+  --tab-txt: #8b949e !important;
+  --accent-blue-bg: #1f6feb !important;
+  --accent-blue-bg-bold: #388bfd !important;
+  --button-tertiary-neutral-text: #c9d1d9 !important;
+  --input-field-bg-outline: #161b22 !important;
+
+  background-color: #0d1117 !important;
+  color: #e6edf3 !important;
+}
+
+body.tadaza-dark #app,
+body.tadaza-dark .app-layout,
+body.tadaza-dark #main-view,
+body.tadaza-dark .main-view {
+  background-color: #0d1117 !important;
+  color: #e6edf3 !important;
+}
+
+/* Left Navigation Bar */
+body.tadaza-dark .nav,
+body.tadaza-dark .nav-bar,
+body.tadaza-dark .sidebar,
+body.tadaza-dark .main-navigation {
+  background-color: #010409 !important;
+  border-right: 1px solid #21262d !important;
+}
+
+/* Chat & Contacts Sidebar List */
+body.tadaza-dark .conv-list,
+body.tadaza-dark .chat-list,
+body.tadaza-dark .conversation-list,
+body.tadaza-dark .msg-item-container,
+body.tadaza-dark .left-section,
+body.tadaza-dark [class*="chat-list"],
+body.tadaza-dark [class*="conv-item"] {
+  background-color: #0d1117 !important;
+  color: #e6edf3 !important;
+  border-color: #21262d !important;
+}
+
+body.tadaza-dark [class*="conv-item"]:hover,
+body.tadaza-dark [class*="chat-item"]:hover {
+  background-color: #161b22 !important;
+}
+
+body.tadaza-dark [class*="conv-item"][class*="selected"],
+body.tadaza-dark [class*="chat-item"][class*="active"] {
+  background-color: #1f344d !important;
+}
+
+/* Main Chat Container */
+body.tadaza-dark .chat-box,
+body.tadaza-dark .chat-area,
+body.tadaza-dark .chat-content,
+body.tadaza-dark .chat-conversation-history,
+body.tadaza-dark .chat-message-list,
+body.tadaza-dark [class*="chat-history"] {
+  background-color: #0d1117 !important;
+}
+
+/* Chat Header */
+body.tadaza-dark .chat-header,
+body.tadaza-dark [class*="chat-box__header"],
+body.tadaza-dark [class*="chat-info-general__header"] {
+  background-color: #161b22 !important;
+  border-bottom: 1px solid #21262d !important;
+  color: #e6edf3 !important;
+}
+
+/* Chat Input Bar */
+body.tadaza-dark .chat-input,
+body.tadaza-dark .chat-input__container,
+body.tadaza-dark [class*="chat-input"],
+body.tadaza-dark [class*="chat-box__footer"] {
+  background-color: #161b22 !important;
+  border-top: 1px solid #21262d !important;
+}
+
+body.tadaza-dark [contenteditable="true"],
+body.tadaza-dark input,
+body.tadaza-dark textarea {
+  color: #e6edf3 !important;
+  background-color: transparent !important;
+}
+
+/* Message Bubbles */
+body.tadaza-dark [class*="message-item--incoming"],
+body.tadaza-dark [class*="bubble--incoming"],
+body.tadaza-dark [class*="msg-bubble--left"] {
+  background-color: #21262d !important;
+  color: #e6edf3 !important;
+  border: 1px solid #30363d !important;
+  border-radius: 12px !important;
+}
+
+body.tadaza-dark [class*="message-item--outgoing"],
+body.tadaza-dark [class*="bubble--outgoing"],
+body.tadaza-dark [class*="msg-bubble--right"] {
+  background-color: #1f6feb !important;
+  color: #ffffff !important;
+  border-radius: 12px !important;
+}
+
+/* Right Info Sidebar (Chat Info / Cloud / ToDo) */
+body.tadaza-dark .right-section,
+body.tadaza-dark .chat-info,
+body.tadaza-dark [class*="chat-info"],
+body.tadaza-dark [class*="cloud-tool"],
+body.tadaza-dark #mycloud-right-sidebar {
+  background-color: #161b22 !important;
+  border-left: 1px solid #21262d !important;
+  color: #e6edf3 !important;
+}
+
+/* Modals & Dropdown Popups */
+body.tadaza-dark .modal,
+body.tadaza-dark .modal-content,
+body.tadaza-dark .popover,
+body.tadaza-dark .menu-popup,
+body.tadaza-dark [class*="popup"],
+body.tadaza-dark [class*="dropdown"] {
+  background-color: #161b22 !important;
+  border: 1px solid #30363d !important;
+  color: #e6edf3 !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Dark Mode Scrollbars */
+body.tadaza-dark ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+body.tadaza-dark ::-webkit-scrollbar-track {
+  background: #0d1117;
+}
+body.tadaza-dark ::-webkit-scrollbar-thumb {
+  background: #30363d;
+  border-radius: 4px;
+}
+body.tadaza-dark ::-webkit-scrollbar-thumb:hover {
+  background: #484f58;
+}
+
+/* --------------------------------------------------------------------------
+   2. Privacy & Anti-Peeping (Blur on hover)
+   -------------------------------------------------------------------------- */
+body.tadaza-blur-msg-active [class*="message-content"],
+body.tadaza-blur-msg-active [class*="msg-content"],
+body.tadaza-blur-msg-active [class*="bubble-content"],
+body.tadaza-blur-msg-active .chat-item__content,
+body.tadaza-blur-msg-active [class*="conv-item__desc"] {
+  filter: blur(6px) !important;
+  transition: filter 0.18s ease-in-out !important;
+}
+
+body.tadaza-blur-msg-active [class*="message-content"]:hover,
+body.tadaza-blur-msg-active [class*="msg-content"]:hover,
+body.tadaza-blur-msg-active [class*="bubble-content"]:hover,
+body.tadaza-blur-msg-active .chat-item__content:hover,
+body.tadaza-blur-msg-active [class*="conv-item__desc"]:hover {
+  filter: blur(0px) !important;
+}
+
+body.tadaza-blur-media-active [class*="message-item"] img,
+body.tadaza-blur-media-active [class*="msg-item"] img,
+body.tadaza-blur-media-active [class*="chat-message"] img,
+body.tadaza-blur-media-active [class*="message-item"] video,
+body.tadaza-blur-media-active [class*="msg-item"] video {
+  filter: blur(14px) !important;
+  transition: filter 0.2s ease-in-out !important;
+}
+
+body.tadaza-blur-media-active [class*="message-item"] img:hover,
+body.tadaza-blur-media-active [class*="msg-item"] img:hover,
+body.tadaza-blur-media-active [class*="chat-message"] img:hover,
+body.tadaza-blur-media-active [class*="message-item"] video:hover,
+body.tadaza-blur-media-active [class*="msg-item"] video:hover {
+  filter: blur(0px) !important;
+}
+
+body.tadaza-blur-names-active [class*="conv-item__name"],
+body.tadaza-blur-names-active [class*="chat-box__header__title"],
+body.tadaza-blur-names-active [class*="avatar"],
+body.tadaza-blur-names-active .chat-item__avatar {
+  filter: blur(5px) !important;
+  transition: filter 0.18s ease-in-out !important;
+}
+
+body.tadaza-blur-names-active [class*="conv-item__name"]:hover,
+body.tadaza-blur-names-active [class*="chat-box__header__title"]:hover,
+body.tadaza-blur-names-active [class*="avatar"]:hover,
+body.tadaza-blur-names-active .chat-item__avatar:hover {
+  filter: blur(0px) !important;
+}
+
+/* --------------------------------------------------------------------------
+   3. Custom Chat Wallpaper Background Layer
+   -------------------------------------------------------------------------- */
+#tadaza-wallpaper-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  z-index: 0;
+  transition: opacity 0.3s ease;
+}
+
+/* --------------------------------------------------------------------------
+   4. TADaZa UI Components (Right Dock Button & Drawer)
+   -------------------------------------------------------------------------- */
+
+/* Floating Right Dock Button */
+#tadaza-sidebar-btn {
+  position: fixed;
+  right: 0;
+  top: 140px;
+  z-index: 999990;
+  width: 38px;
+  height: 84px;
+  background: linear-gradient(135deg, #0068ff 0%, #0045ad 100%);
+  color: #ffffff;
+  border-radius: 10px 0 0 10px;
+  box-shadow: -3px 4px 16px rgba(0, 104, 255, 0.4);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  user-select: none;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#tadaza-sidebar-btn:hover {
+  width: 44px;
+  background: linear-gradient(135deg, #1f7cff 0%, #0056d6 100%);
+  box-shadow: -4px 6px 20px rgba(0, 104, 255, 0.6);
+}
+
+#tadaza-sidebar-btn .tadaza-btn-icon {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+#tadaza-sidebar-btn .tadaza-btn-text {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  font-family: 'Inter', -apple-system, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+/* Overlay Backdrop */
+#tadaza-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(2px);
+  z-index: 999998;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+
+#tadaza-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Main Drawer Panel */
+#tadaza-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 380px;
+  max-width: 90vw;
+  height: 100vh;
+  z-index: 999999;
+  background: #ffffff;
+  color: #1f2328;
+  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.25);
+  transform: translateX(100%);
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+body.tadaza-dark #tadaza-drawer {
+  background: #161b22;
+  color: #e6edf3;
+  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.6);
+  border-left: 1px solid #30363d;
+}
+
+#tadaza-drawer.open {
+  transform: translateX(0);
+}
+
+/* Drawer Header */
+.tadaza-header {
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+body.tadaza-dark .tadaza-header {
+  border-bottom: 1px solid #30363d;
+}
+
+.tadaza-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tadaza-badge {
+  background: linear-gradient(135deg, #0068ff, #0045ad);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  text-transform: uppercase;
+}
+
+.tadaza-title {
+  font-size: 17px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.tadaza-close-btn {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: inherit;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.tadaza-close-btn:hover {
+  background: rgba(128, 128, 128, 0.15);
+}
+
+/* Tab Navigation */
+.tadaza-tabs {
+  display: flex;
+  background: rgba(128, 128, 128, 0.06);
+  padding: 6px;
+  gap: 4px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+body.tadaza-dark .tadaza-tabs {
+  background: #0d1117;
+  border-bottom: 1px solid #21262d;
+}
+
+.tadaza-tab-btn {
+  flex: 1;
+  padding: 8px 4px;
+  border: none;
+  background: transparent;
+  color: #57606a;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  transition: all 0.15s ease;
+}
+
+body.tadaza-dark .tadaza-tab-btn {
+  color: #8b949e;
+}
+
+.tadaza-tab-btn.active {
+  background: #ffffff;
+  color: #0068ff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+body.tadaza-dark .tadaza-tab-btn.active {
+  background: #21262d;
+  color: #58a6ff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Tab Content */
+.tadaza-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.tadaza-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tadaza-section-title {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #0068ff;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+body.tadaza-dark .tadaza-section-title {
+  color: #58a6ff;
+}
+
+.tadaza-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  background: rgba(128, 128, 128, 0.05);
+  border-radius: 10px;
+  border: 1px solid rgba(128, 128, 128, 0.1);
+}
+
+body.tadaza-dark .tadaza-item {
+  background: #21262d;
+  border: 1px solid #30363d;
+}
+
+.tadaza-item-col {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+}
+
+.tadaza-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: 80%;
+}
+
+.tadaza-item-title {
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.tadaza-item-desc {
+  font-size: 11.5px;
+  color: #57606a;
+}
+
+body.tadaza-dark .tadaza-item-desc {
+  color: #8b949e;
+}
+
+/* Custom iOS / Fluent Toggle Switch */
+.tadaza-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.tadaza-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.tadaza-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .25s;
+  border-radius: 24px;
+}
+
+body.tadaza-dark .tadaza-slider {
+  background-color: #30363d;
+}
+
+.tadaza-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .25s;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.tadaza-switch input:checked + .tadaza-slider {
+  background-color: #0068ff;
+}
+
+body.tadaza-dark .tadaza-switch input:checked + .tadaza-slider {
+  background-color: #1f6feb;
+}
+
+.tadaza-switch input:checked + .tadaza-slider:before {
+  transform: translateX(20px);
+}
+
+/* Theme 3-State Buttons */
+.tadaza-btn-group {
+  display: flex;
+  background: rgba(128, 128, 128, 0.1);
+  padding: 4px;
+  border-radius: 8px;
+  gap: 4px;
+  width: 100%;
+}
+
+body.tadaza-dark .tadaza-btn-group {
+  background: #0d1117;
+}
+
+.tadaza-btn-choice {
+  flex: 1;
+  padding: 8px 10px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.tadaza-btn-choice.active {
+  background: #0068ff;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* Sliders & Inputs */
+.tadaza-range-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.tadaza-range {
+  flex: 1;
+  accent-color: #0068ff;
+}
+
+.tadaza-range-val {
+  font-size: 12px;
+  font-weight: 600;
+  width: 36px;
+  text-align: right;
+}
+
+.tadaza-select {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(128, 128, 128, 0.2);
+  background: #ffffff;
+  color: inherit;
+  font-size: 13px;
+  font-family: inherit;
+}
+
+body.tadaza-dark .tadaza-select {
+  background: #161b22;
+  border: 1px solid #30363d;
+}
+
+/* Secondary Button */
+.tadaza-action-btn {
+  padding: 8px 14px;
+  background: #0068ff;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: opacity 0.15s;
+}
+
+.tadaza-action-btn:hover {
+  opacity: 0.9;
+}
+
+.tadaza-action-btn.secondary {
+  background: rgba(128, 128, 128, 0.15);
+  color: inherit;
+}
+
+/* --------------------------------------------------------------------------
+   5. In-Place Quick Translate Component
+   -------------------------------------------------------------------------- */
+.tadaza-trans-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  background: rgba(0, 104, 255, 0.1);
+  color: #0068ff;
+  border: none;
+  cursor: pointer;
+  margin-left: 6px;
+  vertical-align: middle;
+  font-size: 12px;
+  transition: background 0.15s;
+}
+
+.tadaza-trans-btn:hover {
+  background: rgba(0, 104, 255, 0.25);
+}
+
+.tadaza-trans-box {
+  margin-top: 6px;
+  padding: 8px 12px;
+  background: rgba(0, 104, 255, 0.08);
+  border-left: 3px solid #0068ff;
+  border-radius: 4px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: inherit;
+  position: relative;
+}
+
+body.tadaza-dark .tadaza-trans-box {
+  background: rgba(31, 111, 235, 0.15);
+  border-left-color: #58a6ff;
+}
+
+.tadaza-trans-box .trans-header {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: #0068ff;
+  font-weight: 700;
+  margin-bottom: 4px;
+  display: flex;
+  justify-content: space-between;
+}
+
+body.tadaza-dark .tadaza-trans-box .trans-header {
+  color: #58a6ff;
+}
+
+/* --------------------------------------------------------------------------
+   6. Extended Emoji & Reactions Bar (80+)
+   -------------------------------------------------------------------------- */
+.tadaza-emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 6px;
+  max-height: 240px;
+  overflow-y: auto;
+  padding: 8px;
+  background: rgba(128, 128, 128, 0.05);
+  border-radius: 8px;
+}
+
+body.tadaza-dark .tadaza-emoji-grid {
+  background: #0d1117;
+}
+
+.tadaza-emoji-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  height: 32px;
+  border-radius: 6px;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.1s, background 0.1s;
+}
+
+.tadaza-emoji-item:hover {
+  transform: scale(1.25);
+  background: rgba(128, 128, 128, 0.15);
+}
