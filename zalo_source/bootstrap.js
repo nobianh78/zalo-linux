@@ -25,42 +25,71 @@ try {
       if (process.platform === 'linux' && typeof electron.app.setDesktopName === 'function') {
         electron.app.setDesktopName('zalo.desktop');
       }
-      const lastWindowBounds = new Map();
+      let mainAppWindow = null;
+      let lastWindowBounds = null;
+      let wasMaximized = false;
 
-      // Handle second instance on Linux: restore size (avoid 10x10 shrink), show, and focus window
+      function isMainWindow(w) {
+        if (!w || w.isDestroyed()) return false;
+        try {
+          const url = w.webContents ? w.webContents.getURL() : '';
+          if (url.includes('sqlite') || url.includes('worker') || url.includes('notification') || url.includes('call_window')) {
+            return false;
+          }
+          const title = (w.getTitle() || '').toLowerCase();
+          if (title.includes('sqlite') || title.includes('worker') || title.includes('notification')) {
+            return false;
+          }
+          if (url.includes('index.html') || url.includes('login.html') || url.includes('compact-app.html')) {
+            return true;
+          }
+          if (title === 'zalo' || title.includes('zalo')) {
+            return true;
+          }
+        } catch (e) {}
+        return false;
+      }
+
+      function getMainWindow() {
+        if (mainAppWindow && !mainAppWindow.isDestroyed()) {
+          return mainAppWindow;
+        }
+        const windows = electron.BrowserWindow.getAllWindows();
+        for (const w of windows) {
+          if (isMainWindow(w)) {
+            mainAppWindow = w;
+            return w;
+          }
+        }
+        return null;
+      }
+
+      // Handle second instance on Linux: restore ONLY the main window
       electron.app.on('second-instance', (event, commandLine, workingDirectory) => {
         try {
-          const windows = electron.BrowserWindow.getAllWindows();
-          for (const win of windows) {
-            if (!win.isDestroyed()) {
-              if (win.isMinimized()) {
-                win.restore();
-              }
-              const bounds = win.getBounds();
-              const saved = lastWindowBounds.get(win.id);
-              // Zalo shrinks hidden windows to 10x10; restore to saved size or sensible default
-              if (bounds.width <= 200 || bounds.height <= 200) {
-                if (saved && saved.width > 200 && saved.height > 200) {
-                  win.setBounds(saved);
-                } else {
-                  win.setSize(1000, 720);
-                  win.center();
-                }
-              }
-              win.setOpacity(1);
-              win.show();
-              win.setAlwaysOnTop(true);
-              win.focus();
-              setTimeout(() => {
-                if (!win.isDestroyed()) {
-                  win.setAlwaysOnTop(false);
-                  win.focus();
-                }
-              }, 150);
+          const win = getMainWindow();
+          if (win && !win.isDestroyed()) {
+            if (win.isMinimized()) {
+              win.restore();
             }
+            if (wasMaximized) {
+              win.maximize();
+            } else if (lastWindowBounds && lastWindowBounds.width > 200 && lastWindowBounds.height > 200) {
+              win.setBounds(lastWindowBounds);
+            }
+            win.setOpacity(1);
+            win.show();
+            win.setAlwaysOnTop(true);
+            win.focus();
+            setTimeout(() => {
+              if (!win.isDestroyed()) {
+                win.setAlwaysOnTop(false);
+                win.focus();
+              }
+            }, 150);
           }
         } catch (e) {
-          console.error('[Bootstrap] Error restoring window on second-instance:', e.message);
+          console.error('[Bootstrap] Error restoring main window on second-instance:', e.message);
         }
       });
 
@@ -73,10 +102,14 @@ try {
 
         const updateBounds = () => {
           try {
-            if (!win.isDestroyed() && win.isVisible()) {
-              const b = win.getBounds();
-              if (b.width > 200 && b.height > 200) {
-                lastWindowBounds.set(win.id, b);
+            if (isMainWindow(win) && win.isVisible()) {
+              mainAppWindow = win;
+              wasMaximized = win.isMaximized();
+              if (!wasMaximized) {
+                const b = win.getBounds();
+                if (b.width > 200 && b.height > 200) {
+                  lastWindowBounds = b;
+                }
               }
             }
           } catch (e) {}
@@ -84,8 +117,15 @@ try {
 
         win.on('resize', updateBounds);
         win.on('move', updateBounds);
-        win.once('show', updateBounds);
         win.on('close', updateBounds);
+        if (win.webContents) {
+          win.webContents.on('did-finish-load', () => {
+            if (isMainWindow(win)) {
+              mainAppWindow = win;
+              updateBounds();
+            }
+          });
+        }
 
         try {
           if (win && win.webContents) {
