@@ -1371,44 +1371,27 @@
     }
   ];
 
+  const BANK_STOP_WORDS = new Set([
+    'ck', 'cho', 'tao', 'to', 'tớ', 'minh', 'mình', 'ban', 'bạn', 'anh', 'em', 'chi', 'chị',
+    'vao', 'vào', 'qua', 'sang', 'gui', 'gửi', 'ho', 'hộ', 'nhe', 'nhé', 'nha', 'cai', 'cái',
+    'nay', 'này', 'thi', 'thì', 'no', 'nó', 'khong', 'không', 'nhan', 'nhận', 'duoc', 'được',
+    'tien', 'tiền', 'chuyen', 'chuyển', 'khoan', 'khoản', 'so', 'số', 'tai', 'tài', 'bao',
+    'nhieu', 'nhiều', 'voi', 'với', 'ok', 'rep', 'giup', 'giúp', 'di', 'đi', 'roi', 'rồi', 'xong',
+    'chua', 'chưa', 'ngay', 'hom', 'hôm', 'gio', 'giờ', 'tk', 'stk', 'gia', 'giá', 'fix', 'bot',
+    'bớt', 'shop', 'bac', 'bác', 'ong', 'ông', 'chu', 'chú', 'noi', 'nội', 'dung',
+    'la', 'là', 'cua', 'của', 'day', 'đây', 'ạ', 'a'
+  ]);
+
   function parseBankInfo(text) {
     if (!text || typeof text !== 'string') return null;
     const textLower = text.toLowerCase();
 
-    // 1. Identify bank
-    let foundBank = null;
-    for (const b of VIETNAM_BANKS) {
-      for (const a of b.aliases) {
-        const reg = new RegExp(`\\b${a}\\b`, 'i');
-        if (reg.test(textLower)) {
-          foundBank = b;
-          break;
-        }
-      }
-      if (foundBank) break;
-    }
-
-    const hasBankKeyword = /\b(stk|số\s*tk|tài\s*khoản|chuyển\s*khoản|ck|c\/k)\b/i.test(textLower);
-    if (!foundBank && !hasBankKeyword) return null;
-
-    // 2. Identify account number
-    let accountNo = null;
-    const stkPrefixMatch = text.match(/(?:stk|tk|số\s*tk|tài\s*khoản)[\s:]*([0-9]{6,19})\b/i);
-    if (stkPrefixMatch) {
-      accountNo = stkPrefixMatch[1];
-    } else {
-      const candidates = text.match(/\b[0-9]{6,19}\b/g);
-      if (candidates && candidates.length > 0) {
-        accountNo = candidates[0];
-      }
-    }
-
-    if (!accountNo) return null;
-
-    // 3. Identify amount
+    // 1. Identify amount first
     let amount = null;
+    let amountRawStr = '';
     const amtMatch = text.match(/\b(\d+(?:[.,]\d+)?)\s*(k|củ|tr|triệu|đ|d|vnd|dong|đồng)\b/i);
     if (amtMatch) {
+      amountRawStr = amtMatch[0];
       const numStr = amtMatch[1].replace(/\./g, '').replace(/,/g, '.');
       const unit = amtMatch[2].toLowerCase();
       const val = parseFloat(numStr);
@@ -1419,20 +1402,130 @@
       const amtMatch2 = text.match(/\b(\d{1,3}(?:[.,]\d{3})+)\b/);
       if (amtMatch2) {
         const num = amtMatch2[1].replace(/[.,]/g, '');
-        if (num !== accountNo && parseInt(num, 10) >= 1000) {
+        if (parseInt(num, 10) >= 1000) {
           amount = parseInt(num, 10);
+          amountRawStr = amtMatch2[0];
         }
       }
     }
 
+    // 2. Identify bank
+    let foundBank = null;
+    let bankMatchIndex = -1;
+    let bankMatchLength = 0;
+    for (const b of VIETNAM_BANKS) {
+      for (const a of b.aliases) {
+        const reg = new RegExp(`\\b${a}\\b`, 'i');
+        const m = textLower.match(reg);
+        if (m) {
+          foundBank = b;
+          bankMatchIndex = m.index;
+          bankMatchLength = m[0].length;
+          break;
+        }
+      }
+      if (foundBank) break;
+    }
+
+    const hasBankKeyword = /\b(stk|số\s*tk|tài\s*khoản|chuyển\s*khoản|ck|c\/k|alias|nickname)\b/i.test(textLower);
+    if (!foundBank && !hasBankKeyword) return null;
+
+    // Helper: validate account candidate (digits or alphanumeric alias)
+    function isValidAccountCandidate(candidate, rawOriginalWord) {
+      if (!candidate || typeof candidate !== 'string') return false;
+      const candLower = candidate.toLowerCase();
+      if (VIETNAM_BANKS.some(b => b.aliases.includes(candLower))) return false;
+      if (BANK_STOP_WORDS.has(candLower)) return false;
+      if (amountRawStr && (candidate === amountRawStr || candLower === amountRawStr.toLowerCase())) return false;
+      if (/^\d+(k|tr|cu|củ|vnd|d|đ)?$/i.test(candLower) && candLower.endsWith('k')) return false;
+      // If the original token in text has Vietnamese accents (e.g., "chuyển" -> "chuy"), it is NOT an alias
+      if (rawOriginalWord && /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/i.test(rawOriginalWord)) {
+        return false;
+      }
+      if (candidate.length < 4 || candidate.length > 25) return false;
+      return true;
+    }
+
+    // 3. Identify account number or alias
+    let accountNo = null;
+
+    // Pattern A: Explicit prefix (stk, tk, số tk, tài khoản, alias, nickname)
+    const prefixRegex = /(?:stk|số\s*tk|tk|tài\s*khoản|alias|nickname|nick)[\s:]+([A-Za-z0-9_.-]{4,25})\b/i;
+    const pMatch = text.match(prefixRegex);
+    if (pMatch) {
+      const candidate = pMatch[1];
+      const fullWordMatch = text.match(new RegExp(`\\b${candidate}[a-zA-Z0-9À-ỹ]*`, 'i'));
+      const fullWord = fullWordMatch ? fullWordMatch[0] : candidate;
+      if (isValidAccountCandidate(candidate, fullWord)) {
+        accountNo = candidate;
+      }
+    }
+
+    // Pattern B: Traditional numeric STK (6-19 digits)
+    if (!accountNo) {
+      const numericCandidates = text.match(/\b[0-9]{6,19}\b/g);
+      if (numericCandidates && numericCandidates.length > 0) {
+        for (const num of numericCandidates) {
+          if (amount && (num === String(amount) || num === amountRawStr.replace(/[.,]/g, ''))) {
+            continue;
+          }
+          accountNo = num;
+          break;
+        }
+      }
+    }
+
+    // Pattern C: If bank was found, check adjacent/nearby tokens for Nickname/Alias
+    if (!accountNo && foundBank) {
+      // Check right after bank: e.g. "tpbank nobianh78" or "tpbank : nobianh78" or "tpbank stk nobianh78"
+      const afterBankStr = text.substring(bankMatchIndex + bankMatchLength);
+      const afterMatch = afterBankStr.match(/^[\s:,-]*(?:stk|tk|la|là|cua|của|so|số|nick|alias)?[\s:,-]*([A-Za-z0-9_.-]{4,25})\b/i);
+      if (afterMatch) {
+        const candidate = afterMatch[1];
+        const fullWordMatch = afterBankStr.match(new RegExp(`\\b${candidate}[a-zA-Z0-9À-ỹ]*`, 'i'));
+        const fullWord = fullWordMatch ? fullWordMatch[0] : candidate;
+        if (isValidAccountCandidate(candidate, fullWord)) {
+          const hasDigits = /\d/.test(candidate);
+          if (hasDigits || hasBankKeyword || amount || candidate.length >= 6) {
+            accountNo = candidate;
+          }
+        }
+      }
+
+      // Check right before bank: e.g. "nobianh78 tpbank"
+      if (!accountNo) {
+        const beforeBankStr = text.substring(0, bankMatchIndex);
+        const beforeMatch = beforeBankStr.match(/([A-Za-z0-9_.-]{4,25})[\s:,-]*$/i);
+        if (beforeMatch) {
+          const candidate = beforeMatch[1];
+          const fullWordMatch = beforeBankStr.match(new RegExp(`\\b${candidate}[a-zA-Z0-9À-ỹ]*`, 'i'));
+          const fullWord = fullWordMatch ? fullWordMatch[0] : candidate;
+          if (isValidAccountCandidate(candidate, fullWord)) {
+            const hasDigits = /\d/.test(candidate);
+            if (hasDigits || hasBankKeyword || amount || candidate.length >= 6) {
+              accountNo = candidate;
+            }
+          }
+        }
+      }
+    }
+
+    if (!accountNo) return null;
+
     // 4. Identify Account Name (Title Case or UPPERCASE 2-5 words)
     let accountName = '';
-    let cleanedForName = text.replace(new RegExp(`\\b${accountNo}\\b`, 'g'), '');
+    let cleanedForName = text.replace(new RegExp(accountNo, 'g'), '');
     cleanedForName = cleanedForName.replace(/\b\d+([.,]\d+)?\s*(k|củ|tr|triệu|đ|d|vnd|dong|đồng)?\b/gi, '');
-    cleanedForName = cleanedForName.replace(/\b(stk|số\s*tk|tk|tài\s*khoản|chuyển\s*khoản|ck|tiền|c\/k|vao|vào|cho|tớ|mình|nhé|nha|vcb|tcb|mb|bidv|acb|vietcombank|techcombank|mbbank)\b/gi, '');
-    const nameMatches = cleanedForName.match(/\b[A-ZÀ-Ỹ][a-zà-ỹA-ZÀ-Ỹ]*(?:\s+[A-ZÀ-Ỹ][a-zà-ỹA-ZÀ-Ỹ]*){1,4}\b/g);
+    cleanedForName = cleanedForName.replace(/(?:^|\s+)(?:stk|số\s*tk|tk|tài\s*khoản|chuyển\s*khoản|ck|tiền|c\/k|vao|vào|cho|to|tớ|minh|mình|nhé|nha|vcb|tcb|mb|bidv|acb|vietcombank|techcombank|mbbank|tpbank)(?=\s+|$)/gi, ' ');
+    const nameMatches = cleanedForName.match(/\b[A-Za-zÀ-ỹ]+(?:\s+[A-Za-zÀ-ỹ]+){1,4}\b/g);
     if (nameMatches && nameMatches.length > 0) {
-      accountName = nameMatches.reduce((a, b) => a.length >= b.length ? a : b).trim();
+      const valid = nameMatches.filter(n => {
+        const words = n.trim().split(/\s+/);
+        return words.length >= 2 && words.every(w => /^[A-ZÀ-Ỹ]/.test(w));
+      });
+      if (valid.length > 0) {
+        accountName = valid.reduce((a, b) => a.length >= b.length ? a : b).trim();
+      }
     }
 
     return {
