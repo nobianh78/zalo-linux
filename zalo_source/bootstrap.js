@@ -210,17 +210,19 @@ try {
                 const path = require('path');
                 const themeCssPath = path.join(__dirname, 'linux_compat', 'tadaza', 'tadaza_theme.css');
                 const rendererJsPath = path.join(__dirname, 'linux_compat', 'tadaza', 'tadaza_renderer.js');
+                win.webContents.on('console-message', (event, level, message, line, sourceId) => {
+                  console.log(`[Renderer L${level}] ${message}`);
+                });
                 if (fs.existsSync(themeCssPath)) {
                   const css = fs.readFileSync(themeCssPath, 'utf8');
                   win.webContents.insertCSS(css);
                 }
                 if (fs.existsSync(rendererJsPath)) {
                   const js = fs.readFileSync(rendererJsPath, 'utf8');
-                  win.webContents.executeJavaScript(js);
+                  win.webContents.executeJavaScript(js).catch(err => {
+                    console.error('[TADaZa Injector] executeJavaScript Error:', err);
+                  });
                 }
-                win.webContents.on('console-message', (event, level, message, line, sourceId) => {
-                  console.log(`[Renderer L${level}] ${message}`);
-                });
               } catch (err) {
                 console.warn('[TADaZa Injector] Injection error:', err.message);
               }

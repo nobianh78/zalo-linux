@@ -1526,7 +1526,7 @@ body.dark .tadaza-profiles-trigger-btn:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 999999;
+  z-index: 2147483640;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.22s ease;
