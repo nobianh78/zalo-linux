@@ -23,16 +23,90 @@ try {
     if (electron.app) {
       // Multi-Profile configuration for independent sessions
       try {
-        const { getCurrentProfileId, getProfileUserDataDir } = require('./linux_compat/tadaza/profiles_manager');
+        const { getCurrentProfileId, getProfileUserDataDir, getProfilesData } = require('./linux_compat/tadaza/profiles_manager');
         const currentProfile = getCurrentProfileId();
         const profileUserData = getProfileUserDataDir(currentProfile);
-        electron.app.setPath('userData', profileUserData);
+
+        // Ensure user data directory exists
+        const fs = require('fs');
+        if (!fs.existsSync(profileUserData)) {
+          try { fs.mkdirSync(profileUserData, { recursive: true }); } catch (e) {}
+        }
+
+        // Hook electron.app.setPath so migration.js or other code cannot overwrite userData back to default ZaloData
+        const origSetPath = electron.app.setPath.bind(electron.app);
+        electron.app.setPath = function(name, val) {
+          if (name === 'userData') {
+            const cur = getCurrentProfileId();
+            if (cur && cur !== 'default') {
+              const expected = getProfileUserDataDir(cur);
+              return origSetPath('userData', expected);
+            }
+          }
+          return origSetPath(name, val);
+        };
+
+        origSetPath('userData', profileUserData);
         console.log(`[Multi-Profile] Running with profile: "${currentProfile}" (${profileUserData})`);
+
+        if (currentProfile !== 'default') {
+          const profilesData = getProfilesData();
+          const pObj = (profilesData.profiles || []).find(p => p.id === currentProfile);
+          const pName = pObj ? pObj.name : currentProfile;
+          electron.app.setName(`Zalo - ${pName}`);
+        } else {
+          electron.app.setName('Zalo');
+        }
       } catch (profErr) {
         console.warn('[Multi-Profile] Error setting profile userData:', profErr.message);
       }
 
-      electron.app.setName('Zalo');
+      // Isolate call daemon sockets per profile so multi-instance calls don't conflict
+      try {
+        const net = require('net');
+        const cp = require('child_process');
+        const { getCurrentProfileId } = require('./linux_compat/tadaza/profiles_manager');
+        const curProfile = getCurrentProfileId();
+
+        if (curProfile && curProfile !== 'default') {
+          // Wrap Server.prototype.listen
+          const origListen = net.Server.prototype.listen;
+          net.Server.prototype.listen = function(...args) {
+            if (typeof args[0] === 'string' && (args[0].includes('socketzalorecv') || args[0].includes('socketzalosend'))) {
+              args[0] = `${args[0]}_${curProfile}`;
+            }
+            return origListen.apply(this, args);
+          };
+
+          // Wrap Socket.prototype.connect
+          const origConnect = net.Socket.prototype.connect;
+          net.Socket.prototype.connect = function(...args) {
+            if (typeof args[0] === 'string' && (args[0].includes('socketzalorecv') || args[0].includes('socketzalosend'))) {
+              args[0] = `${args[0]}_${curProfile}`;
+            } else if (args[0] && typeof args[0] === 'object' && typeof args[0].path === 'string' && (args[0].path.includes('socketzalorecv') || args[0].path.includes('socketzalosend'))) {
+              args[0].path = `${args[0].path}_${curProfile}`;
+            }
+            return origConnect.apply(this, args);
+          };
+
+          // Wrap cp.spawn so child processes get the profile-specific socket args
+          const origSpawn = cp.spawn;
+          cp.spawn = function(command, args, options) {
+            if (Array.isArray(args)) {
+              args = args.map(arg => {
+                if (typeof arg === 'string' && (arg.includes('socketzalorecv') || arg.includes('socketzalosend'))) {
+                  return `${arg}_${curProfile}`;
+                }
+                return arg;
+              });
+            }
+            return origSpawn.call(this, command, args, options);
+          };
+        }
+      } catch (sockErr) {
+        console.warn('[Multi-Profile] Error setting socket hooks:', sockErr.message);
+      }
+
       if (process.platform === 'linux' && typeof electron.app.setDesktopName === 'function') {
         electron.app.setDesktopName('zalo.desktop');
       }
@@ -141,6 +215,20 @@ try {
           win.setMenuBarVisibility(false);
           win.autoHideMenuBar = true;
         } catch (e) {}
+
+        win.on('page-title-updated', (event, title) => {
+          try {
+            const { getCurrentProfileId, getProfilesData } = require('./linux_compat/tadaza/profiles_manager');
+            const cur = getCurrentProfileId();
+            if (cur && cur !== 'default') {
+              event.preventDefault();
+              const data = getProfilesData();
+              const prof = (data.profiles || []).find(p => p.id === cur);
+              const label = prof ? prof.name : cur;
+              win.setTitle(`${title} [${label}]`);
+            }
+          } catch (e) {}
+        });
 
         const checkAndMark = () => {
           try {

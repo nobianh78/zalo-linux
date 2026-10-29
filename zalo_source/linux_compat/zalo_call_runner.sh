@@ -11,8 +11,11 @@ else
     ELECTRON_BIN="node"
 fi
 
+SOCK_ID="$(basename "${1:-default}")"
+CALL_DATA_DIR="/tmp/zalo_call_window_data_${SOCK_ID}"
+
 if [ "$ELECTRON_BIN" = "node" ]; then
     exec node "$DIR/call_daemon.js" "$1" "$2"
 else
-    exec "$ELECTRON_BIN" --no-sandbox --user-data-dir=/tmp/zalo_call_window_data "$DIR/call_daemon.js" "$1" "$2"
+    exec "$ELECTRON_BIN" --no-sandbox --user-data-dir="$CALL_DATA_DIR" "$DIR/call_daemon.js" "$1" "$2"
 fi

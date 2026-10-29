@@ -170,9 +170,11 @@ function switchProfile(profileId) {
   data.activeProfile = profileId;
   saveProfilesData(data);
 
-  // Relaunch app with new profile
-  const filteredArgs = process.argv.slice(1).filter(a => !a.startsWith('--profile='));
-  const newArgs = filteredArgs.concat([`--profile=${profileId}`]);
+  const profileUserData = getProfileUserDataDir(profileId);
+
+  // Relaunch app with new profile and user-data-dir
+  const filteredArgs = process.argv.slice(1).filter(a => !a.startsWith('--profile=') && !a.startsWith('--user-data-dir='));
+  const newArgs = filteredArgs.concat([`--profile=${profileId}`, `--user-data-dir=${profileUserData}`]);
 
   try {
     electron.app.relaunch({ args: newArgs });
@@ -192,11 +194,12 @@ function launchDualProfile(profileId) {
 
   const rootDir = path.resolve(__dirname, '..', '..');
   const startScript = path.join(rootDir, '..', 'start_zalo.sh');
+  const profileUserData = getProfileUserDataDir(profileId);
 
   try {
     let child;
     if (fs.existsSync(startScript)) {
-      child = spawn(startScript, [`--profile=${profileId}`], {
+      child = spawn(startScript, [`--profile=${profileId}`, `--user-data-dir=${profileUserData}`], {
         cwd: path.dirname(startScript),
         detached: true,
         stdio: 'ignore',
@@ -204,7 +207,7 @@ function launchDualProfile(profileId) {
       });
     } else {
       const electronBin = process.execPath;
-      child = spawn(electronBin, ['--no-sandbox', rootDir, `--profile=${profileId}`], {
+      child = spawn(electronBin, ['--no-sandbox', `--user-data-dir=${profileUserData}`, rootDir, `--profile=${profileId}`], {
         cwd: rootDir,
         detached: true,
         stdio: 'ignore',

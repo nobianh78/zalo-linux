@@ -44,10 +44,31 @@ function parseBinNet(buffer) {
 /**
  * Decompress buffer using zlib inflate, raw deflate, gzip, or python lzma fallback
  */
+/**
+ * Decompress buffer using XZ/LZMA (ZDB4.0), zlib inflate, raw deflate, or gzip
+ */
 function decompressBuffer(buf) {
   if (!Buffer.isBuffer(buf) || buf.length === 0) return null;
 
-  // 1. Try standard zlib inflate
+  // 1. Check for XZ stream header magic (\xfd7zXZ\x00) - used by ZDB4.0 multi-file archives
+  if (buf.length >= 6 && buf[0] === 0xfd && buf[1] === 0x37 && buf[2] === 0x7a && buf[3] === 0x58 && buf[4] === 0x5a && buf[5] === 0x00) {
+    try {
+      const out = execFileSync('python3', ['-c', `
+import sys, lzma
+raw = sys.stdin.buffer.read()
+d = lzma.LZMADecompressor()
+sys.stdout.buffer.write(d.decompress(raw))
+`], { input: buf, maxBuffer: 1024 * 1024 * 1024 });
+      if (out && out.length > 0) {
+        logSync('[db-cross-v4] decompressBuffer: XZ/LZMA decompression succeeded, size =', out.length);
+        return out;
+      }
+    } catch (e) {
+      logSync('[db-cross-v4] decompressBuffer: XZ decompression error:', e.message);
+    }
+  }
+
+  // 2. Try standard zlib inflate
   try {
     const res = zlib.inflateSync(buf);
     if (res && res.length > 0) {
@@ -56,7 +77,7 @@ function decompressBuffer(buf) {
     }
   } catch (e1) {}
 
-  // 2. Try raw deflate (no zlib wrapper)
+  // 3. Try raw deflate (no zlib wrapper)
   try {
     const res = zlib.inflateRawSync(buf);
     if (res && res.length > 0) {
@@ -65,7 +86,7 @@ function decompressBuffer(buf) {
     }
   } catch (e2) {}
 
-  // 3. Try gunzip
+  // 4. Try gunzip
   try {
     const res = zlib.gunzipSync(buf);
     if (res && res.length > 0) {
@@ -74,18 +95,19 @@ function decompressBuffer(buf) {
     }
   } catch (e3) {}
 
-  // 4. Try Python LZMA
+  // 5. Try python general LZMA fallback
   try {
     const out = execFileSync('python3', ['-c', `
 import sys, lzma
 raw = sys.stdin.buffer.read()
 try:
-    sys.stdout.buffer.write(lzma.decompress(raw))
+    d = lzma.LZMADecompressor()
+    sys.stdout.buffer.write(d.decompress(raw))
 except Exception:
-    sys.stdout.buffer.write(lzma.decompress(raw, format=lzma.FORMAT_ALONE))
-`], { input: buf, maxBuffer: 300 * 1024 * 1024, stdio: ['pipe', 'pipe', 'ignore'] });
+    sys.stdout.buffer.write(lzma.decompress(raw))
+`], { input: buf, maxBuffer: 1024 * 1024 * 1024 });
     if (out && out.length > 0) {
-      logSync('[db-cross-v4] decompressBuffer: LZMA succeeded, len =', out.length);
+      logSync('[db-cross-v4] decompressBuffer: fallback LZMA succeeded, len =', out.length);
       return out;
     }
   } catch (e4) {}
@@ -117,10 +139,10 @@ function tryDecryptStream(cipherName, keyBuf, ivBuf, inBuf, startOffset) {
 
     logSync(`[db-cross-v4] MATCH FOUND! cipher=${cipherName}, offset=${startOffset}, type=${isZdb ? 'ZDB4.0' : (isSqlite ? 'SQLite' : 'ZIP')}`);
 
-    // Decrypt entire buffer in 64KB chunks
+    // Decrypt entire buffer in 64KB chunks matching C++ FUN_1001c0c0.
+    // In C++, the initial IV (&local_34) is passed to each 64KB chunk call and is never updated between chunks.
     const chunkSize = 64 * 1024;
     const outChunks = [];
-    let curIv = Buffer.from(ivBuf);
 
     for (let pos = 0; pos < data.length; pos += chunkSize) {
       const end = Math.min(pos + chunkSize, data.length);
@@ -132,15 +154,10 @@ function tryDecryptStream(cipherName, keyBuf, ivBuf, inBuf, startOffset) {
         toDecrypt = Buffer.concat([chunk, Buffer.alloc(16 - rem, 0)]);
       }
 
-      const decipher = crypto.createDecipheriv(cipherName, keyBuf, curIv);
+      const decipher = crypto.createDecipheriv(cipherName, keyBuf, ivBuf);
       decipher.setAutoPadding(false);
       const dec = decipher.update(toDecrypt);
       outChunks.push(dec.subarray(0, chunk.length));
-
-      // Update IV to the last 16 bytes of the current ciphertext chunk
-      if (chunk.length >= 16) {
-        curIv = chunk.subarray(chunk.length - 16, chunk.length);
-      }
     }
 
     return Buffer.concat(outChunks);
@@ -189,29 +206,29 @@ function decryptBackupBuffer(inBuf, password) {
 
   const keyCandidates = [];
 
-  // 1. Password as hex string (32 raw bytes = 64 hex characters)
+  // 1. Password string directly as UTF-8 / ASCII, padded/truncated to 32 bytes (exact C++ db-cross-v4 FUN_1001c0c0 behavior)
+  const keyZeros32 = Buffer.alloc(32, 0);
+  Buffer.from(strPass, 'utf8').copy(keyZeros32, 0, 0, 32);
+  keyCandidates.push({ name: 'utf8-padded-32', key: keyZeros32, cipher: 'aes-256-cbc' });
+
+  // 2. Password as hex string (32 raw bytes = 64 hex characters)
   if (/^[0-9a-fA-F]{64}$/.test(strPass)) {
     try {
       keyCandidates.push({ name: 'hex-64', key: Buffer.from(strPass, 'hex'), cipher: 'aes-256-cbc' });
     } catch (e) {}
   }
 
-  // 2. Password as hex string (16 raw bytes = 32 hex characters)
+  // 3. Password string directly padded/truncated to 16 bytes
+  const keyZeros16 = Buffer.alloc(16, 0);
+  Buffer.from(strPass, 'utf8').copy(keyZeros16, 0, 0, 16);
+  keyCandidates.push({ name: 'utf8-padded-16', key: keyZeros16, cipher: 'aes-128-cbc' });
+
+  // 4. Password as hex string (16 raw bytes = 32 hex characters)
   if (/^[0-9a-fA-F]{32}$/.test(strPass)) {
     try {
       keyCandidates.push({ name: 'hex-32', key: Buffer.from(strPass, 'hex'), cipher: 'aes-128-cbc' });
     } catch (e) {}
   }
-
-  // 3. Password string directly as UTF-8 / ASCII, padded/truncated to 32 bytes (exact C++ db-cross-v4 behavior)
-  const keyZeros32 = Buffer.alloc(32, 0);
-  Buffer.from(strPass, 'utf8').copy(keyZeros32, 0, 0, 32);
-  keyCandidates.push({ name: 'utf8-padded-32', key: keyZeros32, cipher: 'aes-256-cbc' });
-
-  // 4. Password string directly padded/truncated to 16 bytes
-  const keyZeros16 = Buffer.alloc(16, 0);
-  Buffer.from(strPass, 'utf8').copy(keyZeros16, 0, 0, 16);
-  keyCandidates.push({ name: 'utf8-padded-16', key: keyZeros16, cipher: 'aes-128-cbc' });
 
   // 5. SHA-256 of password string
   keyCandidates.push({ name: 'sha256', key: crypto.createHash('sha256').update(strPass).digest(), cipher: 'aes-256-cbc' });
@@ -283,7 +300,7 @@ function extractZdbArchive(decryptedBuf, outputDir, onProgress) {
     files.push({ name, size });
   }
 
-  logSync(`[db-cross-v4] Archive contains ${files.length} files:`, files.map(f => `${f.name} (${f.size}B)`));
+  logSync(`[db-cross-v4] Archive contains ${files.length} files (total declared entries = ${numFiles})`);
 
   const compressedData = decryptedBuf.subarray(offset);
   logSync(`[db-cross-v4] Compressed payload offset = ${offset}, remaining length = ${compressedData.length}`);
@@ -306,24 +323,9 @@ function extractZdbArchive(decryptedBuf, outputDir, onProgress) {
     const destPath = path.join(outputDir, file.name);
     fs.mkdirSync(path.dirname(destPath), { recursive: true });
     fs.writeFileSync(destPath, fileData);
-    logSync(`[db-cross-v4] Wrote ${file.name} (${fileData.length} bytes) to ${destPath}`);
 
-    // If filename is group_<id>.db, also create g<id>.db copy/symlink
-    if (file.name.startsWith('group_')) {
-      const aliasName = 'g' + file.name.substring(6);
-      const aliasPath = path.join(outputDir, aliasName);
-      try {
-        fs.writeFileSync(aliasPath, fileData);
-        logSync(`[db-cross-v4] Created alias ${aliasName} -> ${file.name}`);
-      } catch (e) {}
-    } else if (/^g\d+\.db$/.test(file.name)) {
-      // If filename is g<id>.db, also create group_<id>.db
-      const aliasName = 'group_' + file.name.substring(1);
-      const aliasPath = path.join(outputDir, aliasName);
-      try {
-        fs.writeFileSync(aliasPath, fileData);
-        logSync(`[db-cross-v4] Created alias ${aliasName} -> ${file.name}`);
-      } catch (e) {}
+    if (i % 50 === 0 || i === files.length - 1) {
+      logSync(`[db-cross-v4] Unpacked ${i + 1}/${files.length} files...`);
     }
 
     if (typeof onProgress === 'function') {
