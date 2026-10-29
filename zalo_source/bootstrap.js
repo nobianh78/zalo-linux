@@ -25,12 +25,67 @@ try {
       if (process.platform === 'linux' && typeof electron.app.setDesktopName === 'function') {
         electron.app.setDesktopName('zalo.desktop');
       }
+      const lastWindowBounds = new Map();
+
+      // Handle second instance on Linux: restore size (avoid 10x10 shrink), show, and focus window
+      electron.app.on('second-instance', (event, commandLine, workingDirectory) => {
+        try {
+          const windows = electron.BrowserWindow.getAllWindows();
+          for (const win of windows) {
+            if (!win.isDestroyed()) {
+              if (win.isMinimized()) {
+                win.restore();
+              }
+              const bounds = win.getBounds();
+              const saved = lastWindowBounds.get(win.id);
+              // Zalo shrinks hidden windows to 10x10; restore to saved size or sensible default
+              if (bounds.width <= 200 || bounds.height <= 200) {
+                if (saved && saved.width > 200 && saved.height > 200) {
+                  win.setBounds(saved);
+                } else {
+                  win.setSize(1000, 720);
+                  win.center();
+                }
+              }
+              win.setOpacity(1);
+              win.show();
+              win.setAlwaysOnTop(true);
+              win.focus();
+              setTimeout(() => {
+                if (!win.isDestroyed()) {
+                  win.setAlwaysOnTop(false);
+                  win.focus();
+                }
+              }, 150);
+            }
+          }
+        } catch (e) {
+          console.error('[Bootstrap] Error restoring window on second-instance:', e.message);
+        }
+      });
+
       electron.app.on('browser-window-created', (event, win) => {
         try {
           win.setMenu(null);
           win.setMenuBarVisibility(false);
           win.autoHideMenuBar = true;
         } catch (e) {}
+
+        const updateBounds = () => {
+          try {
+            if (!win.isDestroyed() && win.isVisible()) {
+              const b = win.getBounds();
+              if (b.width > 200 && b.height > 200) {
+                lastWindowBounds.set(win.id, b);
+              }
+            }
+          } catch (e) {}
+        };
+
+        win.on('resize', updateBounds);
+        win.on('move', updateBounds);
+        win.once('show', updateBounds);
+        win.on('close', updateBounds);
 
         try {
           if (win && win.webContents) {
