@@ -96,6 +96,21 @@ function initTadazaMain() {
     }
   });
 
+  // Handle copy-image directly to system clipboard
+  ipcMain.handle('tadaza:copy-image', async (event, dataUri) => {
+    try {
+      if (!electron.clipboard || !electron.nativeImage) {
+        return { success: false, error: 'Clipboard not supported' };
+      }
+      const img = electron.nativeImage.createFromDataURL(dataUri);
+      electron.clipboard.writeImage(img);
+      return { success: true };
+    } catch (err) {
+      console.error('[TADaZa Main] Copy image error:', err);
+      return { success: false, error: err.message };
+    }
+  });
+
   // Listen to OS Dark Mode changes (GNOME / KDE)
   if (nativeTheme) {
     nativeTheme.on('updated', () => {

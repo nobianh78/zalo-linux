@@ -28,6 +28,12 @@ const DEFAULT_CONFIG = {
     enabled: true,
     target_lang: 'vi',
     show_button_on_hover: true
+  },
+  markdown: {
+    enabled: true,
+    code_highlight: true,
+    auto_format_inline: true,
+    code_theme: 'dracula'
   }
 };
 
@@ -56,7 +62,8 @@ class ConfigManager {
         this.config = {
           theme: { ...DEFAULT_CONFIG.theme, ...(parsed.theme || {}) },
           privacy: { ...DEFAULT_CONFIG.privacy, ...(parsed.privacy || {}) },
-          translate: { ...DEFAULT_CONFIG.translate, ...(parsed.translate || {}) }
+          translate: { ...DEFAULT_CONFIG.translate, ...(parsed.translate || {}) },
+          markdown: { ...DEFAULT_CONFIG.markdown, ...(parsed.markdown || {}) }
         };
       } else {
         this.save();
@@ -73,7 +80,8 @@ class ConfigManager {
       this.config = {
         theme: { ...this.config.theme, ...(newConfig.theme || {}) },
         privacy: { ...this.config.privacy, ...(newConfig.privacy || {}) },
-        translate: { ...this.config.translate, ...(newConfig.translate || {}) }
+        translate: { ...this.config.translate, ...(newConfig.translate || {}) },
+        markdown: { ...this.config.markdown, ...(newConfig.markdown || {}) }
       };
     }
     try {

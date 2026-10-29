@@ -749,3 +749,342 @@ body.dark .chat-message.me .tadaza-trans-box {
   border-right-color: #58a6ff;
 }
 
+/* --------------------------------------------------------------------------
+   6. Markdown & Code Snippet Component
+   -------------------------------------------------------------------------- */
+
+/* Inline Code */
+.tadaza-inline-code {
+  font-family: 'Fira Code', 'JetBrains Mono', Consolas, Monaco, monospace;
+  background: rgba(110, 118, 129, 0.18);
+  color: #d73a49;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.9em;
+  border: 1px solid rgba(110, 118, 129, 0.25);
+  word-break: break-word;
+}
+
+body.dark .tadaza-inline-code {
+  background: rgba(110, 118, 129, 0.35);
+  color: #ff7b72;
+  border-color: rgba(240, 246, 252, 0.15);
+}
+
+/* Code Block Card in Messages */
+.tadaza-code-card {
+  display: flex;
+  flex-direction: column;
+  margin: 8px 0;
+  max-width: 100%;
+  border-radius: 8px;
+  background: #1e1e2e;
+  color: #cdd6f4;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  font-size: 13px;
+  text-align: left;
+  user-select: text;
+}
+
+body.dark .tadaza-code-card {
+  background: #181825;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.tadaza-code-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  background: rgba(0, 0, 0, 0.35);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  user-select: none;
+}
+
+.tadaza-code-lang-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #89b4fa;
+  letter-spacing: 0.5px;
+}
+
+.tadaza-code-lang-badge svg {
+  stroke: currentColor;
+}
+
+.tadaza-code-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  font-size: 11.5px;
+  font-weight: 500;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #cdd6f4;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.tadaza-code-copy-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.tadaza-code-copy-btn.copied {
+  background: #238636;
+  color: #ffffff;
+  border-color: #2ea043;
+}
+
+.tadaza-code-pre {
+  margin: 0;
+  padding: 12px 14px;
+  overflow-x: auto;
+  font-family: 'Fira Code', 'JetBrains Mono', Consolas, Monaco, monospace;
+  font-size: 12.5px;
+  line-height: 1.55;
+  tab-size: 2;
+  white-space: pre;
+}
+
+.tadaza-code-content {
+  font-family: inherit;
+  color: inherit;
+}
+
+/* Syntax Highlighting Colors */
+.hl-keyword {
+  color: #cba6f7;
+  font-weight: 600;
+}
+.hl-string {
+  color: #a6e3a1;
+}
+.hl-number {
+  color: #fab387;
+}
+.hl-boolean {
+  color: #f38ba8;
+  font-weight: 600;
+}
+.hl-comment {
+  color: #6c7086;
+  font-style: italic;
+}
+.hl-function {
+  color: #89b4fa;
+}
+
+/* Toolbar Code Button */
+.tadaza-chat-tool-btn,
+.tadaza-code-studio-btn {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  border-radius: 6px;
+  color: #72808e;
+  transition: all 0.15s ease;
+  user-select: none;
+  margin: 0 2px;
+}
+
+.tadaza-chat-tool-btn:hover,
+.tadaza-code-studio-btn:hover {
+  background: rgba(0, 104, 255, 0.12);
+  color: #0068ff;
+}
+
+body.dark .tadaza-chat-tool-btn,
+body.dark .tadaza-code-studio-btn {
+  color: #9aa7b5;
+}
+
+body.dark .tadaza-chat-tool-btn:hover,
+body.dark .tadaza-code-studio-btn:hover {
+  background: rgba(88, 166, 255, 0.18);
+  color: #58a6ff;
+}
+
+/* Code & Markdown Studio Modal */
+#tadaza-code-studio-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(5px);
+  z-index: 999998;
+  align-items: center;
+  justify-content: center;
+}
+
+#tadaza-code-studio-overlay.open {
+  display: flex;
+}
+
+#tadaza-code-studio-modal {
+  width: 860px;
+  max-width: 94vw;
+  max-height: 90vh;
+  background: #1e1e2e;
+  color: #cdd6f4;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: tadazaModalIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes tadazaModalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.tadaza-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  background: rgba(0, 0, 0, 0.25);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.tadaza-modal-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #cdd6f4;
+}
+
+.tadaza-modal-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tadaza-modal-body {
+  display: flex;
+  flex: 1;
+  min-height: 380px;
+  max-height: 520px;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.tadaza-modal-pane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 14px;
+  overflow: hidden;
+}
+
+.tadaza-modal-pane.editor-pane {
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.tadaza-pane-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #89b4fa;
+  margin-bottom: 8px;
+}
+
+.tadaza-code-textarea {
+  flex: 1;
+  width: 100%;
+  box-sizing: border-box;
+  background: #181825;
+  color: #cdd6f4;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 12px;
+  font-family: 'Fira Code', 'JetBrains Mono', Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  tab-size: 2;
+  resize: none;
+  outline: none;
+  white-space: pre;
+}
+
+.tadaza-code-textarea:focus {
+  border-color: #89b4fa;
+  box-shadow: 0 0 0 2px rgba(137, 180, 250, 0.25);
+}
+
+.tadaza-preview-container {
+  flex: 1;
+  overflow: auto;
+  border-radius: 8px;
+  background: #11111b;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.tadaza-canvas-preview {
+  max-width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.tadaza-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.tadaza-modal-btn-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tadaza-btn-send-img {
+  background: linear-gradient(135deg, #89b4fa 0%, #b4befe 100%) !important;
+  color: #11111b !important;
+  font-weight: 700 !important;
+}
+
+.tadaza-btn-send-img:hover {
+  opacity: 0.92;
+  transform: translateY(-1px);
+}
+
+
