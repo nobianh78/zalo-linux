@@ -22,6 +22,7 @@ try {
       translate: (args) => electron.ipcRenderer.invoke('tadaza:translate', args),
       chooseWallpaper: () => electron.ipcRenderer.invoke('tadaza:choose-wallpaper'),
       copyImage: (dataUri) => electron.ipcRenderer.invoke('tadaza:copy-image', dataUri),
+      openExternal: (url) => electron.ipcRenderer.invoke('tadaza:open-external', url),
       onConfigChanged: (cb) => {
         electron.ipcRenderer.on('tadaza:config-changed', (event, cfg) => {
           if (typeof cb === 'function') cb(cfg);

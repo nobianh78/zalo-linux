@@ -34,6 +34,13 @@ const DEFAULT_CONFIG = {
     code_highlight: true,
     auto_format_inline: true,
     code_theme: 'dracula'
+  },
+  quick_parser: {
+    enabled: true,
+    auto_detect_bank: true,
+    auto_detect_tracking: true,
+    auto_detect_phone: true,
+    default_qr_template: 'compact2'
   }
 };
 
@@ -63,7 +70,8 @@ class ConfigManager {
           theme: { ...DEFAULT_CONFIG.theme, ...(parsed.theme || {}) },
           privacy: { ...DEFAULT_CONFIG.privacy, ...(parsed.privacy || {}) },
           translate: { ...DEFAULT_CONFIG.translate, ...(parsed.translate || {}) },
-          markdown: { ...DEFAULT_CONFIG.markdown, ...(parsed.markdown || {}) }
+          markdown: { ...DEFAULT_CONFIG.markdown, ...(parsed.markdown || {}) },
+          quick_parser: { ...DEFAULT_CONFIG.quick_parser, ...(parsed.quick_parser || {}) }
         };
       } else {
         this.save();

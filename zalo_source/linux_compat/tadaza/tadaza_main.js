@@ -111,6 +111,20 @@ function initTadazaMain() {
     }
   });
 
+  // Handle open external link in default browser
+  ipcMain.handle('tadaza:open-external', async (event, url) => {
+    try {
+      if (electron.shell && url && typeof url === 'string') {
+        await electron.shell.openExternal(url);
+        return { success: true };
+      }
+      return { success: false };
+    } catch (err) {
+      console.error('[TADaZa Main] Open external error:', err);
+      return { success: false, error: err.message };
+    }
+  });
+
   // Listen to OS Dark Mode changes (GNOME / KDE)
   if (nativeTheme) {
     nativeTheme.on('updated', () => {
