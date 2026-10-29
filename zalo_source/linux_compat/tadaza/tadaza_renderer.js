@@ -137,14 +137,18 @@
     const isDark = cfg.theme.mode === 'dark' || (cfg.theme.mode === 'system' && (cfg._systemIsDark || window.matchMedia('(prefers-color-scheme: dark)').matches));
 
     if (isDark) {
-      document.body.classList.add('tadaza-dark');
-      document.documentElement.classList.add('tadaza-dark');
+      document.body.classList.add('dark');
+      if (cfg.theme.deep_dark) {
+        document.body.classList.add('tadaza-deep-dark');
+      } else {
+        document.body.classList.remove('tadaza-deep-dark');
+      }
       try {
         localStorage.setItem('za_theme', JSON.stringify({ theme: 'dark' }));
       } catch (e) {}
     } else {
-      document.body.classList.remove('tadaza-dark');
-      document.documentElement.classList.remove('tadaza-dark');
+      document.body.classList.remove('dark');
+      document.body.classList.remove('tadaza-deep-dark');
       try {
         localStorage.setItem('za_theme', JSON.stringify({ theme: 'light' }));
       } catch (e) {}
@@ -175,12 +179,16 @@
       document.head.appendChild(sizeStyle);
     }
     const fontSize = cfg.theme.font_size || 14;
-    sizeStyle.textContent = `
-      [class*="message-content"], [class*="msg-content"], [class*="bubble-content"], [class*="chat-item__content"] {
-        font-size: ${fontSize}px !important;
-        line-height: ${Math.round(fontSize * 1.45)}px !important;
-      }
-    `;
+    if (fontSize !== 14) {
+      sizeStyle.textContent = `
+        [class*="message-content"], [class*="msg-content"], [class*="bubble-content"] {
+          font-size: ${fontSize}px !important;
+          line-height: ${Math.round(fontSize * 1.45)}px !important;
+        }
+      `;
+    } else {
+      sizeStyle.textContent = '';
+    }
 
     // Wallpaper layer
     updateWallpaper(cfg.theme.wallpaper, cfg.theme.wallpaper_opacity, cfg.theme.wallpaper_blur);
@@ -375,12 +383,11 @@
 
     overlay.addEventListener('click', closeDrawer);
 
-    // Mount button into Left Navigation Bar
-    attachSidebarButton(toggleDrawer);
-
     // Watch for React re-renders of the left navigation bar
     const navObserver = new MutationObserver(() => {
-      attachSidebarButton(toggleDrawer);
+      if (!document.getElementById('nav-item-tadaza')) {
+        attachSidebarButton(toggleDrawer);
+      }
     });
     navObserver.observe(document.body, { childList: true, subtree: true });
 
@@ -390,16 +397,13 @@
   function attachSidebarButton(toggleDrawer) {
     if (document.getElementById('nav-item-tadaza')) return;
 
-    const navTop = document.querySelector('.nav__tabs__top');
     const navBottom = document.querySelector('.nav__tabs__bottom');
+    const navTop = document.querySelector('.nav__tabs__top');
     const navTabs = document.querySelector('.nav__tabs');
-
-    const targetContainer = navTop || navBottom || navTabs;
-    if (!targetContainer) return;
 
     const btn = document.createElement('div');
     btn.id = 'nav-item-tadaza';
-    btn.className = 'tadaza-nav-item';
+    btn.className = 'nav__tabs__bottom__btn tadaza-nav-item';
     btn.title = 'TADaZa - Tiện ích mở rộng';
     btn.innerHTML = `
       <svg class="tadaza-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -412,11 +416,11 @@
       toggleDrawer();
     });
 
-    if (navTop) {
+    if (navBottom && navBottom.lastElementChild) {
+      navBottom.insertBefore(btn, navBottom.lastElementChild);
+    } else if (navTop) {
       navTop.appendChild(btn);
-    } else if (navBottom) {
-      navBottom.insertBefore(btn, navBottom.firstChild);
-    } else {
+    } else if (navTabs) {
       navTabs.appendChild(btn);
     }
   }

@@ -7,8 +7,8 @@ const CONFIG_FILE = path.join(CONFIG_DIR, 'tadaza_config.json');
 
 const DEFAULT_CONFIG = {
   theme: {
-    mode: 'system', // 'light' | 'dark' | 'system'
-    deep_dark: true,
+    mode: 'light', // 'light' | 'dark' | 'system'
+    deep_dark: false,
     font_family: 'Default',
     font_size: 14,
     wallpaper: '',

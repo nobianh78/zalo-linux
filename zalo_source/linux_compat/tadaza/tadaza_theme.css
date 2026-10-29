@@ -6,11 +6,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Fira+Code:wght@400;500&family=Inter:wght@400;500;600;700&family=Open+Sans:wght@400;600&family=Roboto:wght@400;500;700&display=swap');
 
 /* --------------------------------------------------------------------------
-   1. Deep Dark Mode Engine (High Contrast & Modern Palette)
+   1. Deep Dark Mode Enhancement (Safe Token Override)
    -------------------------------------------------------------------------- */
-:root body.tadaza-dark,
-:root.tadaza-dark body,
-body.tadaza-dark {
+body.dark.tadaza-deep-dark {
   --surface-background: #0d1117 !important;
   --surface-background-subtle: #161b22 !important;
   --surface-background-overlay: #161b22 !important;
@@ -21,7 +19,6 @@ body.tadaza-dark {
   --layer-background-selected: #1f344d !important;
   --bg-default: #0d1117 !important;
   --title-bar: #0d1117 !important;
-  --title-ptv: #161b22 !important;
   --divider: #30363d !important;
   --divider-bold: #484f58 !important;
   --border-subtle: #30363d !important;
@@ -29,146 +26,21 @@ body.tadaza-dark {
   --border-hover: #58a6ff !important;
   --text-primary: #e6edf3 !important;
   --text-secondary: #8b949e !important;
-  --tab-txt: #8b949e !important;
-  --accent-blue-bg: #1f6feb !important;
-  --accent-blue-bg-bold: #388bfd !important;
-  --button-tertiary-neutral-text: #c9d1d9 !important;
-  --input-field-bg-outline: #161b22 !important;
-
-  background-color: #0d1117 !important;
-  color: #e6edf3 !important;
-}
-
-body.tadaza-dark #app,
-body.tadaza-dark .app-layout,
-body.tadaza-dark #main-view,
-body.tadaza-dark .main-view {
-  background-color: #0d1117 !important;
-  color: #e6edf3 !important;
-}
-
-/* Left Navigation Bar */
-body.tadaza-dark .nav,
-body.tadaza-dark .nav-bar,
-body.tadaza-dark .sidebar,
-body.tadaza-dark .main-navigation {
-  background-color: #010409 !important;
-  border-right: 1px solid #21262d !important;
-}
-
-/* Chat & Contacts Sidebar List */
-body.tadaza-dark .conv-list,
-body.tadaza-dark .chat-list,
-body.tadaza-dark .conversation-list,
-body.tadaza-dark .msg-item-container,
-body.tadaza-dark .left-section,
-body.tadaza-dark [class*="chat-list"],
-body.tadaza-dark [class*="conv-item"] {
-  background-color: #0d1117 !important;
-  color: #e6edf3 !important;
-  border-color: #21262d !important;
-}
-
-body.tadaza-dark [class*="conv-item"]:hover,
-body.tadaza-dark [class*="chat-item"]:hover {
-  background-color: #161b22 !important;
-}
-
-body.tadaza-dark [class*="conv-item"][class*="selected"],
-body.tadaza-dark [class*="chat-item"][class*="active"] {
-  background-color: #1f344d !important;
-}
-
-/* Main Chat Container */
-body.tadaza-dark .chat-box,
-body.tadaza-dark .chat-area,
-body.tadaza-dark .chat-content,
-body.tadaza-dark .chat-conversation-history,
-body.tadaza-dark .chat-message-list,
-body.tadaza-dark [class*="chat-history"] {
-  background-color: #0d1117 !important;
-}
-
-/* Chat Header */
-body.tadaza-dark .chat-header,
-body.tadaza-dark [class*="chat-box__header"],
-body.tadaza-dark [class*="chat-info-general__header"] {
-  background-color: #161b22 !important;
-  border-bottom: 1px solid #21262d !important;
-  color: #e6edf3 !important;
-}
-
-/* Chat Input Bar */
-body.tadaza-dark .chat-input,
-body.tadaza-dark .chat-input__container,
-body.tadaza-dark [class*="chat-input"],
-body.tadaza-dark [class*="chat-box__footer"] {
-  background-color: #161b22 !important;
-  border-top: 1px solid #21262d !important;
-}
-
-body.tadaza-dark [contenteditable="true"],
-body.tadaza-dark input,
-body.tadaza-dark textarea {
-  color: #e6edf3 !important;
-  background-color: transparent !important;
-}
-
-/* Message Bubbles */
-body.tadaza-dark [class*="message-item--incoming"],
-body.tadaza-dark [class*="bubble--incoming"],
-body.tadaza-dark [class*="msg-bubble--left"] {
-  background-color: #21262d !important;
-  color: #e6edf3 !important;
-  border: 1px solid #30363d !important;
-  border-radius: 12px !important;
-}
-
-body.tadaza-dark [class*="message-item--outgoing"],
-body.tadaza-dark [class*="bubble--outgoing"],
-body.tadaza-dark [class*="msg-bubble--right"] {
-  background-color: #1f6feb !important;
-  color: #ffffff !important;
-  border-radius: 12px !important;
-}
-
-/* Right Info Sidebar (Chat Info / Cloud / ToDo) */
-body.tadaza-dark .right-section,
-body.tadaza-dark .chat-info,
-body.tadaza-dark [class*="chat-info"],
-body.tadaza-dark [class*="cloud-tool"],
-body.tadaza-dark #mycloud-right-sidebar {
-  background-color: #161b22 !important;
-  border-left: 1px solid #21262d !important;
-  color: #e6edf3 !important;
-}
-
-/* Modals & Dropdown Popups */
-body.tadaza-dark .modal,
-body.tadaza-dark .modal-content,
-body.tadaza-dark .popover,
-body.tadaza-dark .menu-popup,
-body.tadaza-dark [class*="popup"],
-body.tadaza-dark [class*="dropdown"] {
-  background-color: #161b22 !important;
-  border: 1px solid #30363d !important;
-  color: #e6edf3 !important;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5) !important;
 }
 
 /* Dark Mode Scrollbars */
-body.tadaza-dark ::-webkit-scrollbar {
+body.dark ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
-body.tadaza-dark ::-webkit-scrollbar-track {
+body.dark ::-webkit-scrollbar-track {
   background: #0d1117;
 }
-body.tadaza-dark ::-webkit-scrollbar-thumb {
+body.dark ::-webkit-scrollbar-thumb {
   background: #30363d;
   border-radius: 4px;
 }
-body.tadaza-dark ::-webkit-scrollbar-thumb:hover {
+body.dark ::-webkit-scrollbar-thumb:hover {
   background: #484f58;
 }
 
@@ -177,18 +49,14 @@ body.tadaza-dark ::-webkit-scrollbar-thumb:hover {
    -------------------------------------------------------------------------- */
 body.tadaza-blur-msg-active [class*="message-content"],
 body.tadaza-blur-msg-active [class*="msg-content"],
-body.tadaza-blur-msg-active [class*="bubble-content"],
-body.tadaza-blur-msg-active .chat-item__content,
-body.tadaza-blur-msg-active [class*="conv-item__desc"] {
+body.tadaza-blur-msg-active [class*="bubble-content"] {
   filter: blur(6px) !important;
   transition: filter 0.18s ease-in-out !important;
 }
 
 body.tadaza-blur-msg-active [class*="message-content"]:hover,
 body.tadaza-blur-msg-active [class*="msg-content"]:hover,
-body.tadaza-blur-msg-active [class*="bubble-content"]:hover,
-body.tadaza-blur-msg-active .chat-item__content:hover,
-body.tadaza-blur-msg-active [class*="conv-item__desc"]:hover {
+body.tadaza-blur-msg-active [class*="bubble-content"]:hover {
   filter: blur(0px) !important;
 }
 
@@ -211,7 +79,7 @@ body.tadaza-blur-media-active [class*="msg-item"] video:hover {
 
 body.tadaza-blur-names-active [class*="conv-item__name"],
 body.tadaza-blur-names-active [class*="chat-box__header__title"],
-body.tadaza-blur-names-active [class*="avatar"],
+body.tadaza-blur-names-active [class*="avatar"] img,
 body.tadaza-blur-names-active .chat-item__avatar {
   filter: blur(5px) !important;
   transition: filter 0.18s ease-in-out !important;
@@ -219,7 +87,7 @@ body.tadaza-blur-names-active .chat-item__avatar {
 
 body.tadaza-blur-names-active [class*="conv-item__name"]:hover,
 body.tadaza-blur-names-active [class*="chat-box__header__title"]:hover,
-body.tadaza-blur-names-active [class*="avatar"]:hover,
+body.tadaza-blur-names-active [class*="avatar"] img:hover,
 body.tadaza-blur-names-active .chat-item__avatar:hover {
   filter: blur(0px) !important;
 }
@@ -248,7 +116,7 @@ body.tadaza-blur-names-active .chat-item__avatar:hover {
 /* Left Sidebar Navigation Item */
 .tadaza-nav-item {
   width: 100%;
-  height: 52px;
+  height: 56px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -256,37 +124,37 @@ body.tadaza-blur-names-active .chat-item__avatar:hover {
   position: relative;
   user-select: none;
   color: var(--text-on-color, #c9d1d9);
-  transition: all 0.2s ease;
+  transition: all 0.18s ease;
   box-sizing: border-box;
 }
 
 .tadaza-nav-item:hover {
   color: #ffffff;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .tadaza-nav-item.active {
   color: #0068ff;
-  background: rgba(0, 104, 255, 0.15);
+  background: rgba(0, 104, 255, 0.18);
 }
 
 .tadaza-nav-item.active::before {
   content: "";
   position: absolute;
   left: 0;
-  top: 8px;
-  bottom: 8px;
+  top: 10px;
+  bottom: 10px;
   width: 3.5px;
   background: #0068ff;
   border-radius: 0 3px 3px 0;
 }
 
-body.tadaza-dark .tadaza-nav-item.active {
+body.dark .tadaza-nav-item.active {
   color: #58a6ff;
-  background: rgba(31, 111, 235, 0.2);
+  background: rgba(31, 111, 235, 0.25);
 }
 
-body.tadaza-dark .tadaza-nav-item.active::before {
+body.dark .tadaza-nav-item.active::before {
   background: #58a6ff;
 }
 
@@ -294,63 +162,69 @@ body.tadaza-dark .tadaza-nav-item.active::before {
   width: 24px;
   height: 24px;
   stroke: currentColor;
-  transition: transform 0.2s ease;
+  transition: transform 0.18s ease;
 }
 
 .tadaza-nav-item:hover .tadaza-nav-icon {
-  transform: scale(1.1);
+  transform: scale(1.12);
 }
 
-/* Overlay Backdrop */
+/* Overlay Backdrop - Closed by default */
 #tadaza-overlay {
+  display: none;
   position: fixed;
   top: 0;
-  left: 64px;
-  width: calc(100vw - 64px);
+  left: 0;
+  width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.35);
+  background: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(2px);
   z-index: 999998;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.25s ease, visibility 0.25s ease;
 }
 
 #tadaza-overlay.open {
-  opacity: 1;
-  visibility: visible;
+  display: block;
 }
 
-/* Main Drawer Panel (Left Docked next to Sidebar) */
+/* Main Drawer Panel - Closed by default, zero interference */
 #tadaza-drawer {
+  display: none;
   position: fixed;
   top: 0;
-  left: 64px;
+  left: 68px;
   width: 380px;
-  max-width: calc(100vw - 64px);
+  max-width: calc(100vw - 68px);
   height: 100vh;
   z-index: 999999;
   background: #ffffff;
   color: #1f2328;
   box-shadow: 8px 0 32px rgba(0, 0, 0, 0.25);
-  transform: translateX(-100%);
-  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
-  display: flex;
   flex-direction: column;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   border-right: 1px solid rgba(0, 0, 0, 0.08);
+  animation: tadazaSlideIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-body.tadaza-dark #tadaza-drawer {
+body.dark #tadaza-drawer {
   background: #161b22;
   color: #e6edf3;
   box-shadow: 8px 0 32px rgba(0, 0, 0, 0.6);
   border-right: 1px solid #30363d;
-  border-left: none;
 }
 
 #tadaza-drawer.open {
-  transform: translateX(0);
+  display: flex;
+}
+
+@keyframes tadazaSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 /* Drawer Header */
@@ -362,7 +236,7 @@ body.tadaza-dark #tadaza-drawer {
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
-body.tadaza-dark .tadaza-header {
+body.dark .tadaza-header {
   border-bottom: 1px solid #30363d;
 }
 
@@ -416,7 +290,7 @@ body.tadaza-dark .tadaza-header {
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
-body.tadaza-dark .tadaza-tabs {
+body.dark .tadaza-tabs {
   background: #0d1117;
   border-bottom: 1px solid #21262d;
 }
@@ -438,7 +312,7 @@ body.tadaza-dark .tadaza-tabs {
   transition: all 0.15s ease;
 }
 
-body.tadaza-dark .tadaza-tab-btn {
+body.dark .tadaza-tab-btn {
   color: #8b949e;
 }
 
@@ -448,7 +322,7 @@ body.tadaza-dark .tadaza-tab-btn {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
-body.tadaza-dark .tadaza-tab-btn.active {
+body.dark .tadaza-tab-btn.active {
   background: #21262d;
   color: #58a6ff;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
@@ -479,7 +353,7 @@ body.tadaza-dark .tadaza-tab-btn.active {
   margin: 0;
 }
 
-body.tadaza-dark .tadaza-section-title {
+body.dark .tadaza-section-title {
   color: #58a6ff;
 }
 
@@ -493,7 +367,7 @@ body.tadaza-dark .tadaza-section-title {
   border: 1px solid rgba(128, 128, 128, 0.1);
 }
 
-body.tadaza-dark .tadaza-item {
+body.dark .tadaza-item {
   background: #21262d;
   border: 1px solid #30363d;
 }
@@ -521,7 +395,7 @@ body.tadaza-dark .tadaza-item {
   color: #57606a;
 }
 
-body.tadaza-dark .tadaza-item-desc {
+body.dark .tadaza-item-desc {
   color: #8b949e;
 }
 
@@ -551,7 +425,7 @@ body.tadaza-dark .tadaza-item-desc {
   border-radius: 24px;
 }
 
-body.tadaza-dark .tadaza-slider {
+body.dark .tadaza-slider {
   background-color: #30363d;
 }
 
@@ -572,7 +446,7 @@ body.tadaza-dark .tadaza-slider {
   background-color: #0068ff;
 }
 
-body.tadaza-dark .tadaza-switch input:checked + .tadaza-slider {
+body.dark .tadaza-switch input:checked + .tadaza-slider {
   background-color: #1f6feb;
 }
 
@@ -590,7 +464,7 @@ body.tadaza-dark .tadaza-switch input:checked + .tadaza-slider {
   width: 100%;
 }
 
-body.tadaza-dark .tadaza-btn-group {
+body.dark .tadaza-btn-group {
   background: #0d1117;
 }
 
@@ -643,7 +517,7 @@ body.tadaza-dark .tadaza-btn-group {
   font-family: inherit;
 }
 
-body.tadaza-dark .tadaza-select {
+body.dark .tadaza-select {
   background: #161b22;
   border: 1px solid #30363d;
 }
@@ -710,7 +584,7 @@ body.tadaza-dark .tadaza-select {
   position: relative;
 }
 
-body.tadaza-dark .tadaza-trans-box {
+body.dark .tadaza-trans-box {
   background: rgba(31, 111, 235, 0.15);
   border-left-color: #58a6ff;
 }
@@ -725,7 +599,7 @@ body.tadaza-dark .tadaza-trans-box {
   justify-content: space-between;
 }
 
-body.tadaza-dark .tadaza-trans-box .trans-header {
+body.dark .tadaza-trans-box .trans-header {
   color: #58a6ff;
 }
 
@@ -743,7 +617,7 @@ body.tadaza-dark .tadaza-trans-box .trans-header {
   border-radius: 8px;
 }
 
-body.tadaza-dark .tadaza-emoji-grid {
+body.dark .tadaza-emoji-grid {
   background: #0d1117;
 }
 
