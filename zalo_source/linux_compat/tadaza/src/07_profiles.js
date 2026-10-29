@@ -29,7 +29,7 @@
               </div>
               <div>
                 <div class="tadaza-profiles-title">Quản lý Đa tài khoản</div>
-                <div class="tadaza-profiles-subtitle">Lưu phiên đăng nhập độc lập & chuyển đổi nhanh chỉ bằng 1-click (Ctrl+Shift+P)</div>
+                <div class="tadaza-profiles-subtitle">Lưu trữ phiên đăng nhập độc lập • Chuyển đổi nhanh 1-click hoặc mở song song</div>
               </div>
             </div>
             <button class="tadaza-profiles-close-btn" id="tadaza-btn-close-profiles" title="Đóng (Esc)">
@@ -48,7 +48,7 @@
               <line x1="12" y1="8" x2="12" y2="12"></line>
               <line x1="12" y1="16" x2="12.01" y2="16"></line>
             </svg>
-            <span>💡 <b>Mẹo Linux:</b> Bạn có thể bấm <b>"Mở song song"</b> để chạy đồng thời cả 2 cửa sổ Zalo trên cùng màn hình máy tính!</span>
+            <span>💡 <b>Mẹo:</b> Bạn có thể bấm <b>"Mở song song"</b> để chạy đồng thời nhiều tài khoản Zalo trên cùng một màn hình máy tính!</span>
           </div>
         </div>
       `;
@@ -127,23 +127,23 @@
       html += `
         <div class="tadaza-profile-card ${isCurrent ? 'active' : ''}">
           <div class="tadaza-profile-info">
-            ${p.avatar
-              ? `<img class="tadaza-profile-avatar" src="${escapeHtml(p.avatar)}" alt="${escapeHtml(p.name)}">`
-              : `<div class="tadaza-profile-avatar-fallback">${initial}</div>`
-            }
+            <div class="tadaza-profile-avatar-wrap">
+              ${p.avatar
+                ? `<img class="tadaza-profile-avatar" src="${escapeHtml(p.avatar)}" alt="${escapeHtml(p.name)}">`
+                : `<div class="tadaza-profile-avatar-fallback">${initial}</div>`
+              }
+              ${isCurrent ? '<span class="tadaza-avatar-status-dot" title="Tài khoản đang hoạt động"></span>' : ''}
+            </div>
             <div class="tadaza-profile-details">
-              <div class="tadaza-profile-name-row">
-                <span class="tadaza-profile-name" title="${escapeHtml(p.name)}">${escapeHtml(p.name)}</span>
-                ${isCurrent ? '<span class="tadaza-profile-badge-active"><span class="profile-dot"></span> Đang dùng</span>' : ''}
-              </div>
+              <div class="tadaza-profile-name" title="${escapeHtml(p.name)}">${escapeHtml(p.name)}</div>
               <div class="tadaza-profile-sub">
-                ${isCurrent ? 'Cửa sổ hiện tại đang chạy' : 'Phiên đăng nhập đã lưu trữ độc lập'}
+                ${isCurrent ? '🟢 Cửa sổ hiện tại đang chạy' : 'Phiên làm việc độc lập • Sẵn sàng chuyển đổi'}
               </div>
             </div>
           </div>
           <div class="tadaza-profile-actions">
             ${isCurrent
-              ? '<button class="tadaza-btn-action" style="opacity: 0.6; cursor: default; background: transparent; border: 1px solid rgba(0,104,255,0.3); color: #0068ff;" disabled>🟢 Đang kết nối</button>'
+              ? '<span class="tadaza-badge-current"><span class="tadaza-pulse-dot"></span> Đang chạy</span>'
               : `
                 <button class="tadaza-btn-action tadaza-btn-switch" data-switch-id="${escapeHtml(p.id)}" title="Chuyển sang tài khoản này (Khởi động lại app)">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">

@@ -36,20 +36,16 @@
         buildUI();
         setupMessageTranslator();
         setupMessageCodeFormatter();
-        setupChatToolbarButton();
         setupInputMarkdownShortcuts();
         setupQuickParser();
-        setupFloatingChatHead();
         setupMultiAccountSwitcher();
       });
     } else {
       buildUI();
       setupMessageTranslator();
       setupMessageCodeFormatter();
-      setupChatToolbarButton();
       setupInputMarkdownShortcuts();
       setupQuickParser();
-      setupFloatingChatHead();
       setupMultiAccountSwitcher();
     }
   }

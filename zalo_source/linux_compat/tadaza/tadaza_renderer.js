@@ -457,167 +457,10 @@
   }
 
   function setupMessageTranslator() {
-    // Remove any previously spammed buttons from the DOM
-    document.querySelectorAll('.tadaza-trans-btn').forEach(btn => btn.remove());
-
-    let hoverBtn = document.getElementById('tadaza-hover-trans-btn');
-    if (!hoverBtn) {
-      hoverBtn = document.createElement('div');
-      hoverBtn.id = 'tadaza-hover-trans-btn';
-      hoverBtn.className = 'tadaza-hover-trans-btn';
-      hoverBtn.title = 'Dịch tin nhắn này (TADaZa)';
-      hoverBtn.innerHTML = `
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"/>
-          <line x1="2" y1="12" x2="22" y2="12"/>
-          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-        </svg>
-      `;
-      document.body.appendChild(hoverBtn);
-
-      hoverBtn.addEventListener('click', async (e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        if (!activeHoverMessage) return;
-
-        const msgElem = activeHoverMessage;
-        const textToTranslate = extractMessageText(msgElem);
-        if (!textToTranslate) return;
-
-        const chatMsg = msgElem.closest('.chat-message, [class*="msg-item"], [class*="chat-item"]');
-        const oldBox = (chatMsg || msgElem.parentElement).querySelector('.tadaza-trans-box');
-        if (oldBox) {
-          oldBox.remove();
-          return;
-        }
-
-        hoverBtn.innerHTML = `
-          <svg class="tadaza-spin" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-          </svg>
-        `;
-
-        try {
-          const res = await bridge.translate({
-            text: textToTranslate,
-            targetLang: currentConfig.translate.target_lang || 'vi'
-          });
-
-          hoverBtn.innerHTML = `
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="2" y1="12" x2="22" y2="12"/>
-              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-            </svg>
-          `;
-
-          if (res && res.success && res.translated) {
-            const box = document.createElement('div');
-            box.className = 'tadaza-trans-box';
-            box.innerHTML = `
-              <div class="trans-header">
-                <span>Dịch sang [${res.targetLang || 'vi'}]</span>
-                <span style="cursor:pointer; display:flex; align-items:center;" class="trans-close" title="Đóng">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                  </svg>
-                </span>
-              </div>
-              <div class="trans-body">${escapeHtml(res.translated)}</div>
-              <div style="margin-top:6px; font-size:11px; display:flex; gap:12px;">
-                <span class="trans-copy" style="cursor:pointer; color:#0068ff; font-weight:600;">Sao chép</span>
-              </div>
-            `;
-
-            box.querySelector('.trans-close').addEventListener('click', () => box.remove());
-            box.querySelector('.trans-copy').addEventListener('click', () => {
-              navigator.clipboard.writeText(res.translated);
-              box.querySelector('.trans-copy').innerText = 'Đã chép!';
-              setTimeout(() => {
-                if (box.querySelector('.trans-copy')) box.querySelector('.trans-copy').innerText = 'Sao chép';
-              }, 1500);
-            });
-
-            // Find the message bubble card (.message-content-render, .text-message__container or bubble element)
-            const bubbleElem = msgElem.closest('.message-content-render')
-              || (chatMsg ? chatMsg.querySelector('.message-content-render') : null)
-              || msgElem.closest('.text-message__container')
-              || msgElem.closest('[class*="bubble"]')
-              || msgElem;
-
-            if (bubbleElem && bubbleElem.parentElement && bubbleElem.parentElement !== chatMsg) {
-              bubbleElem.insertAdjacentElement('afterend', box);
-            } else {
-              const contentWrapper = msgElem.closest('.message-content-wrapper')
-                || (chatMsg ? chatMsg.querySelector('.message-content-wrapper') : null);
-              if (contentWrapper) {
-                contentWrapper.appendChild(box);
-              } else if (chatMsg) {
-                const msgWrapper = chatMsg.querySelector('.message-wrapper');
-                if (msgWrapper) {
-                  msgWrapper.appendChild(box);
-                } else {
-                  msgElem.parentElement.appendChild(box);
-                }
-              } else {
-                msgElem.parentElement.appendChild(box);
-              }
-            }
-          }
-        } catch (err) {
-          hoverBtn.innerHTML = `
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="2" y1="12" x2="22" y2="12"/>
-              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1 4-10z"/>
-            </svg>
-          `;
-          console.error('[TADaZa Translate] Error:', err);
-        }
-      });
-    }
-
-    let hideTimer = null;
-    document.addEventListener('mouseover', (e) => {
-      if (!currentConfig.translate.enabled) {
-        hoverBtn.style.display = 'none';
-        return;
-      }
-
-      if (e.target === hoverBtn || hoverBtn.contains(e.target)) {
-        if (hideTimer) clearTimeout(hideTimer);
-        return;
-      }
-
-      // Do not trigger hover button on translation box or TADaZa UI elements
-      if (e.target.closest && (e.target.closest('.tadaza-trans-box') || e.target.closest('#tadaza-drawer') || e.target.closest('#nav-item-tadaza'))) {
-        return;
-      }
-
-      const bubble = e.target.closest && (
-        e.target.closest('.text-message__container') ||
-        e.target.closest('[class*="bubble-content"]') ||
-        e.target.closest('[class*="msg-content"]') ||
-        e.target.closest('[class*="message-content"]')
-      );
-
-      const msgText = bubble ? extractMessageText(bubble) : '';
-      if (bubble && msgText.length > 0) {
-        if (hideTimer) clearTimeout(hideTimer);
-        activeHoverMessage = bubble;
-        const rect = bubble.getBoundingClientRect();
-        hoverBtn.style.display = 'flex';
-        hoverBtn.style.top = `${Math.max(10, rect.top - 12)}px`;
-        hoverBtn.style.left = `${rect.right - 14}px`;
-      } else {
-        if (hideTimer) clearTimeout(hideTimer);
-        hideTimer = setTimeout(() => {
-          hoverBtn.style.display = 'none';
-        }, 350);
-      }
-    }, true);
+    // Remove any floating hover translate buttons from the DOM to keep chat clean
+    document.querySelectorAll('.tadaza-trans-btn, #tadaza-hover-trans-btn').forEach(btn => btn.remove());
   }
+
 
   function escapeHtml(str) {
     if (str === null || str === undefined) return '';
@@ -1289,48 +1132,9 @@
   }
 
   function setupChatToolbarButton() {
-    const insertButton = () => {
-      if (document.getElementById('tadaza-btn-code-studio')) return;
-
-      const bar = document.querySelector('.chat-box-toolbar')
-        || document.querySelector('.chat-box-input__tools')
-        || document.querySelector('.chat-box-bar')
-        || document.querySelector('.chat-input-btns')
-        || document.querySelector('#chat-box-bar-id')
-        || document.querySelector('.chat-input-container__left-layout')
-        || document.querySelector('.chat-input-container');
-
-      if (!bar) return;
-
-      const btn = document.createElement('div');
-      btn.id = 'tadaza-btn-code-studio';
-      btn.className = 'tadaza-chat-tool-btn';
-      btn.title = 'Soạn Code & Markdown Snippet (Ctrl+Shift+M)';
-      btn.innerHTML = `
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="16 18 22 12 16 6"></polyline>
-          <polyline points="8 6 2 12 8 18"></polyline>
-        </svg>
-      `;
-
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        openCodeStudioModal();
-      });
-
-      if (bar.classList.contains('chat-box-toolbar') || bar.classList.contains('chat-box-input__tools') || bar.classList.contains('chat-input-btns')) {
-        bar.appendChild(btn);
-      } else {
-        bar.insertBefore(btn, bar.firstChild);
-      }
-    };
-
-    insertButton();
-
-    const observer = new MutationObserver(() => {
-      insertButton();
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
+    // Keep chat messaging toolbar clean - remove any injected code studio icons
+    const existing = document.getElementById('tadaza-btn-code-studio');
+    if (existing) existing.remove();
   }
 
   function setupInputMarkdownShortcuts() {
@@ -2229,109 +2033,12 @@
       updateButtonsUI();
     };
 
-    // 1. Insert button into bottom chat toolbar (next to Code button <>)
-    const insertToolbarButton = () => {
-      if (document.getElementById('tadaza-btn-pin-chathead-toolbar')) return;
-
-      const bar = document.querySelector('.chat-box-toolbar')
-        || document.querySelector('.chat-box-input__tools')
-        || document.querySelector('.chat-box-bar')
-        || document.querySelector('.chat-input-btns')
-        || document.querySelector('#chat-box-bar-id')
-        || document.querySelector('.chat-input-container__left-layout')
-        || document.querySelector('.chat-input-container');
-
-      if (!bar) return;
-
-      const conv = getActiveConversation();
-      const isPinned = conv && pinnedChatIds.has(conv.id);
-
-      const btn = document.createElement('div');
-      btn.id = 'tadaza-btn-pin-chathead-toolbar';
-      btn.className = `tadaza-chat-tool-btn ${isPinned ? 'pinned' : ''}`;
-      btn.title = 'Ghim ra Bong bóng chat rời (Chat Head Desktop PiP)';
-      btn.innerHTML = `
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
-          <circle cx="12" cy="12" r="2.5" fill="#89b4fa" stroke="none"></circle>
-        </svg>
-      `;
-
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        togglePinAction();
-      });
-
-      const codeBtn = document.getElementById('tadaza-btn-code-studio');
-      if (codeBtn && codeBtn.nextSibling) {
-        bar.insertBefore(btn, codeBtn.nextSibling);
-      } else {
-        bar.appendChild(btn);
-      }
-    };
-
-    // 2. Insert button into top header (next to phone/video/search icons)
-    const insertHeaderButton = () => {
-      if (document.getElementById('tadaza-btn-pin-chathead-header')) return;
-
-      let headerContainer = null;
-      let refNode = null;
-
-      const allSvgs = document.querySelectorAll('svg');
-      for (const svg of allSvgs) {
-        const rect = svg.getBoundingClientRect();
-        if (rect.top >= 0 && rect.top <= 75 && rect.right > 450) {
-          const btnWrapper = svg.closest('[role="button"], button, [class*="btn"], div[tabindex]');
-          if (btnWrapper && btnWrapper.parentElement) {
-            headerContainer = btnWrapper.parentElement;
-            refNode = btnWrapper;
-            break;
-          }
-        }
-      }
-
-      if (!headerContainer) {
-        headerContainer = document.querySelector(
-          '.chat-box-header .action-bar, [class*="header-actions"], [class*="header-tool"], [class*="header-btns"], [class*="chat-header__tools"], .chat-box-header'
-        );
-      }
-
-      if (!headerContainer) return;
-
-      const conv = getActiveConversation();
-      const isPinned = conv && pinnedChatIds.has(conv.id);
-
-      const btn = document.createElement('div');
-      btn.id = 'tadaza-btn-pin-chathead-header';
-      btn.className = `tadaza-chat-header-btn ${isPinned ? 'pinned' : ''}`;
-      btn.title = 'Ghim ra Bong bóng chat rời (Chat Head Desktop PiP)';
-      btn.innerHTML = `
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
-          <circle cx="12" cy="12" r="3" fill="#89b4fa" stroke="none"></circle>
-        </svg>
-      `;
-
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        togglePinAction();
-      });
-
-      if (refNode) {
-        headerContainer.insertBefore(btn, refNode);
-      } else {
-        headerContainer.appendChild(btn);
-      }
-    };
-
     const mountButtons = () => {
-      insertToolbarButton();
-      insertHeaderButton();
+      // Keep chat messaging interface clean - remove injected buttons
+      document.querySelectorAll('#tadaza-btn-pin-chathead-toolbar, #tadaza-btn-pin-chathead-header').forEach(el => el.remove());
     };
 
     mountButtons();
-    const pinObs = new MutationObserver(mountButtons);
-    pinObs.observe(document.body, { childList: true, subtree: true });
   }
 
 /* ==========================================================================
@@ -2369,7 +2076,7 @@
               </div>
               <div>
                 <div class="tadaza-profiles-title">Quản lý Đa tài khoản</div>
-                <div class="tadaza-profiles-subtitle">Lưu phiên đăng nhập độc lập & chuyển đổi nhanh chỉ bằng 1-click (Ctrl+Shift+P)</div>
+                <div class="tadaza-profiles-subtitle">Lưu trữ phiên đăng nhập độc lập • Chuyển đổi nhanh 1-click hoặc mở song song</div>
               </div>
             </div>
             <button class="tadaza-profiles-close-btn" id="tadaza-btn-close-profiles" title="Đóng (Esc)">
@@ -2388,7 +2095,7 @@
               <line x1="12" y1="8" x2="12" y2="12"></line>
               <line x1="12" y1="16" x2="12.01" y2="16"></line>
             </svg>
-            <span>💡 <b>Mẹo Linux:</b> Bạn có thể bấm <b>"Mở song song"</b> để chạy đồng thời cả 2 cửa sổ Zalo trên cùng màn hình máy tính!</span>
+            <span>💡 <b>Mẹo:</b> Bạn có thể bấm <b>"Mở song song"</b> để chạy đồng thời nhiều tài khoản Zalo trên cùng một màn hình máy tính!</span>
           </div>
         </div>
       `;
@@ -2467,23 +2174,23 @@
       html += `
         <div class="tadaza-profile-card ${isCurrent ? 'active' : ''}">
           <div class="tadaza-profile-info">
-            ${p.avatar
-              ? `<img class="tadaza-profile-avatar" src="${escapeHtml(p.avatar)}" alt="${escapeHtml(p.name)}">`
-              : `<div class="tadaza-profile-avatar-fallback">${initial}</div>`
-            }
+            <div class="tadaza-profile-avatar-wrap">
+              ${p.avatar
+                ? `<img class="tadaza-profile-avatar" src="${escapeHtml(p.avatar)}" alt="${escapeHtml(p.name)}">`
+                : `<div class="tadaza-profile-avatar-fallback">${initial}</div>`
+              }
+              ${isCurrent ? '<span class="tadaza-avatar-status-dot" title="Tài khoản đang hoạt động"></span>' : ''}
+            </div>
             <div class="tadaza-profile-details">
-              <div class="tadaza-profile-name-row">
-                <span class="tadaza-profile-name" title="${escapeHtml(p.name)}">${escapeHtml(p.name)}</span>
-                ${isCurrent ? '<span class="tadaza-profile-badge-active"><span class="profile-dot"></span> Đang dùng</span>' : ''}
-              </div>
+              <div class="tadaza-profile-name" title="${escapeHtml(p.name)}">${escapeHtml(p.name)}</div>
               <div class="tadaza-profile-sub">
-                ${isCurrent ? 'Cửa sổ hiện tại đang chạy' : 'Phiên đăng nhập đã lưu trữ độc lập'}
+                ${isCurrent ? '🟢 Cửa sổ hiện tại đang chạy' : 'Phiên làm việc độc lập • Sẵn sàng chuyển đổi'}
               </div>
             </div>
           </div>
           <div class="tadaza-profile-actions">
             ${isCurrent
-              ? '<button class="tadaza-btn-action" style="opacity: 0.6; cursor: default; background: transparent; border: 1px solid rgba(0,104,255,0.3); color: #0068ff;" disabled>🟢 Đang kết nối</button>'
+              ? '<span class="tadaza-badge-current"><span class="tadaza-pulse-dot"></span> Đang chạy</span>'
               : `
                 <button class="tadaza-btn-action tadaza-btn-switch" data-switch-id="${escapeHtml(p.id)}" title="Chuyển sang tài khoản này (Khởi động lại app)">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -3801,20 +3508,16 @@
         buildUI();
         setupMessageTranslator();
         setupMessageCodeFormatter();
-        setupChatToolbarButton();
         setupInputMarkdownShortcuts();
         setupQuickParser();
-        setupFloatingChatHead();
         setupMultiAccountSwitcher();
       });
     } else {
       buildUI();
       setupMessageTranslator();
       setupMessageCodeFormatter();
-      setupChatToolbarButton();
       setupInputMarkdownShortcuts();
       setupQuickParser();
-      setupFloatingChatHead();
       setupMultiAccountSwitcher();
     }
   }

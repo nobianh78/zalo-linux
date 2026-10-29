@@ -1572,8 +1572,8 @@ body.dark .tadaza-profiles-trigger-btn:hover {
 }
 
 .tadaza-profiles-modal {
-  width: 540px;
-  max-width: 92vw;
+  width: 620px;
+  max-width: 94vw;
   background: #ffffff;
   border-radius: 18px;
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22), 0 0 0 1px rgba(0, 0, 0, 0.06);
@@ -1677,7 +1677,7 @@ body.dark .tadaza-profiles-close-btn:hover {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 16px;
+  padding: 14px 18px;
   border-radius: 14px;
   background: #f8fafc;
   border: 1.5px solid rgba(0, 0, 0, 0.06);
@@ -1702,9 +1702,32 @@ body.dark .tadaza-profile-card.active {
 .tadaza-profile-info {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   flex: 1;
   min-width: 0;
+}
+
+.tadaza-profile-avatar-wrap {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+}
+
+.tadaza-avatar-status-dot {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #10b981;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
+}
+
+body.dark .tadaza-avatar-status-dot {
+  border-color: #1e2430;
 }
 
 .tadaza-profile-avatar {
@@ -1742,30 +1765,37 @@ body.dark .tadaza-profile-avatar {
   min-width: 0;
 }
 
-.tadaza-profile-name-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
 .tadaza-profile-name {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
+  line-height: 1.3;
+  color: inherit;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-width: 250px;
 }
 
-.tadaza-profile-badge-active {
-  font-size: 10px;
-  font-weight: 700;
-  color: #10b981;
-  background: rgba(16, 185, 129, 0.12);
-  padding: 2px 7px;
-  border-radius: 10px;
+.tadaza-badge-current {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  letter-spacing: 0.2px;
+}
+
+.tadaza-pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 6px #10b981;
 }
 
 .tadaza-profile-sub {

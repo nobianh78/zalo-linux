@@ -659,48 +659,9 @@
   }
 
   function setupChatToolbarButton() {
-    const insertButton = () => {
-      if (document.getElementById('tadaza-btn-code-studio')) return;
-
-      const bar = document.querySelector('.chat-box-toolbar')
-        || document.querySelector('.chat-box-input__tools')
-        || document.querySelector('.chat-box-bar')
-        || document.querySelector('.chat-input-btns')
-        || document.querySelector('#chat-box-bar-id')
-        || document.querySelector('.chat-input-container__left-layout')
-        || document.querySelector('.chat-input-container');
-
-      if (!bar) return;
-
-      const btn = document.createElement('div');
-      btn.id = 'tadaza-btn-code-studio';
-      btn.className = 'tadaza-chat-tool-btn';
-      btn.title = 'Soạn Code & Markdown Snippet (Ctrl+Shift+M)';
-      btn.innerHTML = `
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="16 18 22 12 16 6"></polyline>
-          <polyline points="8 6 2 12 8 18"></polyline>
-        </svg>
-      `;
-
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        openCodeStudioModal();
-      });
-
-      if (bar.classList.contains('chat-box-toolbar') || bar.classList.contains('chat-box-input__tools') || bar.classList.contains('chat-input-btns')) {
-        bar.appendChild(btn);
-      } else {
-        bar.insertBefore(btn, bar.firstChild);
-      }
-    };
-
-    insertButton();
-
-    const observer = new MutationObserver(() => {
-      insertButton();
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
+    // Keep chat messaging toolbar clean - remove any injected code studio icons
+    const existing = document.getElementById('tadaza-btn-code-studio');
+    if (existing) existing.remove();
   }
 
   function setupInputMarkdownShortcuts() {
