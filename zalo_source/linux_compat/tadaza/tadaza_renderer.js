@@ -243,6 +243,60 @@
      -------------------------------------------------------------------------- */
   let activeHoverMessage = null;
 
+  function extractMessageText(elem) {
+    if (!elem) return '';
+
+    // Clone element to safely query and remove metadata nodes without altering DOM
+    const clone = elem.cloneNode(true);
+
+    // Remove metadata elements: timestamp, reaction counters/emojis, action menus, quotes
+    const selectorsToRemove = [
+      '.card-send-time',
+      '.card-send-time__sendTime',
+      '[class*="send-time"]',
+      '[class*="bubble-message-time"]',
+      '[class*="chat-timestamp"]',
+      '[class*="message-inner-time"]',
+      '[class*="reaction"]',
+      '[class*="Reaction"]',
+      '.tadaza-trans-box',
+      '.tadaza-hover-trans-btn',
+      '[class*="chat-message__actions"]',
+      '[class*="quick-action"]',
+      '[class*="MessageQuoteFragment"]',
+      '[class*="message-quote"]',
+      'svg'
+    ];
+
+    selectorsToRemove.forEach(sel => {
+      try {
+        clone.querySelectorAll(sel).forEach(el => el.remove());
+      } catch (e) {}
+    });
+
+    const rawText = (clone.innerText || clone.textContent || '').trim();
+    if (!rawText) return '';
+
+    // Filter out leaked reaction shortcuts, timestamps, and emoji codes
+    const timeRegex = /^(\d{1,2}:\d{2}(?::\d{2})?(\s*(AM|PM|am|pm|Hôm nay|hôm nay|Hôm qua|hôm qua))?|Hôm nay|Hôm qua)$/i;
+    const commonReactionCodes = new Set([
+      '/-strong', '/-heart', '/-break', '/-fade', '/-thanks', '/-rose', '/-kiss',
+      ':>', ':o', ':O', ':-((', ':-h', ':-H', ':-)', ':-(', ';-)', '<3', ':-*', ':D', ':)', ':('
+    ]);
+
+    const lines = rawText.split('\n')
+      .map(line => line.trim())
+      .filter(line => {
+        if (!line) return false;
+        if (timeRegex.test(line)) return false;
+        if (commonReactionCodes.has(line)) return false;
+        if (/^\/-[a-zA-Z0-9_-]+$/.test(line)) return false;
+        return true;
+      });
+
+    return lines.length > 0 ? lines.join('\n').trim() : rawText;
+  }
+
   function setupMessageTranslator() {
     // Remove any previously spammed buttons from the DOM
     document.querySelectorAll('.tadaza-trans-btn').forEach(btn => btn.remove());
@@ -268,7 +322,7 @@
         if (!activeHoverMessage) return;
 
         const msgElem = activeHoverMessage;
-        const textToTranslate = (msgElem.innerText || '').trim();
+        const textToTranslate = extractMessageText(msgElem);
         if (!textToTranslate) return;
 
         const chatMsg = msgElem.closest('.chat-message, [class*="msg-item"], [class*="chat-item"]');
@@ -384,7 +438,8 @@
         e.target.closest('[class*="message-content"]')
       );
 
-      if (bubble && bubble.innerText && bubble.innerText.trim().length > 0) {
+      const msgText = bubble ? extractMessageText(bubble) : '';
+      if (bubble && msgText.length > 0) {
         if (hideTimer) clearTimeout(hideTimer);
         activeHoverMessage = bubble;
         const rect = bubble.getBoundingClientRect();
