@@ -326,21 +326,10 @@
   }
 
   /* --------------------------------------------------------------------------
-     4. Build TADaZa UI (Right Sidebar Button & Drawer Panel)
+     4. Build TADaZa UI (Left Navigation Bar Button & Drawer Panel)
      -------------------------------------------------------------------------- */
   function buildUI() {
-    if (document.getElementById('tadaza-sidebar-btn')) return;
-
-    // Create Right Dock Button
-    const btn = document.createElement('div');
-    btn.id = 'tadaza-sidebar-btn';
-    btn.title = 'Mở bảng điều khiển tiện ích TADaZa';
-    btn.innerHTML = `
-      <svg class="tadaza-btn-icon" viewBox="0 0 24 24">
-        <path d="M12 2L1 21h22L12 2zm0 3.84L19.5 19h-15L12 5.84zM11 10h2v4h-2zm0 6h2v2h-2z"/>
-      </svg>
-      <span class="tadaza-btn-text">TADaZa</span>
-    `;
+    if (document.getElementById('tadaza-drawer')) return;
 
     // Create Overlay
     const overlay = document.createElement('div');
@@ -350,25 +339,86 @@
     const drawer = document.createElement('div');
     drawer.id = 'tadaza-drawer';
 
-    document.body.appendChild(btn);
     document.body.appendChild(overlay);
     document.body.appendChild(drawer);
 
-    // Toggle Drawer Open/Close
+    const toggleDrawer = () => {
+      const isOpen = drawer.classList.contains('open');
+      if (isOpen) {
+        closeDrawer();
+      } else {
+        openDrawer();
+      }
+    };
+
     const openDrawer = () => {
       renderDrawerContent();
+      const nav = document.querySelector('.nav__tabs') || document.querySelector('.nav');
+      if (nav) {
+        const rect = nav.getBoundingClientRect();
+        drawer.style.left = `${rect.right}px`;
+        overlay.style.left = `${rect.right}px`;
+        overlay.style.width = `calc(100vw - ${rect.right}px)`;
+      }
       drawer.classList.add('open');
       overlay.classList.add('open');
+      const navBtn = document.getElementById('nav-item-tadaza');
+      if (navBtn) navBtn.classList.add('active');
     };
+
     const closeDrawer = () => {
       drawer.classList.remove('open');
       overlay.classList.remove('open');
+      const navBtn = document.getElementById('nav-item-tadaza');
+      if (navBtn) navBtn.classList.remove('active');
     };
 
-    btn.addEventListener('click', openDrawer);
     overlay.addEventListener('click', closeDrawer);
 
+    // Mount button into Left Navigation Bar
+    attachSidebarButton(toggleDrawer);
+
+    // Watch for React re-renders of the left navigation bar
+    const navObserver = new MutationObserver(() => {
+      attachSidebarButton(toggleDrawer);
+    });
+    navObserver.observe(document.body, { childList: true, subtree: true });
+
     renderDrawerContent();
+  }
+
+  function attachSidebarButton(toggleDrawer) {
+    if (document.getElementById('nav-item-tadaza')) return;
+
+    const navTop = document.querySelector('.nav__tabs__top');
+    const navBottom = document.querySelector('.nav__tabs__bottom');
+    const navTabs = document.querySelector('.nav__tabs');
+
+    const targetContainer = navTop || navBottom || navTabs;
+    if (!targetContainer) return;
+
+    const btn = document.createElement('div');
+    btn.id = 'nav-item-tadaza';
+    btn.className = 'tadaza-nav-item';
+    btn.title = 'TADaZa - Tiện ích mở rộng';
+    btn.innerHTML = `
+      <svg class="tadaza-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 11a2 2 0 0 1 2-2h1a2 2 0 0 0 2-2 2 2 0 0 1 4 0 2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v1a2 2 0 0 0 2 2 2 2 0 0 1 0 4 2 2 0 0 0-2 2v1a2 2 0 0 1-2 2h-1a2 2 0 0 0-2 2 2 2 0 0 1-4 0 2 2 0 0 0-2-2H6a2 2 0 0 1-2-2v-1a2 2 0 0 0-2-2 2 2 0 0 1 0-4 2 2 0 0 0 2-2z"/>
+      </svg>
+    `;
+
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleDrawer();
+    });
+
+    if (navTop) {
+      navTop.appendChild(btn);
+    } else if (navBottom) {
+      navBottom.insertBefore(btn, navBottom.firstChild);
+    } else {
+      navTabs.appendChild(btn);
+    }
   }
 
   let activeTab = 'theme'; // 'theme' | 'privacy' | 'translate' | 'features'
@@ -419,6 +469,8 @@
     drawer.querySelector('#tadaza-close').addEventListener('click', () => {
       drawer.classList.remove('open');
       document.getElementById('tadaza-overlay').classList.remove('open');
+      const navBtn = document.getElementById('nav-item-tadaza');
+      if (navBtn) navBtn.classList.remove('active');
     });
 
     // Bind Tab Switching

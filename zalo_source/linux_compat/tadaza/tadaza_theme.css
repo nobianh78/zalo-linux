@@ -242,60 +242,73 @@ body.tadaza-blur-names-active .chat-item__avatar:hover {
 }
 
 /* --------------------------------------------------------------------------
-   4. TADaZa UI Components (Right Dock Button & Drawer)
+   4. TADaZa UI Components (Left Sidebar Navigation Item & Drawer)
    -------------------------------------------------------------------------- */
 
-/* Floating Right Dock Button */
-#tadaza-sidebar-btn {
-  position: fixed;
-  right: 0;
-  top: 140px;
-  z-index: 999990;
-  width: 38px;
-  height: 84px;
-  background: linear-gradient(135deg, #0068ff 0%, #0045ad 100%);
-  color: #ffffff;
-  border-radius: 10px 0 0 10px;
-  box-shadow: -3px 4px 16px rgba(0, 104, 255, 0.4);
-  cursor: pointer;
+/* Left Sidebar Navigation Item */
+.tadaza-nav-item {
+  width: 100%;
+  height: 52px;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  cursor: pointer;
+  position: relative;
   user-select: none;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  color: var(--text-on-color, #c9d1d9);
+  transition: all 0.2s ease;
+  box-sizing: border-box;
 }
 
-#tadaza-sidebar-btn:hover {
-  width: 44px;
-  background: linear-gradient(135deg, #1f7cff 0%, #0056d6 100%);
-  box-shadow: -4px 6px 20px rgba(0, 104, 255, 0.6);
+.tadaza-nav-item:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
 }
 
-#tadaza-sidebar-btn .tadaza-btn-icon {
-  width: 18px;
-  height: 18px;
-  fill: currentColor;
+.tadaza-nav-item.active {
+  color: #0068ff;
+  background: rgba(0, 104, 255, 0.15);
 }
 
-#tadaza-sidebar-btn .tadaza-btn-text {
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
-  font-family: 'Inter', -apple-system, sans-serif;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 1px;
+.tadaza-nav-item.active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 3.5px;
+  background: #0068ff;
+  border-radius: 0 3px 3px 0;
+}
+
+body.tadaza-dark .tadaza-nav-item.active {
+  color: #58a6ff;
+  background: rgba(31, 111, 235, 0.2);
+}
+
+body.tadaza-dark .tadaza-nav-item.active::before {
+  background: #58a6ff;
+}
+
+.tadaza-nav-icon {
+  width: 24px;
+  height: 24px;
+  stroke: currentColor;
+  transition: transform 0.2s ease;
+}
+
+.tadaza-nav-item:hover .tadaza-nav-icon {
+  transform: scale(1.1);
 }
 
 /* Overlay Backdrop */
 #tadaza-overlay {
   position: fixed;
   top: 0;
-  left: 0;
-  width: 100vw;
+  left: 64px;
+  width: calc(100vw - 64px);
   height: 100vh;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.35);
   backdrop-filter: blur(2px);
   z-index: 999998;
   opacity: 0;
@@ -308,30 +321,32 @@ body.tadaza-blur-names-active .chat-item__avatar:hover {
   visibility: visible;
 }
 
-/* Main Drawer Panel */
+/* Main Drawer Panel (Left Docked next to Sidebar) */
 #tadaza-drawer {
   position: fixed;
   top: 0;
-  right: 0;
+  left: 64px;
   width: 380px;
-  max-width: 90vw;
+  max-width: calc(100vw - 64px);
   height: 100vh;
   z-index: 999999;
   background: #ffffff;
   color: #1f2328;
-  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.25);
-  transform: translateX(100%);
+  box-shadow: 8px 0 32px rgba(0, 0, 0, 0.25);
+  transform: translateX(-100%);
   transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
   display: flex;
   flex-direction: column;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 body.tadaza-dark #tadaza-drawer {
   background: #161b22;
   color: #e6edf3;
-  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.6);
-  border-left: 1px solid #30363d;
+  box-shadow: 8px 0 32px rgba(0, 0, 0, 0.6);
+  border-right: 1px solid #30363d;
+  border-left: none;
 }
 
 #tadaza-drawer.open {
