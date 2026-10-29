@@ -271,8 +271,8 @@
         const textToTranslate = (msgElem.innerText || '').trim();
         if (!textToTranslate) return;
 
-        const container = msgElem.closest('.chat-message, [class*="msg-item"], [class*="bubble-content"]') || msgElem.parentElement;
-        let oldBox = container ? container.querySelector('.tadaza-trans-box') : null;
+        const chatMsg = msgElem.closest('.chat-message, [class*="msg-item"], [class*="chat-item"]');
+        const oldBox = (chatMsg || msgElem.parentElement).querySelector('.tadaza-trans-box');
         if (oldBox) {
           oldBox.remove();
           return;
@@ -321,10 +321,30 @@
               }, 1500);
             });
 
-            if (container) {
-              container.appendChild(box);
+            // Find the message bubble card (.message-content-render, .text-message__container or bubble element)
+            const bubbleElem = msgElem.closest('.message-content-render')
+              || (chatMsg ? chatMsg.querySelector('.message-content-render') : null)
+              || msgElem.closest('.text-message__container')
+              || msgElem.closest('[class*="bubble"]')
+              || msgElem;
+
+            if (bubbleElem && bubbleElem.parentElement && bubbleElem.parentElement !== chatMsg) {
+              bubbleElem.insertAdjacentElement('afterend', box);
             } else {
-              msgElem.parentElement.appendChild(box);
+              const contentWrapper = msgElem.closest('.message-content-wrapper')
+                || (chatMsg ? chatMsg.querySelector('.message-content-wrapper') : null);
+              if (contentWrapper) {
+                contentWrapper.appendChild(box);
+              } else if (chatMsg) {
+                const msgWrapper = chatMsg.querySelector('.message-wrapper');
+                if (msgWrapper) {
+                  msgWrapper.appendChild(box);
+                } else {
+                  msgElem.parentElement.appendChild(box);
+                }
+              } else {
+                msgElem.parentElement.appendChild(box);
+              }
             }
           }
         } catch (err) {
@@ -332,7 +352,7 @@
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="10"/>
               <line x1="2" y1="12" x2="22" y2="12"/>
-              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1 4-10z"/>
             </svg>
           `;
           console.error('[TADaZa Translate] Error:', err);
@@ -352,7 +372,13 @@
         return;
       }
 
+      // Do not trigger hover button on translation box or TADaZa UI elements
+      if (e.target.closest && (e.target.closest('.tadaza-trans-box') || e.target.closest('#tadaza-drawer') || e.target.closest('#nav-item-tadaza'))) {
+        return;
+      }
+
       const bubble = e.target.closest && (
+        e.target.closest('.text-message__container') ||
         e.target.closest('[class*="bubble-content"]') ||
         e.target.closest('[class*="msg-content"]') ||
         e.target.closest('[class*="message-content"]')

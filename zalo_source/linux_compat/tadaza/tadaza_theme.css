@@ -598,20 +598,30 @@ body.dark .tadaza-hover-trans-btn:hover {
 }
 
 .tadaza-trans-box {
+  display: block !important;
+  width: fit-content;
+  max-width: 100%;
+  min-width: 140px;
+  box-sizing: border-box;
+  clear: both;
   margin-top: 6px;
   padding: 8px 12px;
   background: rgba(0, 104, 255, 0.08);
   border-left: 3px solid #0068ff;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 13px;
-  line-height: 1.4;
+  line-height: 1.45;
   color: inherit;
   position: relative;
+  word-break: break-word;
+  user-select: text;
+  z-index: 10;
 }
 
 body.dark .tadaza-trans-box {
-  background: rgba(31, 111, 235, 0.15);
+  background: rgba(31, 111, 235, 0.18);
   border-left-color: #58a6ff;
+  color: #e6edf3;
 }
 
 .tadaza-trans-box .trans-header {
@@ -622,10 +632,30 @@ body.dark .tadaza-trans-box {
   margin-bottom: 4px;
   display: flex;
   justify-content: space-between;
+  align-items: center;
 }
 
 body.dark .tadaza-trans-box .trans-header {
   color: #58a6ff;
+}
+
+.tadaza-trans-box .trans-body {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* For outgoing messages (From me): align cleanly to the right */
+.message-wrapper--me .tadaza-trans-box,
+.chat-message.me .tadaza-trans-box {
+  margin-left: auto;
+  border-left: none;
+  border-right: 3px solid #0068ff;
+  text-align: left;
+}
+
+body.dark .message-wrapper--me .tadaza-trans-box,
+body.dark .chat-message.me .tadaza-trans-box {
+  border-right-color: #58a6ff;
 }
 
 /* --------------------------------------------------------------------------
