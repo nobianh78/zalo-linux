@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>TADaZa Floating Chat Head</title>
+  <link rel="stylesheet" href="chat_head.css">
+</head>
+<body>
+  <div id="chathead-container" class="mode-bubble">
+    <!-- Bubble State -->
+    <div id="bubble-view">
+      <div class="bubble-avatar-wrap" id="bubble-avatar-wrap" title="Nhấp để mở khung chat nổi">
+        <img class="bubble-avatar-img" id="bubble-avatar-img" src="" alt="Avatar" style="display:none;" />
+        <div class="bubble-default-icon" id="bubble-default-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+          </svg>
+        </div>
+        <div class="bubble-badge" id="bubble-badge">0</div>
+        <div class="bubble-close-btn" id="bubble-close-btn" title="Bỏ ghim bong bóng">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Expanded State (Mini PiP Window) -->
+    <div id="expanded-view">
+      <!-- Tabs (if 2 or more chats) -->
+      <div class="pip-tabs-bar" id="pip-tabs-bar"></div>
+
+      <!-- Header -->
+      <div class="pip-header" id="pip-header">
+        <div class="pip-contact-info">
+          <img class="pip-avatar" id="pip-avatar" src="" alt="" style="display:none;" />
+          <div class="pip-meta">
+            <span class="pip-name" id="pip-name">Đang tải cuộc trò chuyện...</span>
+            <span class="pip-status">
+              <span class="pip-status-dot"></span>
+              <span>Đang hoạt động (PiP Mode)</span>
+            </span>
+          </div>
+        </div>
+        <div class="pip-controls">
+          <button class="pip-btn" id="pip-btn-minimize" title="Thu nhỏ về bong bóng">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+          </button>
+          <button class="pip-btn" id="pip-btn-focus-main" title="Mở trong cửa sổ Zalo chính">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <line x1="10" y1="14" x2="21" y2="3"></line>
+            </svg>
+          </button>
+          <button class="pip-btn close" id="pip-btn-close" title="Bỏ ghim / Đóng">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Messages Body -->
+      <div class="pip-body" id="pip-body">
+        <div class="pip-empty-state" id="pip-empty-state">
+          <div class="pip-empty-icon">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#6c7086" stroke-width="1.5">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+          </div>
+          <div>Chưa có tin nhắn nào được đồng bộ.</div>
+          <div style="font-size:11px; margin-top:4px; opacity:0.7;">Các tin nhắn mới sẽ hiển thị trực tiếp tại đây!</div>
+        </div>
+      </div>
+
+      <!-- Quick Input Footer -->
+      <div class="pip-footer">
+        <div class="pip-input-wrap">
+          <input type="text" class="pip-input" id="pip-input" placeholder="Nhập tin nhắn nhanh... (Enter để gửi)" />
+        </div>
+        <button class="pip-send-btn" id="pip-send-btn" title="Gửi tin nhắn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="chat_head.js"></script>
+</body>
+</html>

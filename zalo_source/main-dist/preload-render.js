@@ -23,6 +23,19 @@ try {
       chooseWallpaper: () => electron.ipcRenderer.invoke('tadaza:choose-wallpaper'),
       copyImage: (dataUri) => electron.ipcRenderer.invoke('tadaza:copy-image', dataUri),
       openExternal: (url) => electron.ipcRenderer.invoke('tadaza:open-external', url),
+      pinChatHead: (chatData) => electron.ipcRenderer.invoke('tadaza:chathead-pin', chatData),
+      unpinChatHead: (chatId) => electron.ipcRenderer.invoke('tadaza:chathead-unpin', chatId),
+      syncChatHead: (data) => electron.ipcRenderer.send('tadaza:chathead-sync-from-main', data),
+      onChatHeadSend: (cb) => {
+        electron.ipcRenderer.on('tadaza:chathead-send-to-main', (event, data) => {
+          if (typeof cb === 'function') cb(data);
+        });
+      },
+      onChatHeadStateChanged: (cb) => {
+        electron.ipcRenderer.on('tadaza:chathead-state-changed', (event, state) => {
+          if (typeof cb === 'function') cb(state);
+        });
+      },
       onConfigChanged: (cb) => {
         electron.ipcRenderer.on('tadaza:config-changed', (event, cfg) => {
           if (typeof cb === 'function') cb(cfg);

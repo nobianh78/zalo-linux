@@ -1963,7 +1963,212 @@
   }
 
   /* --------------------------------------------------------------------------
-     6. Build TADaZa UI (Left Navigation Bar Button & Drawer Panel)
+     6. Floating Chat Heads (Desktop PiP) Feature
+     -------------------------------------------------------------------------- */
+  function getActiveConversation() {
+    const titleElem = document.querySelector(
+      '.header-title, [class*="header-title"], .main-title-container, .header-conv-name, .header-info__name, [class*="title-name"], .chat-box-header .title'
+    );
+    const name = titleElem ? titleElem.textContent.trim() : '';
+    if (!name) return null;
+
+    let avatar = '';
+    const avaImg = document.querySelector(
+      '.header-info__ava img, .chat-box-header img, [class*="header-avatar"] img, [class*="header"] [class*="avatar"] img'
+    );
+    if (avaImg && avaImg.src) {
+      avatar = avaImg.src;
+    }
+
+    let safeHash = 'conv_default';
+    try {
+      safeHash = 'conv_' + btoa(unescape(encodeURIComponent(name))).replace(/[^a-zA-Z0-9]/g, '').slice(0, 16);
+    } catch (e) {
+      safeHash = 'conv_' + name.slice(0, 10).replace(/[^a-zA-Z0-9]/g, '');
+    }
+
+    return {
+      id: safeHash,
+      name,
+      avatar
+    };
+  }
+
+  function scrapeCurrentMessages() {
+    const results = [];
+    const bubbles = document.querySelectorAll(
+      '.text-message__container, [class*="bubble-content"], [class*="msg-content"], .message-content'
+    );
+
+    bubbles.forEach(bubble => {
+      if (bubble.closest('.tadaza-trans-box') || bubble.closest('#tadaza-code-studio-overlay')) return;
+      const text = extractMessageText(bubble);
+      if (!text) return;
+
+      const chatItem = bubble.closest('.chat-message, [class*="msg-item"], [class*="chat-item"], [class*="message-item"]') || bubble;
+      const classStr = (chatItem.className || '') + ' ' + (bubble.className || '');
+      const isMe = /\b(me|outgoing|self|is-me|msg-me|my-message)\b/i.test(classStr)
+        || Boolean(chatItem.querySelector('.avatar--right, [class*="avatar-right"]'));
+
+      let time = '';
+      const timeElem = chatItem.querySelector('[class*="message-time"], [class*="bubble-message-time"], [class*="time"]');
+      if (timeElem) time = timeElem.textContent.trim();
+
+      results.push({
+        text,
+        isMe,
+        time
+      });
+    });
+
+    return results.slice(-35);
+  }
+
+  function sendMessageToCurrentChat(text) {
+    if (!text) return false;
+    const richInput = document.querySelector('[id^="richInput"]') || document.getElementById('richInput') || document.querySelector('.rich-input');
+    if (!richInput) return false;
+    richInput.focus();
+
+    const ok = document.execCommand('insertText', false, text);
+    if (!ok) {
+      richInput.innerText = text;
+      richInput.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+
+    setTimeout(() => {
+      const enterDown = new KeyboardEvent('keydown', {
+        key: 'Enter',
+        code: 'Enter',
+        keyCode: 13,
+        which: 13,
+        bubbles: true,
+        cancelable: true
+      });
+      richInput.dispatchEvent(enterDown);
+
+      setTimeout(() => {
+        const sendBtn = document.querySelector('.chat-input__send-btn')
+          || document.querySelector('[data-translate-inner="STR_SEND"]')
+          || document.querySelector('button[title*="Gửi"]')
+          || document.querySelector('.btn-send');
+        if (sendBtn) sendBtn.click();
+      }, 60);
+    }, 40);
+
+    return true;
+  }
+
+  let pinnedChatIds = new Set();
+
+  function setupFloatingChatHead() {
+    if (!bridge) return;
+
+    if (bridge.onChatHeadStateChanged) {
+      bridge.onChatHeadStateChanged((state) => {
+        if (state && state.pinnedChats) {
+          pinnedChatIds = new Set(state.pinnedChats.map(c => c.id));
+          const btn = document.getElementById('tadaza-btn-pin-chathead');
+          const conv = getActiveConversation();
+          if (btn && conv) {
+            if (pinnedChatIds.has(conv.id)) {
+              btn.classList.add('pinned');
+            } else {
+              btn.classList.remove('pinned');
+            }
+          }
+        }
+      });
+    }
+
+    if (bridge.onChatHeadSend) {
+      bridge.onChatHeadSend(({ text }) => {
+        sendMessageToCurrentChat(text);
+      });
+    }
+
+    let syncTimer = null;
+    const syncActiveChat = () => {
+      const conv = getActiveConversation();
+      if (!conv || !pinnedChatIds.has(conv.id)) return;
+      const messages = scrapeCurrentMessages();
+      if (bridge.syncChatHead) {
+        bridge.syncChatHead({
+          chatId: conv.id,
+          messages
+        });
+      }
+    };
+
+    const syncObs = new MutationObserver(() => {
+      if (syncTimer) clearTimeout(syncTimer);
+      syncTimer = setTimeout(syncActiveChat, 250);
+    });
+    syncObs.observe(document.body, { childList: true, subtree: true });
+
+    const insertPinButton = () => {
+      if (document.getElementById('tadaza-btn-pin-chathead')) return;
+
+      const headerBar = document.querySelector(
+        '.chat-box-header .action-bar, ' +
+        '[class*="header-actions"], ' +
+        '[class*="header-tool"], ' +
+        '[class*="header-btns"], ' +
+        '[class*="chat-header__tools"], ' +
+        '[class*="chat-header"] .buttons, ' +
+        '.chat-box-header'
+      );
+
+      if (!headerBar) return;
+
+      const conv = getActiveConversation();
+      if (!conv) return;
+
+      const btn = document.createElement('div');
+      btn.id = 'tadaza-btn-pin-chathead';
+      btn.className = `tadaza-chat-header-btn ${pinnedChatIds.has(conv.id) ? 'pinned' : ''}`;
+      btn.title = 'Ghim ra Bong bóng chat rời (Chat Head Desktop PiP)';
+      btn.innerHTML = `
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+          <circle cx="12" cy="12" r="3" fill="#89b4fa" stroke="none"></circle>
+        </svg>
+      `;
+
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const currentConv = getActiveConversation();
+        if (!currentConv) return;
+
+        if (pinnedChatIds.has(currentConv.id)) {
+          if (bridge.unpinChatHead) await bridge.unpinChatHead(currentConv.id);
+          pinnedChatIds.delete(currentConv.id);
+          btn.classList.remove('pinned');
+        } else {
+          const messages = scrapeCurrentMessages();
+          if (bridge.pinChatHead) {
+            await bridge.pinChatHead({
+              id: currentConv.id,
+              name: currentConv.name,
+              avatar: currentConv.avatar,
+              messages
+            });
+          }
+          pinnedChatIds.add(currentConv.id);
+          btn.classList.add('pinned');
+        }
+      });
+
+      headerBar.insertBefore(btn, headerBar.firstChild);
+    };
+
+    insertPinButton();
+    const pinObs = new MutationObserver(insertPinButton);
+    pinObs.observe(document.body, { childList: true, subtree: true });
+  }
+
+  /* --------------------------------------------------------------------------
+     7. Build TADaZa UI (Left Navigation Bar Button & Drawer Panel)
      -------------------------------------------------------------------------- */
   function buildUI() {
     if (document.getElementById('tadaza-drawer')) return;
@@ -2121,6 +2326,13 @@
             <line x1="2" y1="10" x2="22" y2="10"></line>
           </svg>
           <span>Trích xuất & VietQR</span>
+        </button>
+        <button class="tadaza-tab-btn ${activeTab === 'floating_chat' ? 'active' : ''}" data-tab="floating_chat">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+            <circle cx="12" cy="12" r="3" fill="#89b4fa" stroke="none"></circle>
+          </svg>
+          <span>Chat Head nổi</span>
         </button>
       </div>
 
@@ -2487,6 +2699,53 @@
       `;
     }
 
+    if (activeTab === 'floating_chat') {
+      const fc = currentConfig.floating_chat || {};
+      const conv = getActiveConversation();
+      return `
+        <div class="tadaza-section">
+          <h3 class="tadaza-section-title">Bong bóng chat rời (Desktop Floating PiP)</h3>
+          <div class="tadaza-item">
+            <div class="tadaza-item-info">
+              <span class="tadaza-item-title">Bật Bong bóng chat rời</span>
+              <span class="tadaza-item-desc">Hiện biểu tượng ghim Chat Head trên thanh tiêu đề cuộc trò chuyện</span>
+            </div>
+            <label class="tadaza-switch">
+              <input type="checkbox" id="toggle-fc-enabled" ${fc.enabled ? 'checked' : ''}>
+              <span class="tadaza-slider"></span>
+            </label>
+          </div>
+
+          <div class="tadaza-item sub-item ${!fc.enabled ? 'tadaza-item-disabled' : ''}">
+            <div class="tadaza-item-info">
+              <span class="tadaza-item-title">Tự động thu nhỏ khi click ra ngoài</span>
+              <span class="tadaza-item-desc">Tự động thu về bong bóng tròn nhỏ khi chuyển sang ứng dụng khác</span>
+            </div>
+            <label class="tadaza-switch">
+              <input type="checkbox" id="toggle-fc-auto-collapse" ${fc.enabled && fc.auto_collapse_blur ? 'checked' : ''} ${!fc.enabled ? 'disabled' : ''}>
+              <span class="tadaza-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="tadaza-section">
+          <h3 class="tadaza-section-title">Thao tác nhanh</h3>
+          <div class="tadaza-item tadaza-item-col">
+            <button class="tadaza-action-btn" id="btn-pin-current-chat" style="width: 100%; justify-content: center; height: 38px;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+                <circle cx="12" cy="12" r="3" fill="#89b4fa" stroke="none"></circle>
+              </svg>
+              <span style="font-weight: 600;">Ghim cuộc trò chuyện hiện tại ra Bong bóng</span>
+            </button>
+            <div class="tadaza-item-desc" style="margin-top: 8px;">
+              ${conv ? `Đang mở: <b>${escapeHtml(conv.name)}</b>` : 'Hãy mở một cuộc trò chuyện để ghim nhanh ra góc màn hình desktop!'}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
     return '';
   }
 
@@ -2758,6 +3017,49 @@
         });
       }
     }
+
+    if (activeTab === 'floating_chat') {
+      const toggleFcEnabled = drawer.querySelector('#toggle-fc-enabled');
+      const toggleFcAutoCollapse = drawer.querySelector('#toggle-fc-auto-collapse');
+      const btnPin = drawer.querySelector('#btn-pin-current-chat');
+
+      if (toggleFcEnabled) {
+        toggleFcEnabled.addEventListener('change', () => {
+          saveAndApply({ floating_chat: { ...currentConfig.floating_chat, enabled: toggleFcEnabled.checked } });
+          renderDrawerContent();
+        });
+      }
+
+      if (toggleFcAutoCollapse) {
+        toggleFcAutoCollapse.addEventListener('change', () => {
+          saveAndApply({ floating_chat: { ...currentConfig.floating_chat, auto_collapse_blur: toggleFcAutoCollapse.checked } });
+        });
+      }
+
+      if (btnPin) {
+        btnPin.addEventListener('click', async () => {
+          const conv = getActiveConversation();
+          if (!conv) {
+            alert('Vui lòng mở một cuộc trò chuyện trước khi ghim!');
+            return;
+          }
+          const messages = scrapeCurrentMessages();
+          if (bridge.pinChatHead) {
+            await bridge.pinChatHead({
+              id: conv.id,
+              name: conv.name,
+              avatar: conv.avatar,
+              messages
+            });
+          }
+          pinnedChatIds.add(conv.id);
+          const headerBtn = document.getElementById('tadaza-btn-pin-chathead');
+          if (headerBtn) headerBtn.classList.add('pinned');
+          drawer.classList.remove('open');
+          document.getElementById('tadaza-overlay').classList.remove('open');
+        });
+      }
+    }
   }
 
   /* --------------------------------------------------------------------------
@@ -2801,6 +3103,7 @@
         setupChatToolbarButton();
         setupInputMarkdownShortcuts();
         setupQuickParser();
+        setupFloatingChatHead();
       });
     } else {
       buildUI();
@@ -2809,6 +3112,7 @@
       setupChatToolbarButton();
       setupInputMarkdownShortcuts();
       setupQuickParser();
+      setupFloatingChatHead();
     }
   }
 

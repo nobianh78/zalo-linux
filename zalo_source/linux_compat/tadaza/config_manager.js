@@ -41,6 +41,15 @@ const DEFAULT_CONFIG = {
     auto_detect_tracking: true,
     auto_detect_phone: true,
     default_qr_template: 'compact2'
+  },
+  floating_chat: {
+    enabled: true,
+    always_on_top: true,
+    auto_collapse_blur: false,
+    bubble_size: 64,
+    window_width: 370,
+    window_height: 520,
+    pinned_chats: []
   }
 };
 
@@ -71,7 +80,8 @@ class ConfigManager {
           privacy: { ...DEFAULT_CONFIG.privacy, ...(parsed.privacy || {}) },
           translate: { ...DEFAULT_CONFIG.translate, ...(parsed.translate || {}) },
           markdown: { ...DEFAULT_CONFIG.markdown, ...(parsed.markdown || {}) },
-          quick_parser: { ...DEFAULT_CONFIG.quick_parser, ...(parsed.quick_parser || {}) }
+          quick_parser: { ...DEFAULT_CONFIG.quick_parser, ...(parsed.quick_parser || {}) },
+          floating_chat: { ...DEFAULT_CONFIG.floating_chat, ...(parsed.floating_chat || {}) }
         };
       } else {
         this.save();
@@ -89,7 +99,9 @@ class ConfigManager {
         theme: { ...this.config.theme, ...(newConfig.theme || {}) },
         privacy: { ...this.config.privacy, ...(newConfig.privacy || {}) },
         translate: { ...this.config.translate, ...(newConfig.translate || {}) },
-        markdown: { ...this.config.markdown, ...(newConfig.markdown || {}) }
+        markdown: { ...this.config.markdown, ...(newConfig.markdown || {}) },
+        quick_parser: { ...this.config.quick_parser, ...(newConfig.quick_parser || {}) },
+        floating_chat: { ...this.config.floating_chat, ...(newConfig.floating_chat || {}) }
       };
     }
     try {

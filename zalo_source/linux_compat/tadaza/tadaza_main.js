@@ -125,6 +125,282 @@ function initTadazaMain() {
     }
   });
 
+  /* --------------------------------------------------------------------------
+     Floating Chat Heads (PiP Window Management)
+     -------------------------------------------------------------------------- */
+  const { screen } = electron;
+  let chatHeadWindow = null;
+  let bubblePosition = null;
+  const chatHeadState = {
+    pinnedChats: [],
+    activeChatId: null,
+    mode: 'bubble'
+  };
+
+  function broadcastChatHeadSync() {
+    if (chatHeadWindow && !chatHeadWindow.isDestroyed() && chatHeadWindow.webContents) {
+      chatHeadWindow.webContents.send('tadaza:chathead-sync-data', {
+        pinnedChats: chatHeadState.pinnedChats,
+        activeChatId: chatHeadState.activeChatId,
+        mode: chatHeadState.mode
+      });
+    }
+
+    // Broadcast state to main windows (so UI buttons can show pinned state)
+    try {
+      const windows = BrowserWindow.getAllWindows();
+      for (const win of windows) {
+        if (win !== chatHeadWindow && !win.isDestroyed() && win.webContents) {
+          win.webContents.send('tadaza:chathead-state-changed', {
+            pinnedChats: chatHeadState.pinnedChats.map(c => ({ id: c.id, name: c.name })),
+            activeChatId: chatHeadState.activeChatId,
+            isOpen: chatHeadWindow && !chatHeadWindow.isDestroyed() && chatHeadWindow.isVisible()
+          });
+        }
+      }
+    } catch (e) {}
+  }
+
+  function ensureChatHeadWindow() {
+    if (chatHeadWindow && !chatHeadWindow.isDestroyed()) {
+      if (!chatHeadWindow.isVisible()) {
+        chatHeadWindow.show();
+      }
+      return chatHeadWindow;
+    }
+
+    const primaryDisplay = screen ? screen.getPrimaryDisplay() : null;
+    const workArea = primaryDisplay ? primaryDisplay.workArea : { x: 0, y: 0, width: 1920, height: 1080 };
+
+    if (!bubblePosition) {
+      bubblePosition = {
+        x: workArea.x + workArea.width - 92,
+        y: workArea.y + workArea.height - 200
+      };
+    }
+
+    chatHeadWindow = new BrowserWindow({
+      width: 68,
+      height: 68,
+      x: bubblePosition.x,
+      y: bubblePosition.y,
+      frame: false,
+      transparent: true,
+      alwaysOnTop: true,
+      skipTaskbar: true,
+      resizable: false,
+      show: false,
+      hasShadow: false,
+      webPreferences: {
+        nodeIntegration: false,
+        contextIsolation: true,
+        preload: path.join(__dirname, 'chat_head_preload.js')
+      }
+    });
+
+    chatHeadWindow.loadFile(path.join(__dirname, 'chat_head.html'));
+
+    chatHeadWindow.once('ready-to-show', () => {
+      if (!chatHeadWindow || chatHeadWindow.isDestroyed()) return;
+      chatHeadWindow.show();
+      broadcastChatHeadSync();
+    });
+
+    chatHeadWindow.on('blur', () => {
+      try {
+        const cfg = configManager.get().floating_chat || {};
+        if (cfg.auto_collapse_blur && chatHeadState.mode === 'expanded') {
+          setChatHeadMode('bubble');
+        }
+      } catch (e) {}
+    });
+
+    chatHeadWindow.on('closed', () => {
+      chatHeadWindow = null;
+      chatHeadState.mode = 'bubble';
+      broadcastChatHeadSync();
+    });
+
+    return chatHeadWindow;
+  }
+
+  function setChatHeadMode(targetMode) {
+    if (!chatHeadWindow || chatHeadWindow.isDestroyed()) return;
+    if (chatHeadState.mode === targetMode) return;
+
+    const [curX, curY] = chatHeadWindow.getPosition();
+    const primaryDisplay = screen ? screen.getPrimaryDisplay() : null;
+    const workArea = primaryDisplay ? primaryDisplay.workArea : { x: 0, y: 0, width: 1920, height: 1080 };
+
+    if (targetMode === 'expanded') {
+      bubblePosition = { x: curX, y: curY };
+      const targetW = 370;
+      const targetH = 520;
+      let targetX = curX - (targetW - 68);
+      let targetY = curY - (targetH - 68);
+
+      if (targetX < workArea.x + 10) targetX = workArea.x + 10;
+      if (targetY < workArea.y + 10) targetY = workArea.y + 10;
+      if (targetX + targetW > workArea.x + workArea.width - 10) {
+        targetX = workArea.x + workArea.width - targetW - 10;
+      }
+      if (targetY + targetH > workArea.y + workArea.height - 10) {
+        targetY = workArea.y + workArea.height - targetH - 10;
+      }
+
+      chatHeadState.mode = 'expanded';
+      chatHeadWindow.setBounds({ x: Math.round(targetX), y: Math.round(targetY), width: targetW, height: targetH });
+      chatHeadWindow.webContents.send('tadaza:chathead-mode-changed', 'expanded');
+      chatHeadWindow.focus();
+    } else {
+      chatHeadState.mode = 'bubble';
+      const bX = bubblePosition ? bubblePosition.x : Math.max(workArea.x, curX);
+      const bY = bubblePosition ? bubblePosition.y : Math.max(workArea.y, curY);
+      chatHeadWindow.setBounds({ x: Math.round(bX), y: Math.round(bY), width: 68, height: 68 });
+      chatHeadWindow.webContents.send('tadaza:chathead-mode-changed', 'bubble');
+    }
+    broadcastChatHeadSync();
+  }
+
+  // Handle get initial state
+  ipcMain.handle('tadaza:chathead-get-state', () => {
+    return {
+      pinnedChats: chatHeadState.pinnedChats,
+      activeChatId: chatHeadState.activeChatId,
+      mode: chatHeadState.mode
+    };
+  });
+
+  // Handle pin conversation
+  ipcMain.handle('tadaza:chathead-pin', (event, chatData) => {
+    if (!chatData || !chatData.id) return { success: false };
+
+    const existingIdx = chatHeadState.pinnedChats.findIndex(c => c.id === chatData.id);
+    if (existingIdx >= 0) {
+      chatHeadState.pinnedChats[existingIdx] = {
+        ...chatHeadState.pinnedChats[existingIdx],
+        ...chatData
+      };
+    } else {
+      // Limit to 3 pinned chats
+      if (chatHeadState.pinnedChats.length >= 3) {
+        chatHeadState.pinnedChats.shift();
+      }
+      chatHeadState.pinnedChats.push({
+        id: chatData.id,
+        name: chatData.name || 'Chat',
+        avatar: chatData.avatar || '',
+        messages: chatData.messages || [],
+        unreadCount: 0
+      });
+    }
+
+    chatHeadState.activeChatId = chatData.id;
+    ensureChatHeadWindow();
+    broadcastChatHeadSync();
+    return { success: true, count: chatHeadState.pinnedChats.length };
+  });
+
+  // Handle unpin conversation
+  ipcMain.on('tadaza:chathead-unpin', (event, chatId) => {
+    chatHeadState.pinnedChats = chatHeadState.pinnedChats.filter(c => c.id !== chatId);
+    if (chatHeadState.pinnedChats.length === 0) {
+      chatHeadState.activeChatId = null;
+      if (chatHeadWindow && !chatHeadWindow.isDestroyed()) {
+        chatHeadWindow.hide();
+      }
+    } else {
+      if (chatHeadState.activeChatId === chatId) {
+        chatHeadState.activeChatId = chatHeadState.pinnedChats[0].id;
+      }
+      broadcastChatHeadSync();
+    }
+  });
+
+  ipcMain.handle('tadaza:chathead-unpin', (event, chatId) => {
+    chatHeadState.pinnedChats = chatHeadState.pinnedChats.filter(c => c.id !== chatId);
+    if (chatHeadState.pinnedChats.length === 0) {
+      chatHeadState.activeChatId = null;
+      if (chatHeadWindow && !chatHeadWindow.isDestroyed()) {
+        chatHeadWindow.hide();
+      }
+    } else {
+      if (chatHeadState.activeChatId === chatId) {
+        chatHeadState.activeChatId = chatHeadState.pinnedChats[0].id;
+      }
+      broadcastChatHeadSync();
+    }
+    return { success: true };
+  });
+
+  // Handle switch active chat
+  ipcMain.on('tadaza:chathead-switch-chat', (event, chatId) => {
+    chatHeadState.activeChatId = chatId;
+    broadcastChatHeadSync();
+  });
+
+  // Handle mode toggle
+  ipcMain.on('tadaza:chathead-set-mode', (event, mode) => {
+    setChatHeadMode(mode);
+  });
+
+  // Handle window movement from client drag
+  ipcMain.on('tadaza:chathead-move', (event, { deltaX, deltaY }) => {
+    if (!chatHeadWindow || chatHeadWindow.isDestroyed()) return;
+    const [x, y] = chatHeadWindow.getPosition();
+    const newX = Math.round(x + deltaX);
+    const newY = Math.round(y + deltaY);
+    chatHeadWindow.setPosition(newX, newY);
+    if (chatHeadState.mode === 'bubble') {
+      bubblePosition = { x: newX, y: newY };
+    }
+  });
+
+  // Handle sending message from Chat Head to Main Window
+  ipcMain.on('tadaza:chathead-send-message', (event, payload) => {
+    const windows = BrowserWindow.getAllWindows();
+    for (const win of windows) {
+      if (win !== chatHeadWindow && !win.isDestroyed() && win.webContents) {
+        win.webContents.send('tadaza:chathead-send-to-main', payload);
+      }
+    }
+  });
+
+  // Handle message synchronization from Main Window to Chat Head
+  ipcMain.on('tadaza:chathead-sync-from-main', (event, { chatId, messages, unreadCount }) => {
+    const chat = chatHeadState.pinnedChats.find(c => c.id === chatId);
+    if (chat) {
+      if (messages) chat.messages = messages;
+      if (typeof unreadCount === 'number') chat.unreadCount = unreadCount;
+      if (chatHeadWindow && !chatHeadWindow.isDestroyed() && chatHeadWindow.webContents) {
+        chatHeadWindow.webContents.send('tadaza:chathead-sync-data', {
+          pinnedChats: chatHeadState.pinnedChats,
+          activeChatId: chatHeadState.activeChatId,
+          mode: chatHeadState.mode
+        });
+      }
+    }
+  });
+
+  // Handle focus main Zalo window
+  ipcMain.on('tadaza:chathead-focus-main', () => {
+    const windows = BrowserWindow.getAllWindows();
+    for (const win of windows) {
+      if (win !== chatHeadWindow && !win.isDestroyed()) {
+        win.show();
+        win.focus();
+        break;
+      }
+    }
+  });
+
+  // Handle close window
+  ipcMain.on('tadaza:chathead-close', () => {
+    if (chatHeadWindow && !chatHeadWindow.isDestroyed()) {
+      chatHeadWindow.hide();
+    }
+  });
+
   // Listen to OS Dark Mode changes (GNOME / KDE)
   if (nativeTheme) {
     nativeTheme.on('updated', () => {
