@@ -95,6 +95,62 @@ except Exception:
 }
 
 /**
+ * Stream-decrypts chunks matching C++ FUN_1001c0c0 and FUN_10026b50
+ */
+function tryDecryptStream(cipherName, keyBuf, ivBuf, inBuf, startOffset) {
+  try {
+    const data = inBuf.subarray(startOffset);
+    if (data.length < 16) return null;
+
+    // Test first 16-byte block without final() to avoid block length errors
+    const testDecipher = crypto.createDecipheriv(cipherName, keyBuf, ivBuf);
+    testDecipher.setAutoPadding(false);
+    const testHeader = testDecipher.update(data.subarray(0, 16));
+
+    const isZdb = testHeader.length >= 6 && testHeader.subarray(0, 6).toString('ascii') === 'ZDB4.0';
+    const isSqlite = testHeader.length >= 16 && testHeader.subarray(0, 16).toString('ascii') === 'SQLite format 3\0';
+    const isZip = testHeader.length >= 4 && testHeader[0] === 0x50 && testHeader[1] === 0x4b && testHeader[2] === 0x03 && testHeader[3] === 0x04;
+
+    if (!isZdb && !isSqlite && !isZip) {
+      return null;
+    }
+
+    logSync(`[db-cross-v4] MATCH FOUND! cipher=${cipherName}, offset=${startOffset}, type=${isZdb ? 'ZDB4.0' : (isSqlite ? 'SQLite' : 'ZIP')}`);
+
+    // Decrypt entire buffer in 64KB chunks
+    const chunkSize = 64 * 1024;
+    const outChunks = [];
+    let curIv = Buffer.from(ivBuf);
+
+    for (let pos = 0; pos < data.length; pos += chunkSize) {
+      const end = Math.min(pos + chunkSize, data.length);
+      const chunk = data.subarray(pos, end);
+      const rem = chunk.length % 16;
+      let toDecrypt = chunk;
+      if (rem !== 0) {
+        // C++ pads the final incomplete chunk to 16 bytes with zeros
+        toDecrypt = Buffer.concat([chunk, Buffer.alloc(16 - rem, 0)]);
+      }
+
+      const decipher = crypto.createDecipheriv(cipherName, keyBuf, curIv);
+      decipher.setAutoPadding(false);
+      const dec = decipher.update(toDecrypt);
+      outChunks.push(dec.subarray(0, chunk.length));
+
+      // Update IV to the last 16 bytes of the current ciphertext chunk
+      if (chunk.length >= 16) {
+        curIv = chunk.subarray(chunk.length - 16, chunk.length);
+      }
+    }
+
+    return Buffer.concat(outChunks);
+  } catch (err) {
+    logSync(`[db-cross-v4] tryDecryptStream error: ${err.message}`);
+    return null;
+  }
+}
+
+/**
  * Decrypts a buffer using AES-256-CBC with password/privateKey
  */
 function decryptBackupBuffer(inBuf, password) {
@@ -103,9 +159,14 @@ function decryptBackupBuffer(inBuf, password) {
     return inBuf;
   }
 
-  logSync('[db-cross-v4] decryptBackupBuffer called, inBuf len =', inBuf.length,
-          'first 32 bytes hex =', inBuf.subarray(0, 32).toString('hex'),
-          'password len =', password ? String(password).length : 0);
+  const strPass = String(password || '');
+  logSync('[db-cross-v4] decryptBackupBuffer called:', {
+    inBufLen: inBuf.length,
+    mod16: inBuf.length % 16,
+    first32Hex: inBuf.subarray(0, 32).toString('hex'),
+    passwordLen: strPass.length,
+    passwordVal: strPass
+  });
 
   // Already decrypted check
   if (inBuf.length >= 6 && inBuf.subarray(0, 6).toString('ascii') === 'ZDB4.0') {
@@ -126,7 +187,6 @@ function decryptBackupBuffer(inBuf, password) {
     return inBuf;
   }
 
-  const strPass = String(password);
   const keyCandidates = [];
 
   // 1. Password as hex string (32 raw bytes = 64 hex characters)
@@ -143,12 +203,12 @@ function decryptBackupBuffer(inBuf, password) {
     } catch (e) {}
   }
 
-  // 3. Password string directly as UTF-8 / ASCII, truncated/padded with zeroes to 32 bytes (exact C++ db-cross-v4 behavior)
+  // 3. Password string directly as UTF-8 / ASCII, padded/truncated to 32 bytes (exact C++ db-cross-v4 behavior)
   const keyZeros32 = Buffer.alloc(32, 0);
   Buffer.from(strPass, 'utf8').copy(keyZeros32, 0, 0, 32);
   keyCandidates.push({ name: 'utf8-padded-32', key: keyZeros32, cipher: 'aes-256-cbc' });
 
-  // 4. Password string directly truncated/padded to 16 bytes
+  // 4. Password string directly padded/truncated to 16 bytes
   const keyZeros16 = Buffer.alloc(16, 0);
   Buffer.from(strPass, 'utf8').copy(keyZeros16, 0, 0, 16);
   keyCandidates.push({ name: 'utf8-padded-16', key: keyZeros16, cipher: 'aes-128-cbc' });
@@ -161,74 +221,30 @@ function decryptBackupBuffer(inBuf, password) {
 
   const ivZeros = Buffer.alloc(16, 0);
 
+  // Test combinations of keys, IVs, and offsets
   for (const cand of keyCandidates) {
-    // Attempt A: Zero IV, no padding
-    try {
-      const decipher = crypto.createDecipheriv(cand.cipher, cand.key, ivZeros);
-      decipher.setAutoPadding(false);
-      const dec = Buffer.concat([decipher.update(inBuf), decipher.final()]);
-      if (dec.length >= 6 && dec.subarray(0, 6).toString('ascii') === 'ZDB4.0') {
-        logSync(`[db-cross-v4] Decrypted ZDB4.0 with key candidate ${cand.name} (zero IV, no padding)!`);
-        return dec;
-      }
-      if (dec.length >= 16 && dec.subarray(0, 16).toString('ascii') === 'SQLite format 3\0') {
-        logSync(`[db-cross-v4] Decrypted SQLite with key candidate ${cand.name} (zero IV, no padding)!`);
-        return dec;
-      }
-      if (dec.length >= 4 && dec[0] === 0x50 && dec[1] === 0x4b && dec[2] === 0x03 && dec[3] === 0x04) {
-        logSync(`[db-cross-v4] Decrypted ZIP with key candidate ${cand.name} (zero IV, no padding)!`);
-        return dec;
-      }
-    } catch (e) {}
+    // 1. Offset 0 with Zero IV
+    let dec = tryDecryptStream(cand.cipher, cand.key, ivZeros, inBuf, 0);
+    if (dec) return dec;
 
-    // Attempt B: Zero IV, PKCS7 padding
-    try {
-      const decipher = crypto.createDecipheriv(cand.cipher, cand.key, ivZeros);
-      const dec = Buffer.concat([decipher.update(inBuf), decipher.final()]);
-      if (dec.length >= 6 && dec.subarray(0, 6).toString('ascii') === 'ZDB4.0') {
-        logSync(`[db-cross-v4] Decrypted ZDB4.0 with key candidate ${cand.name} (zero IV, PKCS7)!`);
-        return dec;
-      }
-      if (dec.length >= 16 && dec.subarray(0, 16).toString('ascii') === 'SQLite format 3\0') {
-        logSync(`[db-cross-v4] Decrypted SQLite with key candidate ${cand.name} (zero IV, PKCS7)!`);
-        return dec;
-      }
-      if (dec.length >= 4 && dec[0] === 0x50 && dec[1] === 0x4b && dec[2] === 0x03 && dec[3] === 0x04) {
-        logSync(`[db-cross-v4] Decrypted ZIP with key candidate ${cand.name} (zero IV, PKCS7)!`);
-        return dec;
-      }
-    } catch (e) {}
+    // 2. Offset 4 with Zero IV (in case of 4-byte length header)
+    if (inBuf.length > 20) {
+      dec = tryDecryptStream(cand.cipher, cand.key, ivZeros, inBuf, 4);
+      if (dec) return dec;
+    }
 
-    // Attempt C: First 16 bytes is prepended IV
+    // 3. Offset 16 where first 16 bytes is IV
     if (inBuf.length > 32) {
       const iv = inBuf.subarray(0, 16);
-      const data = inBuf.subarray(16);
-      try {
-        const decipher = crypto.createDecipheriv(cand.cipher, cand.key, iv);
-        decipher.setAutoPadding(false);
-        const dec = Buffer.concat([decipher.update(data), decipher.final()]);
-        if (dec.length >= 6 && dec.subarray(0, 6).toString('ascii') === 'ZDB4.0') {
-          logSync(`[db-cross-v4] Decrypted ZDB4.0 with key candidate ${cand.name} (prepended IV, no padding)!`);
-          return dec;
-        }
-        if (dec.length >= 16 && dec.subarray(0, 16).toString('ascii') === 'SQLite format 3\0') {
-          logSync(`[db-cross-v4] Decrypted SQLite with key candidate ${cand.name} (prepended IV, no padding)!`);
-          return dec;
-        }
-      } catch (e) {}
+      dec = tryDecryptStream(cand.cipher, cand.key, iv, inBuf, 16);
+      if (dec) return dec;
+    }
 
-      try {
-        const decipher = crypto.createDecipheriv(cand.cipher, cand.key, iv);
-        const dec = Buffer.concat([decipher.update(data), decipher.final()]);
-        if (dec.length >= 6 && dec.subarray(0, 6).toString('ascii') === 'ZDB4.0') {
-          logSync(`[db-cross-v4] Decrypted ZDB4.0 with key candidate ${cand.name} (prepended IV, PKCS7)!`);
-          return dec;
-        }
-        if (dec.length >= 16 && dec.subarray(0, 16).toString('ascii') === 'SQLite format 3\0') {
-          logSync(`[db-cross-v4] Decrypted SQLite with key candidate ${cand.name} (prepended IV, PKCS7)!`);
-          return dec;
-        }
-      } catch (e) {}
+    // 4. Offset 20 where bytes 4..20 is IV
+    if (inBuf.length > 36) {
+      const iv = inBuf.subarray(4, 20);
+      dec = tryDecryptStream(cand.cipher, cand.key, iv, inBuf, 20);
+      if (dec) return dec;
     }
   }
 
