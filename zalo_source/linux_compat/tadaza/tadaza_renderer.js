@@ -1968,6 +1968,7 @@
   function getActiveConversation() {
     let name = '';
 
+    // 1. Check document.title (e.g. "Zalo - Người nhận")
     if (document.title && document.title.includes('-')) {
       const parts = document.title.split(/[-–—]/);
       if (parts.length > 1) {
@@ -1978,7 +1979,7 @@
       }
     }
 
-    // 2. Check input placeholder (e.g. "Nhập @, tin nhắn tới Tuấn Anh")
+    // 2. Check input placeholder (e.g. "Nhập @, tin nhắn tới...")
     if (!name) {
       const richInput = document.querySelector('[id^="richInput"]') || document.getElementById('richInput') || document.querySelector('.rich-input');
       const placeholder = (richInput ? (richInput.getAttribute('placeholder') || richInput.getAttribute('data-placeholder') || '') : '')
@@ -2011,7 +2012,7 @@
     }
 
     if (!name) {
-      name = 'Tuấn Anh'; // Default fallback
+      name = 'Hội thoại'; // Default fallback
     }
 
     // Avatar detection: find img in top header or active sidebar item
