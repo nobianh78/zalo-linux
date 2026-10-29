@@ -48,6 +48,9 @@ try {
                   const js = fs.readFileSync(rendererJsPath, 'utf8');
                   win.webContents.executeJavaScript(js);
                 }
+                win.webContents.on('console-message', (event, level, message, line, sourceId) => {
+                  console.log(`[Renderer L${level}] ${message}`);
+                });
               } catch (err) {
                 console.warn('[TADaZa Injector] Injection error:', err.message);
               }

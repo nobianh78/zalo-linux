@@ -59,31 +59,17 @@
     _systemIsDark: false
   };
 
-  const REACTIONS_PREVIEW = [
-    { emoji: '👍', name: 'Thích' },
-    { emoji: '❤️', name: 'Yêu thích' },
-    { emoji: '😆', name: 'Haha' },
-    { emoji: '😲', name: 'Wow' },
-    { emoji: '😭', name: 'Khóc' },
-    { emoji: '😡', name: 'Phẫn nộ' },
-    { emoji: '👎', name: 'Không thích' },
-    { emoji: '🙏', name: 'Cảm ơn' },
-    { emoji: '👌', name: 'OK' },
-    { emoji: '✌️', name: 'Chiến thắng' },
-    { emoji: '🌹', name: 'Hoa hồng' },
-    { emoji: '💔', name: 'Tan vỡ' },
-    { emoji: '💩', name: 'Hài hước' },
-    { emoji: '🤟', name: 'Yêu bạn' },
-    { emoji: '👏', name: 'Vỗ tay' },
-    { emoji: '😘', name: 'Hôn gió' },
-    { emoji: '😀', name: 'Cười tươi' },
-    { emoji: '🙂', name: 'Mỉm cười' },
-    { emoji: '😎', name: 'Ngầu' },
-    { emoji: '😛', name: 'Lè lưỡi' },
-    { emoji: '🤣', name: 'Cười bò' },
-    { emoji: '🤑', name: 'Giàu có' },
-    { emoji: '😴', name: 'Buồn ngủ' },
-    { emoji: '👊', name: 'Cụng tay' }
+  const EMOJI_LIST = [
+    '👍', '❤️', '😂', '😮', '😭', '😡', '🙏', '🔥',
+    '👏', '🎉', '🥰', '😍', '🤩', '😘', '😋', '😎',
+    '🤔', '🤫', '🤭', '😏', '🙄', '😬', '🤥', '😌',
+    '😴', '😷', '🤕', '🤮', '🤧', '🥵', '🥶', '🤯',
+    '🥳', '🥺', '😱', '😈', '💀', '💩', '👻', '🤖',
+    '💖', '💕', '💔', '✨', '🌟', '💡', '🚀', '🎯',
+    '☕', '🍻', '💯', '✔️', '❌', '⚠️', '⭐', '🍀',
+    '🤝', '✌️', '🤞', '🤟', '🤘', '👌', '🤌', '💪',
+    '👈', '👉', '👆', '👇', '✋', '👋', '🤙', '🎈',
+    '🎁', '🎂', '🍕', '🍔', '🍦', '🍩', '🥑', '🍎'
   ];
 
   const FONT_OPTIONS = [
@@ -227,12 +213,7 @@
       document.body.classList.remove('tadaza-blur-names-active');
     }
 
-    // Extended reactions toggle
-    if (cfg.emoji && cfg.emoji.extended_reactions) {
-      document.body.classList.remove('tadaza-default-reactions');
-    } else {
-      document.body.classList.add('tadaza-default-reactions');
-    }
+
   }
 
   function updateWallpaper(wallpaperUri, opacity = 0.85, blur = 0) {
@@ -824,30 +805,19 @@
     }
 
     if (activeTab === 'features') {
-      const em = currentConfig.emoji || { extended_reactions: true };
       return `
         <div class="tadaza-section">
-          <h3 class="tadaza-section-title">Phản ứng tin nhắn mở rộng (24 Reactions)</h3>
-          <div class="tadaza-item">
-            <div class="tadaza-item-info">
-              <span class="tadaza-item-title">Mở rộng thanh thả cảm xúc</span>
-              <span class="tadaza-item-desc">Thêm 18 biểu tượng cảm xúc mới ngoài 6 icon mặc định</span>
+          <h3 class="tadaza-section-title">Kho Biểu cảm & Emoji nhanh</h3>
+          <div class="tadaza-item-desc" style="line-height:1.5; margin-bottom:12px;">
+            <div style="padding:8px 10px; background:rgba(0,104,255,0.08); border-left:3px solid #0068ff; border-radius:4px; margin-bottom:10px; font-size:12px;">
+              ℹ️ <strong>Lưu ý về thả cảm xúc tin nhắn:</strong> Máy chủ Zalo chỉ hỗ trợ 6 biểu tượng chuẩn (👍 ❤️ 😆 😲 😭 😡) hiển thị cố định trên tin nhắn.
             </div>
-            <label class="tadaza-switch">
-              <input type="checkbox" id="toggle-extended-reactions" ${em.extended_reactions ? 'checked' : ''}>
-              <span class="tadaza-slider"></span>
-            </label>
+            Nhấp vào bất kỳ emoji bên dưới để chèn nhanh vào ô nhập tin nhắn:
           </div>
-
-          <div class="tadaza-item tadaza-item-col">
-            <span class="tadaza-item-title">Danh sách 24 biểu tượng thả cảm xúc:</span>
-            <div class="tadaza-item-desc" style="margin-bottom:8px;">
-              Khi rê chuột vào bất kỳ tin nhắn nào trong khung chat, thanh thả cảm xúc sẽ mở rộng đủ 24 biểu tượng bên dưới để bạn bấm thả trực tiếp:
-            </div>
-            <div class="tadaza-reaction-preview-grid">
-              ${REACTIONS_PREVIEW.map(r => `<div class="tadaza-reaction-preview-item" title="${r.name}">${r.emoji}<span>${r.name}</span></div>`).join('')}
-            </div>
+          <div class="tadaza-emoji-grid">
+            ${EMOJI_LIST.map(emoji => `<div class="tadaza-emoji-item" data-emoji="${emoji}">${emoji}</div>`).join('')}
           </div>
+          <div id="tadaza-emoji-copied" style="font-size:12px; color:#0068ff; font-weight:600; text-align:center; height:18px; margin-top:8px;"></div>
         </div>
       `;
     }
@@ -999,27 +969,35 @@
     }
 
     if (activeTab === 'features') {
-      const extToggle = drawer.querySelector('#toggle-extended-reactions');
-      if (extToggle) {
-        extToggle.addEventListener('change', () => {
-          saveAndApply({ emoji: { ...currentConfig.emoji, extended_reactions: extToggle.checked } });
+      const grid = drawer.querySelector('.tadaza-emoji-grid');
+      const feedback = drawer.querySelector('#tadaza-emoji-copied');
+      if (grid) {
+        grid.querySelectorAll('.tadaza-emoji-item').forEach(item => {
+          item.addEventListener('click', () => {
+            const emoji = item.dataset.emoji;
+            navigator.clipboard.writeText(emoji).catch(() => {});
+
+            // Focus and insert directly into chat input if open
+            const input = document.querySelector('#input_chat, [contenteditable="true"], .chat-input__content');
+            if (input) {
+              if (input.isContentEditable) {
+                input.focus();
+                document.execCommand('insertText', false, emoji);
+              } else {
+                input.value += emoji;
+              }
+            }
+
+            if (feedback) {
+              feedback.textContent = `Đã chèn: ${emoji}`;
+              setTimeout(() => {
+                if (feedback) feedback.textContent = '';
+              }, 1500);
+            }
+          });
         });
       }
     }
-  }
-
-  function setupReactionObserver() {
-    const observer = new MutationObserver(() => {
-      document.querySelectorAll('.reaction-emoji-list').forEach(list => {
-        if (list.children.length > 6) {
-          const wrapper = list.closest('.emoji-list-wrapper');
-          if (wrapper && !wrapper.classList.contains('has-extended-reactions')) {
-            wrapper.classList.add('has-extended-reactions');
-          }
-        }
-      });
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
   }
 
   /* --------------------------------------------------------------------------
@@ -1027,7 +1005,6 @@
      -------------------------------------------------------------------------- */
   async function init() {
     setupNetworkHooks();
-    setupReactionObserver();
 
     try {
       const cfg = await bridge.getConfig();
