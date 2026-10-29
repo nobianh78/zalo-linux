@@ -549,27 +549,52 @@ body.dark .tadaza-select {
 }
 
 /* --------------------------------------------------------------------------
-   5. In-Place Quick Translate Component
+   5. In-Place Quick Translate Component (Single Floating Hover Button)
    -------------------------------------------------------------------------- */
-.tadaza-trans-btn {
-  display: inline-flex;
+.tadaza-hover-trans-btn {
+  display: none;
+  position: fixed;
+  z-index: 999995;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #0068ff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(0, 104, 255, 0.2);
+  cursor: pointer;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 4px;
-  background: rgba(0, 104, 255, 0.1);
-  color: #0068ff;
-  border: none;
-  cursor: pointer;
-  margin-left: 6px;
-  vertical-align: middle;
-  font-size: 12px;
-  transition: background 0.15s;
+  user-select: none;
+  transition: transform 0.15s ease, background 0.15s ease, color 0.15s ease;
 }
 
-.tadaza-trans-btn:hover {
-  background: rgba(0, 104, 255, 0.25);
+body.dark .tadaza-hover-trans-btn {
+  background: #21262d;
+  color: #58a6ff;
+  border: 1px solid #30363d;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.tadaza-hover-trans-btn:hover {
+  transform: scale(1.18);
+  background: #0068ff;
+  color: #ffffff;
+}
+
+body.dark .tadaza-hover-trans-btn:hover {
+  background: #1f6feb;
+  color: #ffffff;
+}
+
+.tadaza-spin {
+  animation: tadazaSpin 0.8s linear infinite;
+}
+
+@keyframes tadazaSpin {
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .tadaza-trans-box {

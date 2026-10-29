@@ -239,61 +239,65 @@
   }
 
   /* --------------------------------------------------------------------------
-     3. Quick In-Place Message Translation
+     3. Quick In-Place Message Translation (Single Floating Hover Button)
      -------------------------------------------------------------------------- */
+  let activeHoverMessage = null;
+
   function setupMessageTranslator() {
-    const observer = new MutationObserver((mutations) => {
-      if (!currentConfig.translate.enabled) return;
+    // Remove any previously spammed buttons from the DOM
+    document.querySelectorAll('.tadaza-trans-btn').forEach(btn => btn.remove());
 
-      for (const mutation of mutations) {
-        for (const node of mutation.addedNodes) {
-          if (node.nodeType === Node.ELEMENT_NODE) {
-            checkAndAttachTranslateButton(node);
-          }
-        }
-      }
-    });
+    let hoverBtn = document.getElementById('tadaza-hover-trans-btn');
+    if (!hoverBtn) {
+      hoverBtn = document.createElement('div');
+      hoverBtn.id = 'tadaza-hover-trans-btn';
+      hoverBtn.className = 'tadaza-hover-trans-btn';
+      hoverBtn.title = 'Dịch tin nhắn này (TADaZa)';
+      hoverBtn.innerHTML = `
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="2" y1="12" x2="22" y2="12"/>
+          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+        </svg>
+      `;
+      document.body.appendChild(hoverBtn);
 
-    observer.observe(document.body, { childList: true, subtree: true });
-    // Scan existing elements
-    document.querySelectorAll('[class*="message-item"], [class*="bubble-content"]').forEach(checkAndAttachTranslateButton);
-  }
-
-  function checkAndAttachTranslateButton(element) {
-    if (!element || !element.querySelectorAll) return;
-    const bubbles = element.matches && (element.matches('[class*="bubble-content"]') || element.matches('[class*="message-content"]'))
-      ? [element]
-      : element.querySelectorAll('[class*="bubble-content"], [class*="msg-content"], [class*="message-content"]');
-
-    bubbles.forEach(bubble => {
-      if (bubble.dataset.tadazaTransAttached) return;
-      bubble.dataset.tadazaTransAttached = 'true';
-
-      const transBtn = document.createElement('button');
-      transBtn.className = 'tadaza-trans-btn';
-      transBtn.title = 'Dịch nhanh tin nhắn (TADaZa)';
-      transBtn.innerHTML = '🌐';
-      transBtn.addEventListener('click', async (e) => {
+      hoverBtn.addEventListener('click', async (e) => {
         e.stopPropagation();
         e.preventDefault();
+        if (!activeHoverMessage) return;
 
-        const textToTranslate = bubble.innerText.replace('🌐', '').trim();
+        const msgElem = activeHoverMessage;
+        const textToTranslate = (msgElem.innerText || '').trim();
         if (!textToTranslate) return;
 
-        let existingBox = bubble.parentElement.querySelector('.tadaza-trans-box');
-        if (existingBox) {
-          existingBox.remove();
+        const container = msgElem.closest('.chat-message, [class*="msg-item"], [class*="bubble-content"]') || msgElem.parentElement;
+        let oldBox = container ? container.querySelector('.tadaza-trans-box') : null;
+        if (oldBox) {
+          oldBox.remove();
           return;
         }
 
-        transBtn.innerHTML = '⏳';
+        hoverBtn.innerHTML = `
+          <svg class="tadaza-spin" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+          </svg>
+        `;
+
         try {
           const res = await bridge.translate({
             text: textToTranslate,
             targetLang: currentConfig.translate.target_lang || 'vi'
           });
 
-          transBtn.innerHTML = '🌐';
+          hoverBtn.innerHTML = `
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="2" y1="12" x2="22" y2="12"/>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+            </svg>
+          `;
+
           if (res && res.success && res.translated) {
             const box = document.createElement('div');
             box.className = 'tadaza-trans-box';
@@ -303,7 +307,7 @@
                 <span style="cursor:pointer;" class="trans-close">✕</span>
               </div>
               <div class="trans-body">${escapeHtml(res.translated)}</div>
-              <div style="margin-top:4px; font-size:10px; color:#888; display:flex; gap:8px;">
+              <div style="margin-top:6px; font-size:11px; display:flex; gap:12px;">
                 <span class="trans-copy" style="cursor:pointer; color:#0068ff; font-weight:600;">Sao chép</span>
               </div>
             `;
@@ -317,16 +321,57 @@
               }, 1500);
             });
 
-            bubble.parentElement.appendChild(box);
+            if (container) {
+              container.appendChild(box);
+            } else {
+              msgElem.parentElement.appendChild(box);
+            }
           }
         } catch (err) {
-          transBtn.innerHTML = '🌐';
+          hoverBtn.innerHTML = `
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="2" y1="12" x2="22" y2="12"/>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+            </svg>
+          `;
           console.error('[TADaZa Translate] Error:', err);
         }
       });
+    }
 
-      bubble.appendChild(transBtn);
-    });
+    let hideTimer = null;
+    document.addEventListener('mouseover', (e) => {
+      if (!currentConfig.translate.enabled) {
+        hoverBtn.style.display = 'none';
+        return;
+      }
+
+      if (e.target === hoverBtn || hoverBtn.contains(e.target)) {
+        if (hideTimer) clearTimeout(hideTimer);
+        return;
+      }
+
+      const bubble = e.target.closest && (
+        e.target.closest('[class*="bubble-content"]') ||
+        e.target.closest('[class*="msg-content"]') ||
+        e.target.closest('[class*="message-content"]')
+      );
+
+      if (bubble && bubble.innerText && bubble.innerText.trim().length > 0) {
+        if (hideTimer) clearTimeout(hideTimer);
+        activeHoverMessage = bubble;
+        const rect = bubble.getBoundingClientRect();
+        hoverBtn.style.display = 'flex';
+        hoverBtn.style.top = `${Math.max(10, rect.top - 12)}px`;
+        hoverBtn.style.left = `${rect.right - 14}px`;
+      } else {
+        if (hideTimer) clearTimeout(hideTimer);
+        hideTimer = setTimeout(() => {
+          hoverBtn.style.display = 'none';
+        }, 350);
+      }
+    }, true);
   }
 
   function escapeHtml(str) {
