@@ -14,7 +14,8 @@
     "pack": "electron-builder --dir",
     "dist": "electron-builder --linux AppImage deb",
     "dist:appimage": "electron-builder --linux AppImage",
-    "dist:deb": "electron-builder --linux deb"
+    "dist:deb": "electron-builder --linux deb",
+    "build:tadaza": "node zalo_source/linux_compat/tadaza/build.js"
   },
   "build": {
     "appId": "com.vng.zalo.linux",

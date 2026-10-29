@@ -208,6 +208,10 @@ try {
               try {
                 const fs = require('fs');
                 const path = require('path');
+                try {
+                  const { buildTadaza } = require('./linux_compat/tadaza/build');
+                  buildTadaza();
+                } catch (bErr) {}
                 const themeCssPath = path.join(__dirname, 'linux_compat', 'tadaza', 'tadaza_theme.css');
                 const rendererJsPath = path.join(__dirname, 'linux_compat', 'tadaza', 'tadaza_renderer.js');
                 win.webContents.on('console-message', (event, level, message, line, sourceId) => {

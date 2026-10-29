@@ -1,0 +1,109 @@
+/* --------------------------------------------------------------------------
+   5. In-Place Quick Translate Component (Single Floating Hover Button)
+   -------------------------------------------------------------------------- */
+.tadaza-hover-trans-btn {
+  display: none;
+  position: fixed;
+  z-index: 999995;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #0068ff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(0, 104, 255, 0.2);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  transition: transform 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+body.dark .tadaza-hover-trans-btn {
+  background: #21262d;
+  color: #58a6ff;
+  border: 1px solid #30363d;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.tadaza-hover-trans-btn:hover {
+  transform: scale(1.18);
+  background: #0068ff;
+  color: #ffffff;
+}
+
+body.dark .tadaza-hover-trans-btn:hover {
+  background: #1f6feb;
+  color: #ffffff;
+}
+
+.tadaza-spin {
+  animation: tadazaSpin 0.8s linear infinite;
+}
+
+@keyframes tadazaSpin {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.tadaza-trans-box {
+  display: block !important;
+  width: fit-content;
+  max-width: 100%;
+  min-width: 140px;
+  box-sizing: border-box;
+  clear: both;
+  margin-top: 6px;
+  padding: 8px 12px;
+  background: rgba(0, 104, 255, 0.08);
+  border-left: 3px solid #0068ff;
+  border-radius: 6px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: inherit;
+  position: relative;
+  word-break: break-word;
+  user-select: text;
+  z-index: 10;
+}
+
+body.dark .tadaza-trans-box {
+  background: rgba(31, 111, 235, 0.18);
+  border-left-color: #58a6ff;
+  color: #e6edf3;
+}
+
+.tadaza-trans-box .trans-header {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: #0068ff;
+  font-weight: 700;
+  margin-bottom: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+body.dark .tadaza-trans-box .trans-header {
+  color: #58a6ff;
+}
+
+.tadaza-trans-box .trans-body {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* For outgoing messages (From me): align cleanly to the right */
+.message-wrapper--me .tadaza-trans-box,
+.chat-message.me .tadaza-trans-box {
+  margin-left: auto;
+  border-left: none;
+  border-right: 3px solid #0068ff;
+  text-align: left;
+}
+
+body.dark .message-wrapper--me .tadaza-trans-box,
+body.dark .chat-message.me .tadaza-trans-box {
+  border-right-color: #58a6ff;
+}

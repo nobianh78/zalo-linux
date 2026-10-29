@@ -1,0 +1,345 @@
+/* --------------------------------------------------------------------------
+   7. Quick Parser Component (VietQR, Banking & Tracking)
+   -------------------------------------------------------------------------- */
+
+.tadaza-parser-box {
+  margin-top: 6px;
+  padding: 8px 12px;
+  background: rgba(0, 104, 255, 0.07);
+  border-left: 3px solid #0068ff;
+  border-radius: 8px;
+  font-size: 13px;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 100%;
+  box-sizing: border-box;
+  animation: tadazaFadeIn 0.2s ease;
+  user-select: text;
+}
+
+body.dark .tadaza-parser-box {
+  background: rgba(30, 40, 60, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-left: 3px solid #58a6ff;
+}
+
+.message-wrapper--me .tadaza-parser-box,
+.chat-message.me .tadaza-parser-box {
+  margin-left: auto;
+  border-left: none;
+  border-right: 3px solid #0068ff;
+}
+
+body.dark .message-wrapper--me .tadaza-parser-box,
+body.dark .chat-message.me .tadaza-parser-box {
+  border-right-color: #58a6ff;
+}
+
+.tadaza-parser-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tadaza-parser-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  font-size: 12.5px;
+  color: #0068ff;
+}
+
+body.dark .tadaza-parser-title {
+  color: #89b4fa;
+}
+
+.tadaza-bank-badge {
+  background: #0068ff;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+body.dark .tadaza-bank-badge {
+  background: #3b82f6;
+  color: #fff;
+}
+
+.tadaza-parser-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 13px;
+}
+
+.tadaza-parser-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tadaza-parser-val {
+  font-family: 'Fira Code', 'JetBrains Mono', monospace;
+  font-weight: 700;
+  color: #1e293b;
+  letter-spacing: 0.5px;
+}
+
+body.dark .tadaza-parser-val {
+  color: #f1f5f9;
+}
+
+.tadaza-parser-amount {
+  font-weight: 700;
+  color: #10b981;
+}
+
+body.dark .tadaza-parser-amount {
+  color: #34d399;
+}
+
+.tadaza-parser-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+  flex-wrap: wrap;
+}
+
+.tadaza-parser-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid rgba(0, 104, 255, 0.25);
+  background: rgba(0, 104, 255, 0.08);
+  color: #0068ff;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.tadaza-parser-btn:hover {
+  background: #0068ff;
+  color: #fff;
+  border-color: #0068ff;
+}
+
+body.dark .tadaza-parser-btn {
+  background: rgba(88, 166, 255, 0.12);
+  border-color: rgba(88, 166, 255, 0.25);
+  color: #89b4fa;
+}
+
+body.dark .tadaza-parser-btn:hover {
+  background: #388bfd;
+  color: #fff;
+  border-color: #388bfd;
+}
+
+.tadaza-parser-btn.vietqr {
+  background: linear-gradient(135deg, #0068ff 0%, #00a2ff 100%);
+  color: #fff;
+  font-weight: 600;
+  border: none;
+  box-shadow: 0 2px 6px rgba(0, 104, 255, 0.35);
+}
+
+.tadaza-parser-btn.vietqr:hover {
+  opacity: 0.93;
+  transform: translateY(-1px);
+}
+
+body.dark .tadaza-parser-btn.vietqr {
+  background: linear-gradient(135deg, #2563eb 0%, #38bdf8 100%);
+  color: #fff;
+}
+
+/* VietQR Modal */
+#tadaza-vietqr-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(6px);
+  z-index: 999999;
+  align-items: center;
+  justify-content: center;
+}
+
+#tadaza-vietqr-overlay.open {
+  display: flex;
+}
+
+#tadaza-vietqr-modal {
+  width: 440px;
+  max-width: 92vw;
+  max-height: 90vh;
+  background: #ffffff;
+  color: #1e293b;
+  border-radius: 16px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: tadazaModalIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body.dark #tadaza-vietqr-modal {
+  background: #1e1e2e;
+  color: #cdd6f4;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+}
+
+.tadaza-vietqr-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+body.dark .tadaza-vietqr-header {
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+.tadaza-vietqr-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #0068ff;
+}
+
+body.dark .tadaza-vietqr-title {
+  color: #89b4fa;
+}
+
+.tadaza-vietqr-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-y: auto;
+  gap: 16px;
+}
+
+.tadaza-qr-img-wrap {
+  width: 260px;
+  height: 260px;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.tadaza-qr-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.tadaza-vietqr-details {
+  width: 100%;
+  background: #f8fafc;
+  border-radius: 10px;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+
+body.dark .tadaza-vietqr-details {
+  background: #181825;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.tadaza-detail-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.tadaza-detail-label {
+  color: #64748b;
+  font-size: 12px;
+}
+
+body.dark .tadaza-detail-label {
+  color: #a6adc8;
+}
+
+.tadaza-detail-val-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tadaza-detail-val {
+  font-weight: 600;
+  font-family: 'Fira Code', 'JetBrains Mono', monospace;
+}
+
+.tadaza-copy-mini-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #0068ff;
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  transition: background 0.15s;
+}
+
+.tadaza-copy-mini-btn:hover {
+  background: rgba(0, 104, 255, 0.1);
+}
+
+body.dark .tadaza-copy-mini-btn {
+  color: #89b4fa;
+}
+
+body.dark .tadaza-copy-mini-btn:hover {
+  background: rgba(137, 180, 250, 0.15);
+}
+
+.tadaza-vietqr-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+body.dark .tadaza-vietqr-footer {
+  border-top-color: rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.2);
+}

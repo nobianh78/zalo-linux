@@ -1,0 +1,471 @@
+/* --------------------------------------------------------------------------
+   9. Multi-Account Switcher (Profiles System)
+   -------------------------------------------------------------------------- */
+.tadaza-profiles-trigger-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  height: 28px;
+  border-radius: 14px;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid rgba(0, 104, 255, 0.2);
+  background: rgba(0, 104, 255, 0.08);
+  color: #0068ff;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-right: 6px;
+}
+
+body.dark .tadaza-profiles-trigger-btn {
+  border-color: rgba(137, 180, 250, 0.25);
+  background: rgba(137, 180, 250, 0.12);
+  color: #89b4fa;
+}
+
+.tadaza-profiles-trigger-btn:hover {
+  background: rgba(0, 104, 255, 0.16);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 104, 255, 0.15);
+}
+
+body.dark .tadaza-profiles-trigger-btn:hover {
+  background: rgba(137, 180, 250, 0.22);
+  box-shadow: 0 2px 8px rgba(137, 180, 250, 0.2);
+}
+
+.tadaza-profiles-trigger-btn .profile-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 6px #10b981;
+}
+
+/* Multi-Account Modal */
+.tadaza-profiles-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2147483640;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.22s ease;
+}
+
+.tadaza-profiles-modal-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.tadaza-profiles-modal {
+  width: 540px;
+  max-width: 92vw;
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22), 0 0 0 1px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transform: scale(0.96) translateY(10px);
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  color: #1e293b;
+}
+
+body.dark .tadaza-profiles-modal {
+  background: #181c24;
+  color: #f1f5f9;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.tadaza-profiles-modal-overlay.active .tadaza-profiles-modal {
+  transform: scale(1) translateY(0);
+}
+
+.tadaza-profiles-header {
+  padding: 18px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+body.dark .tadaza-profiles-header {
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+.tadaza-profiles-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tadaza-profiles-icon-badge {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #0068ff, #6366f1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+}
+
+.tadaza-profiles-title {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.tadaza-profiles-subtitle {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 3px;
+}
+
+body.dark .tadaza-profiles-subtitle {
+  color: #94a3b8;
+}
+
+.tadaza-profiles-close-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.tadaza-profiles-close-btn:hover {
+  background: rgba(0, 0, 0, 0.06);
+  color: #0f172a;
+}
+
+body.dark .tadaza-profiles-close-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.tadaza-profiles-body {
+  padding: 18px 22px;
+  max-height: 60vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tadaza-profile-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: #f8fafc;
+  border: 1.5px solid rgba(0, 0, 0, 0.06);
+  transition: all 0.18s ease;
+}
+
+body.dark .tadaza-profile-card {
+  background: #1e2430;
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+.tadaza-profile-card.active {
+  border-color: #0068ff;
+  background: rgba(0, 104, 255, 0.04);
+}
+
+body.dark .tadaza-profile-card.active {
+  border-color: #89b4fa;
+  background: rgba(137, 180, 250, 0.08);
+}
+
+.tadaza-profile-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.tadaza-profile-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+body.dark .tadaza-profile-avatar {
+  border-color: #2a3242;
+}
+
+.tadaza-profile-avatar-fallback {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25);
+  flex-shrink: 0;
+}
+
+.tadaza-profile-details {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.tadaza-profile-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tadaza-profile-name {
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tadaza-profile-badge-active {
+  font-size: 10px;
+  font-weight: 700;
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.12);
+  padding: 2px 7px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tadaza-profile-sub {
+  font-size: 11.5px;
+  color: #64748b;
+}
+
+body.dark .tadaza-profile-sub {
+  color: #94a3b8;
+}
+
+.tadaza-profile-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.tadaza-btn-action {
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.15s ease;
+}
+
+.tadaza-btn-switch {
+  background: #0068ff;
+  color: #ffffff;
+}
+
+.tadaza-btn-switch:hover {
+  background: #0056d6;
+  transform: translateY(-1px);
+}
+
+body.dark .tadaza-btn-switch {
+  background: #3b82f6;
+}
+
+body.dark .tadaza-btn-switch:hover {
+  background: #2563eb;
+}
+
+.tadaza-btn-dual {
+  background: rgba(0, 104, 255, 0.1);
+  color: #0068ff;
+}
+
+body.dark .tadaza-btn-dual {
+  background: rgba(137, 180, 250, 0.15);
+  color: #89b4fa;
+}
+
+.tadaza-btn-dual:hover {
+  background: rgba(0, 104, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+body.dark .tadaza-btn-dual:hover {
+  background: rgba(137, 180, 250, 0.25);
+}
+
+.tadaza-btn-icon-only {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #94a3b8;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.tadaza-btn-icon-only:hover {
+  background: rgba(0, 0, 0, 0.06);
+  color: #475569;
+}
+
+body.dark .tadaza-btn-icon-only:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #cbd5e1;
+}
+
+.tadaza-btn-icon-only.danger:hover {
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+}
+
+/* Add profile area */
+.tadaza-add-profile-wrap {
+  margin-top: 6px;
+  border-top: 1px dashed rgba(0, 0, 0, 0.1);
+  padding-top: 14px;
+}
+
+body.dark .tadaza-add-profile-wrap {
+  border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+.tadaza-btn-add-profile {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1.5px dashed rgba(0, 104, 255, 0.35);
+  background: rgba(0, 104, 255, 0.03);
+  color: #0068ff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.18s;
+}
+
+body.dark .tadaza-btn-add-profile {
+  border-color: rgba(137, 180, 250, 0.35);
+  background: rgba(137, 180, 250, 0.05);
+  color: #89b4fa;
+}
+
+.tadaza-btn-add-profile:hover {
+  background: rgba(0, 104, 255, 0.08);
+  border-color: #0068ff;
+}
+
+body.dark .tadaza-btn-add-profile:hover {
+  background: rgba(137, 180, 250, 0.12);
+  border-color: #89b4fa;
+}
+
+.tadaza-new-profile-form {
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 12px;
+  background: #f1f5f9;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+body.dark .tadaza-new-profile-form {
+  background: #1e2430;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.tadaza-new-profile-form.active {
+  display: flex;
+}
+
+.tadaza-new-profile-input {
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  background: #ffffff;
+  color: inherit;
+  font-size: 13px;
+  outline: none;
+}
+
+body.dark .tadaza-new-profile-input {
+  background: #0f141c;
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.tadaza-new-profile-input:focus {
+  border-color: #0068ff;
+  box-shadow: 0 0 0 2px rgba(0, 104, 255, 0.15);
+}
+
+body.dark .tadaza-new-profile-input:focus {
+  border-color: #89b4fa;
+  box-shadow: 0 0 0 2px rgba(137, 180, 250, 0.2);
+}
+
+.tadaza-new-profile-form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.tadaza-profiles-footer {
+  padding: 12px 22px;
+  background: #f8fafc;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  font-size: 11.5px;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+body.dark .tadaza-profiles-footer {
+  background: #13171f;
+  border-top-color: rgba(255, 255, 255, 0.06);
+  color: #94a3b8;
+}

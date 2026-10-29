@@ -1,0 +1,45 @@
+/* ==========================================================================
+   TADaZa Extension Core Styles for Zalo PC Linux
+   ========================================================================== */
+
+/* Google Fonts Import for Vietnamese & Crisp Typography */
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Fira+Code:wght@400;500&family=Inter:wght@400;500;600;700&family=Open+Sans:wght@400;600&family=Roboto:wght@400;500;700&display=swap');
+
+/* --------------------------------------------------------------------------
+   1. Deep Dark Mode Enhancement (Safe Token Override)
+   -------------------------------------------------------------------------- */
+body.dark.tadaza-deep-dark {
+  --surface-background: #0d1117 !important;
+  --surface-background-subtle: #161b22 !important;
+  --surface-background-overlay: #161b22 !important;
+  --surface-alt: #161b22 !important;
+  --layer-background: #161b22 !important;
+  --layer-background-subtle: #21262d !important;
+  --layer-background-hover: #30363d !important;
+  --layer-background-selected: #1f344d !important;
+  --bg-default: #0d1117 !important;
+  --title-bar: #0d1117 !important;
+  --divider: #30363d !important;
+  --divider-bold: #484f58 !important;
+  --border-subtle: #30363d !important;
+  --border-bold: #484f58 !important;
+  --border-hover: #58a6ff !important;
+  --text-primary: #e6edf3 !important;
+  --text-secondary: #8b949e !important;
+}
+
+/* Dark Mode Scrollbars */
+body.dark ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+body.dark ::-webkit-scrollbar-track {
+  background: #0d1117;
+}
+body.dark ::-webkit-scrollbar-thumb {
+  background: #30363d;
+  border-radius: 4px;
+}
+body.dark ::-webkit-scrollbar-thumb:hover {
+  background: #484f58;
+}

@@ -1,0 +1,481 @@
+/* --------------------------------------------------------------------------
+   4. TADaZa UI Components (Left Sidebar Navigation Item & Drawer)
+   -------------------------------------------------------------------------- */
+
+/* Left Sidebar Navigation Item */
+.tadaza-nav-item {
+  width: 100%;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  user-select: none;
+  color: var(--text-on-color, #c9d1d9);
+  transition: all 0.18s ease;
+  box-sizing: border-box;
+}
+
+.tadaza-nav-item:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.tadaza-nav-item.active {
+  color: #0068ff;
+  background: rgba(0, 104, 255, 0.18);
+}
+
+.tadaza-nav-item.active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 10px;
+  bottom: 10px;
+  width: 3.5px;
+  background: #0068ff;
+  border-radius: 0 3px 3px 0;
+}
+
+body.dark .tadaza-nav-item.active {
+  color: #58a6ff;
+  background: rgba(31, 111, 235, 0.25);
+}
+
+body.dark .tadaza-nav-item.active::before {
+  background: #58a6ff;
+}
+
+.tadaza-nav-icon {
+  width: 24px;
+  height: 24px;
+  stroke: currentColor;
+  transition: transform 0.18s ease;
+}
+
+.tadaza-nav-item:hover .tadaza-nav-icon {
+  transform: scale(1.12);
+}
+
+/* Overlay Backdrop - Closed by default */
+#tadaza-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(2px);
+  z-index: 999998;
+}
+
+#tadaza-overlay.open {
+  display: block;
+}
+
+/* Main Drawer Panel - Closed by default, zero interference */
+#tadaza-drawer {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 68px;
+  width: 380px;
+  max-width: calc(100vw - 68px);
+  height: 100vh;
+  z-index: 999999;
+  background: #ffffff;
+  color: #1f2328;
+  box-shadow: 8px 0 32px rgba(0, 0, 0, 0.25);
+  flex-direction: column;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
+  animation: tadazaSlideIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body.dark #tadaza-drawer {
+  background: #161b22;
+  color: #e6edf3;
+  box-shadow: 8px 0 32px rgba(0, 0, 0, 0.6);
+  border-right: 1px solid #30363d;
+}
+
+#tadaza-drawer.open {
+  display: flex;
+}
+
+@keyframes tadazaSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Drawer Header */
+.tadaza-header {
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+body.dark .tadaza-header {
+  border-bottom: 1px solid #30363d;
+}
+
+.tadaza-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tadaza-badge {
+  background: linear-gradient(135deg, #0068ff, #0045ad);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  text-transform: uppercase;
+}
+
+.tadaza-title {
+  font-size: 17px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.tadaza-close-btn {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: inherit;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.tadaza-close-btn:hover {
+  background: rgba(128, 128, 128, 0.15);
+}
+
+/* Tab Navigation */
+.tadaza-tabs {
+  display: flex;
+  background: rgba(128, 128, 128, 0.06);
+  padding: 6px;
+  gap: 4px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+body.dark .tadaza-tabs {
+  background: #0d1117;
+  border-bottom: 1px solid #21262d;
+}
+
+.tadaza-tab-btn {
+  flex: 1;
+  padding: 10px 4px;
+  border: none;
+  background: transparent;
+  color: #57606a;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.tadaza-tab-btn svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  transition: transform 0.15s ease;
+}
+
+.tadaza-tab-btn:hover svg {
+  transform: translateY(-1px);
+}
+
+body.dark .tadaza-tab-btn {
+  color: #8b949e;
+}
+
+.tadaza-tab-btn.active {
+  background: #ffffff;
+  color: #0068ff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+body.dark .tadaza-tab-btn.active {
+  background: #21262d;
+  color: #58a6ff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Tab Content */
+.tadaza-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.tadaza-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tadaza-section-title {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #0068ff;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+body.dark .tadaza-section-title {
+  color: #58a6ff;
+}
+
+.tadaza-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  background: rgba(128, 128, 128, 0.05);
+  border-radius: 10px;
+  border: 1px solid rgba(128, 128, 128, 0.1);
+}
+
+body.dark .tadaza-item {
+  background: #21262d;
+  border: 1px solid #30363d;
+}
+
+.tadaza-item-col {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+}
+
+.tadaza-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: 80%;
+}
+
+.tadaza-item-title {
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.tadaza-item-desc {
+  font-size: 11.5px;
+  color: #57606a;
+}
+
+body.dark .tadaza-item-desc {
+  color: #8b949e;
+}
+
+/* Custom iOS / Fluent Toggle Switch */
+.tadaza-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.tadaza-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.tadaza-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .25s;
+  border-radius: 24px;
+}
+
+body.dark .tadaza-slider {
+  background-color: #30363d;
+}
+
+.tadaza-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .25s;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.tadaza-switch input:checked + .tadaza-slider {
+  background-color: #0068ff;
+}
+
+body.dark .tadaza-switch input:checked + .tadaza-slider {
+  background-color: #1f6feb;
+}
+
+.tadaza-switch input:checked + .tadaza-slider:before {
+  transform: translateX(20px);
+}
+
+/* Disabled Switch & Sub-Items */
+.tadaza-item.tadaza-item-disabled {
+  opacity: 0.45;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.tadaza-switch input:disabled + .tadaza-slider {
+  background-color: rgba(128, 128, 128, 0.18) !important;
+  cursor: not-allowed !important;
+  opacity: 0.5 !important;
+}
+
+body.dark .tadaza-switch input:disabled + .tadaza-slider {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.tadaza-switch input:disabled + .tadaza-slider:before {
+  background-color: #999999 !important;
+  box-shadow: none !important;
+  transform: translateX(0) !important;
+}
+
+/* Theme 3-State Buttons */
+.tadaza-btn-group {
+  display: flex;
+  background: rgba(128, 128, 128, 0.1);
+  padding: 4px;
+  border-radius: 8px;
+  gap: 4px;
+  width: 100%;
+}
+
+body.dark .tadaza-btn-group {
+  background: #0d1117;
+}
+
+.tadaza-btn-choice {
+  flex: 1;
+  padding: 8px 10px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.15s;
+}
+
+.tadaza-btn-choice svg {
+  stroke: currentColor;
+  flex-shrink: 0;
+}
+
+.tadaza-btn-choice.active {
+  background: #0068ff;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* Sliders & Inputs */
+.tadaza-range-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.tadaza-range {
+  flex: 1;
+  accent-color: #0068ff;
+}
+
+.tadaza-range-val {
+  font-size: 12px;
+  font-weight: 600;
+  width: 36px;
+  text-align: right;
+}
+
+.tadaza-select {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(128, 128, 128, 0.2);
+  background: #ffffff;
+  color: inherit;
+  font-size: 13px;
+  font-family: inherit;
+}
+
+body.dark .tadaza-select {
+  background: #161b22;
+  border: 1px solid #30363d;
+}
+
+/* Secondary Button */
+.tadaza-action-btn {
+  padding: 8px 14px;
+  background: #0068ff;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: opacity 0.15s;
+}
+
+.tadaza-action-btn:hover {
+  opacity: 0.9;
+}
+
+.tadaza-action-btn.secondary {
+  background: rgba(128, 128, 128, 0.15);
+  color: inherit;
+}

@@ -1,0 +1,112 @@
+/* --------------------------------------------------------------------------
+   2. Privacy & Anti-Peeping (Blur on hover)
+   -------------------------------------------------------------------------- */
+/* Message text blur (chat bubbles & preview in conversation thread list) */
+body.tadaza-blur-msg-active [class*="message-content"],
+body.tadaza-blur-msg-active [class*="msg-content"],
+body.tadaza-blur-msg-active [class*="bubble-content"],
+body.tadaza-blur-msg-active .text-message__container,
+body.tadaza-blur-msg-active .conv-message,
+body.tadaza-blur-msg-active [class*="conv-message"],
+body.tadaza-blur-msg-active [class*="z-conv-message"],
+body.tadaza-blur-msg-active .conv-item-message,
+body.tadaza-blur-msg-active .z-conv-message__preview-message {
+  filter: blur(6px) !important;
+  transition: filter 0.18s ease-in-out !important;
+}
+
+body.tadaza-blur-msg-active [class*="message-content"]:hover,
+body.tadaza-blur-msg-active [class*="msg-content"]:hover,
+body.tadaza-blur-msg-active [class*="bubble-content"]:hover,
+body.tadaza-blur-msg-active .text-message__container:hover,
+body.tadaza-blur-msg-active .conv-message:hover,
+body.tadaza-blur-msg-active [class*="conv-message"]:hover,
+body.tadaza-blur-msg-active [class*="z-conv-message"]:hover,
+body.tadaza-blur-msg-active .conv-item:hover .conv-message,
+body.tadaza-blur-msg-active .conv-item:hover [class*="conv-message"],
+body.tadaza-blur-msg-active .conv-item:hover [class*="z-conv-message"] {
+  filter: blur(0px) !important;
+}
+
+/* Media blur */
+body.tadaza-blur-media-active [class*="message-item"] img,
+body.tadaza-blur-media-active [class*="msg-item"] img,
+body.tadaza-blur-media-active [class*="chat-message"] img,
+body.tadaza-blur-media-active [class*="message-item"] video,
+body.tadaza-blur-media-active [class*="msg-item"] video,
+body.tadaza-blur-media-active .chat-message-picture__photo {
+  filter: blur(14px) !important;
+  transition: filter 0.2s ease-in-out !important;
+}
+
+body.tadaza-blur-media-active [class*="message-item"] img:hover,
+body.tadaza-blur-media-active [class*="msg-item"] img:hover,
+body.tadaza-blur-media-active [class*="chat-message"] img:hover,
+body.tadaza-blur-media-active [class*="message-item"] video:hover,
+body.tadaza-blur-media-active [class*="msg-item"] video:hover,
+body.tadaza-blur-media-active .chat-message-picture__photo:hover {
+  filter: blur(0px) !important;
+}
+
+/* Name & avatar blur (chat header, conversation list & input placeholder) */
+body.tadaza-blur-names-active .header-title,
+body.tadaza-blur-names-active [class*="header-title"],
+body.tadaza-blur-names-active .main-title-container,
+body.tadaza-blur-names-active .header-conv-name,
+body.tadaza-blur-names-active .header-info__name,
+body.tadaza-blur-names-active .conv-item-title__name,
+body.tadaza-blur-names-active [class*="conv-item-title"],
+body.tadaza-blur-names-active [class*="conv-title"],
+body.tadaza-blur-names-active [class*="conv-name"],
+body.tadaza-blur-names-active .conv-title-name,
+body.tadaza-blur-names-active .chat-data-conv-item-name,
+body.tadaza-blur-names-active .pin_conv-name,
+body.tadaza-blur-names-active [class*="avatar"] img,
+body.tadaza-blur-names-active .chat-item__avatar,
+body.tadaza-blur-names-active .conv-item__avatar,
+body.tadaza-blur-names-active .header-info__ava,
+body.tadaza-blur-names-active [class*="rtf-placeholder"],
+body.tadaza-blur-names-active #input_chat::placeholder {
+  filter: blur(6px) !important;
+  transition: filter 0.18s ease-in-out !important;
+}
+
+body.tadaza-blur-names-active .header-title:hover,
+body.tadaza-blur-names-active [class*="header-title"]:hover,
+body.tadaza-blur-names-active .main-title-container:hover,
+body.tadaza-blur-names-active .header-conv-name:hover,
+body.tadaza-blur-names-active .header-info__name:hover,
+body.tadaza-blur-names-active .conv-item-title__name:hover,
+body.tadaza-blur-names-active [class*="conv-item-title"]:hover,
+body.tadaza-blur-names-active [class*="conv-title"]:hover,
+body.tadaza-blur-names-active [class*="conv-name"]:hover,
+body.tadaza-blur-names-active .conv-title-name:hover,
+body.tadaza-blur-names-active .conv-item:hover [class*="conv-item-title"],
+body.tadaza-blur-names-active .conv-item:hover [class*="conv-title"],
+body.tadaza-blur-names-active .conv-item:hover [class*="conv-name"],
+body.tadaza-blur-names-active .conv-item:hover [class*="avatar"] img,
+body.tadaza-blur-names-active [class*="avatar"] img:hover,
+body.tadaza-blur-names-active .chat-item__avatar:hover,
+body.tadaza-blur-names-active .conv-item__avatar:hover,
+body.tadaza-blur-names-active .header-info__ava:hover,
+body.tadaza-blur-names-active [class*="rtf-placeholder"]:hover,
+body.tadaza-blur-names-active #input_chat:focus::placeholder {
+  filter: blur(0px) !important;
+}
+
+/* --------------------------------------------------------------------------
+   3. Custom Chat Wallpaper Background Layer
+   -------------------------------------------------------------------------- */
+#tadaza-wallpaper-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  z-index: 0;
+  transition: opacity 0.3s ease;
+}
