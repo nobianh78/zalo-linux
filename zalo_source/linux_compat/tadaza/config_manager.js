@@ -28,9 +28,6 @@ const DEFAULT_CONFIG = {
     enabled: true,
     target_lang: 'vi',
     show_button_on_hover: true
-  },
-  features: {
-    extended_reactions: true
   }
 };
 
@@ -59,8 +56,7 @@ class ConfigManager {
         this.config = {
           theme: { ...DEFAULT_CONFIG.theme, ...(parsed.theme || {}) },
           privacy: { ...DEFAULT_CONFIG.privacy, ...(parsed.privacy || {}) },
-          translate: { ...DEFAULT_CONFIG.translate, ...(parsed.translate || {}) },
-          features: { ...DEFAULT_CONFIG.features, ...(parsed.features || {}) }
+          translate: { ...DEFAULT_CONFIG.translate, ...(parsed.translate || {}) }
         };
       } else {
         this.save();
@@ -77,8 +73,7 @@ class ConfigManager {
       this.config = {
         theme: { ...this.config.theme, ...(newConfig.theme || {}) },
         privacy: { ...this.config.privacy, ...(newConfig.privacy || {}) },
-        translate: { ...this.config.translate, ...(newConfig.translate || {}) },
-        features: { ...this.config.features, ...(newConfig.features || {}) }
+        translate: { ...this.config.translate, ...(newConfig.translate || {}) }
       };
     }
     try {

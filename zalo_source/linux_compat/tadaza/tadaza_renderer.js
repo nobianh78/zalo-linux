@@ -53,24 +53,8 @@
       target_lang: 'vi',
       show_button_on_hover: true
     },
-    features: {
-      extended_reactions: true
-    },
     _systemIsDark: false
   };
-
-  const EMOJI_LIST = [
-    '👍', '❤️', '😂', '😮', '😭', '😡', '🙏', '🔥',
-    '👏', '🎉', '🥰', '😍', '🤩', '😘', '😋', '😎',
-    '🤔', '🤫', '🤭', '😏', '🙄', '😬', '🤥', '😌',
-    '😴', '😷', '🤕', '🤮', '🤧', '🥵', '🥶', '🤯',
-    '🥳', '🥺', '😱', '😈', '💀', '💩', '👻', '🤖',
-    '💖', '💕', '💔', '✨', '🌟', '💡', '🚀', '🎯',
-    '☕', '🍻', '💯', '✔️', '❌', '⚠️', '⭐', '🍀',
-    '🤝', '✌️', '🤞', '🤟', '🤘', '👌', '🤌', '💪',
-    '👈', '👉', '👆', '👇', '✋', '👋', '🤙', '🎈',
-    '🎁', '🎂', '🍕', '🍔', '🍦', '🍩', '🥑', '🍎'
-  ];
 
   const FONT_OPTIONS = [
     { label: 'Mặc định Zalo', value: 'Default' },
@@ -360,7 +344,12 @@
             box.innerHTML = `
               <div class="trans-header">
                 <span>Dịch sang [${res.targetLang || 'vi'}]</span>
-                <span style="cursor:pointer;" class="trans-close">✕</span>
+                <span style="cursor:pointer; display:flex; align-items:center;" class="trans-close" title="Đóng">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </span>
               </div>
               <div class="trans-body">${escapeHtml(res.translated)}</div>
               <div style="margin-top:6px; font-size:11px; display:flex; gap:12px;">
@@ -553,16 +542,17 @@
     }
   }
 
-  let activeTab = 'theme'; // 'theme' | 'privacy' | 'translate' | 'features'
+  let activeTab = 'theme'; // 'theme' | 'privacy' | 'translate'
 
   function renderDrawerContent() {
     const drawer = document.getElementById('tadaza-drawer');
     if (!drawer) return;
 
+    if (activeTab === 'features') activeTab = 'theme';
+
     const t = currentConfig.theme;
     const p = currentConfig.privacy;
     const tr = currentConfig.translate;
-    const f = currentConfig.features;
 
     drawer.innerHTML = `
       <div class="tadaza-header">
@@ -570,25 +560,41 @@
           <span class="tadaza-badge">LINUX</span>
           <h2 class="tadaza-title">TADaZa Control Center</h2>
         </div>
-        <button class="tadaza-close-btn" id="tadaza-close">✕</button>
+        <button class="tadaza-close-btn" id="tadaza-close" title="Đóng">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
       </div>
 
       <div class="tadaza-tabs">
         <button class="tadaza-tab-btn ${activeTab === 'theme' ? 'active' : ''}" data-tab="theme">
-          <span>🎨</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle>
+            <circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle>
+            <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle>
+            <circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle>
+            <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"></path>
+          </svg>
           <span>Giao diện</span>
         </button>
         <button class="tadaza-tab-btn ${activeTab === 'privacy' ? 'active' : ''}" data-tab="privacy">
-          <span>🔒</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
           <span>Riêng tư</span>
         </button>
         <button class="tadaza-tab-btn ${activeTab === 'translate' ? 'active' : ''}" data-tab="translate">
-          <span>🌐</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 8l6 6"></path>
+            <path d="M4 14l6-6 2-3"></path>
+            <path d="M2 5h12"></path>
+            <path d="M7 2h1"></path>
+            <path d="M22 22l-5-10-5 10"></path>
+            <path d="M14 18h6"></path>
+          </svg>
           <span>Dịch thuật</span>
-        </button>
-        <button class="tadaza-tab-btn ${activeTab === 'features' ? 'active' : ''}" data-tab="features">
-          <span>😀</span>
-          <span>Tiện ích</span>
         </button>
       </div>
 
@@ -629,11 +635,36 @@
           <h3 class="tadaza-section-title">Chế độ hiển thị (Theme)</h3>
           <div class="tadaza-item tadaza-item-col">
             <div class="tadaza-btn-group" id="group-theme-mode">
-              <button class="tadaza-btn-choice ${t.mode === 'light' ? 'active' : ''}" data-mode="light">☀️ Sáng</button>
-              <button class="tadaza-btn-choice ${t.mode === 'dark' ? 'active' : ''}" data-mode="dark">🌙 Tối (Dark)</button>
-              <button class="tadaza-btn-choice ${t.mode === 'system' ? 'active' : ''}" data-mode="system">💻 Hệ thống</button>
+              <button class="tadaza-btn-choice ${t.mode === 'light' ? 'active' : ''}" data-mode="light">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="5"></circle>
+                  <line x1="12" y1="1" x2="12" y2="3"></line>
+                  <line x1="12" y1="21" x2="12" y2="23"></line>
+                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                  <line x1="1" y1="12" x2="3" y2="12"></line>
+                  <line x1="21" y1="12" x2="23" y2="12"></line>
+                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+                <span>Sáng</span>
+              </button>
+              <button class="tadaza-btn-choice ${t.mode === 'dark' ? 'active' : ''}" data-mode="dark">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+                <span>Tối (Dark)</span>
+              </button>
+              <button class="tadaza-btn-choice ${t.mode === 'system' ? 'active' : ''}" data-mode="system">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                  <line x1="8" y1="21" x2="16" y2="21"></line>
+                  <line x1="12" y1="17" x2="12" y2="21"></line>
+                </svg>
+                <span>Hệ thống</span>
+              </button>
             </div>
-            <div class="tadaza-item-desc">Đồng bộ tự động theo theme tối của GNOME/KDE hoặc chọn màu tối chuyên sâu.</div>
+            <div class="tadaza-item-desc">Đồng bộ tự động theo theme tối của hệ điều hành hoặc chọn màu tối chuyên sâu.</div>
           </div>
         </div>
 
@@ -665,7 +696,14 @@
           <h3 class="tadaza-section-title">Hình nền cuộc trò chuyện</h3>
           <div class="tadaza-item tadaza-item-col">
             <div style="display:flex; gap:8px;">
-              <button class="tadaza-action-btn" id="btn-choose-wallpaper">🖼️ Chọn ảnh nền từ máy</button>
+              <button class="tadaza-action-btn" id="btn-choose-wallpaper">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                  <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                  <polyline points="21 15 16 10 5 21"></polyline>
+                </svg>
+                <span>Chọn ảnh nền từ máy</span>
+              </button>
               ${t.wallpaper ? '<button class="tadaza-action-btn secondary" id="btn-clear-wallpaper">Xóa nền</button>' : ''}
             </div>
             ${t.wallpaper ? `
@@ -796,28 +834,10 @@
             <span class="tadaza-item-title">Cách sử dụng:</span>
             <div class="tadaza-item-desc">
               1. Rê chuột vào bất kỳ tin nhắn nào trong cuộc trò chuyện.<br>
-              2. Nhấn vào biểu tượng 🌐 hiển thị cạnh nội dung.<br>
+              2. Nhấn vào nút dịch thuật xuất hiện ở góc tin nhắn.<br>
               3. Bản dịch sẽ xuất hiện trực tiếp ngay dưới tin nhắn.
             </div>
           </div>
-        </div>
-      `;
-    }
-
-    if (activeTab === 'features') {
-      return `
-        <div class="tadaza-section">
-          <h3 class="tadaza-section-title">Kho Biểu cảm & Emoji nhanh</h3>
-          <div class="tadaza-item-desc" style="line-height:1.5; margin-bottom:12px;">
-            <div style="padding:8px 10px; background:rgba(0,104,255,0.08); border-left:3px solid #0068ff; border-radius:4px; margin-bottom:10px; font-size:12px;">
-              ℹ️ <strong>Lưu ý về thả cảm xúc tin nhắn:</strong> Máy chủ Zalo chỉ hỗ trợ 6 biểu tượng chuẩn (👍 ❤️ 😆 😲 😭 😡) hiển thị cố định trên tin nhắn.
-            </div>
-            Nhấp vào bất kỳ emoji bên dưới để chèn nhanh vào ô nhập tin nhắn:
-          </div>
-          <div class="tadaza-emoji-grid">
-            ${EMOJI_LIST.map(emoji => `<div class="tadaza-emoji-item" data-emoji="${emoji}">${emoji}</div>`).join('')}
-          </div>
-          <div id="tadaza-emoji-copied" style="font-size:12px; color:#0068ff; font-weight:600; text-align:center; height:18px; margin-top:8px;"></div>
         </div>
       `;
     }
@@ -964,37 +984,6 @@
       if (targetLang) {
         targetLang.addEventListener('change', () => {
           saveAndApply({ translate: { ...currentConfig.translate, target_lang: targetLang.value } });
-        });
-      }
-    }
-
-    if (activeTab === 'features') {
-      const grid = drawer.querySelector('.tadaza-emoji-grid');
-      const feedback = drawer.querySelector('#tadaza-emoji-copied');
-      if (grid) {
-        grid.querySelectorAll('.tadaza-emoji-item').forEach(item => {
-          item.addEventListener('click', () => {
-            const emoji = item.dataset.emoji;
-            navigator.clipboard.writeText(emoji).catch(() => {});
-
-            // Focus and insert directly into chat input if open
-            const input = document.querySelector('#input_chat, [contenteditable="true"], .chat-input__content');
-            if (input) {
-              if (input.isContentEditable) {
-                input.focus();
-                document.execCommand('insertText', false, emoji);
-              } else {
-                input.value += emoji;
-              }
-            }
-
-            if (feedback) {
-              feedback.textContent = `Đã chèn: ${emoji}`;
-              setTimeout(() => {
-                if (feedback) feedback.textContent = '';
-              }, 1500);
-            }
-          });
         });
       }
     }
