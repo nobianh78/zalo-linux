@@ -15,9 +15,19 @@ Bản port chạy Native Zalo PC trên Linux (sử dụng Electron + Native Modu
   - Hỗ trợ System Tray và Native OS Notifications.
   - Cửa sổ Photo Viewer frameless, đồng bộ giao diện hệ thống.
 
-## Cài đặt & Chạy
+## Cài đặt nhanh (1 dòng lệnh) ⚡
 
-### Cách 1: Chạy từ mã nguồn
+Không cần clone mã nguồn hay cài đặt Node.js/npm, chỉ cần chạy đúng 1 dòng lệnh sau vào Terminal:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/nobianh78/zalo-linux/main/install.sh | sudo bash
+```
+
+---
+
+## Cài đặt thủ công & Phát triển
+
+### Cách 1: Chạy trực tiếp từ mã nguồn
 ```bash
 # Cài đặt dependencies
 npm install
