@@ -733,35 +733,35 @@
             </label>
           </div>
 
-          <div class="tadaza-item">
+          <div class="tadaza-item sub-item ${!p.anti_peeping ? 'tadaza-item-disabled' : ''}">
             <div class="tadaza-item-info">
               <span class="tadaza-item-title">Làm mờ tin nhắn văn bản</span>
-              <span class="tadaza-item-desc">Làm mờ toàn bộ nội dung chat</span>
+              <span class="tadaza-item-desc">Làm mờ nội dung chat & tin nhắn xem trước</span>
             </div>
             <label class="tadaza-switch">
-              <input type="checkbox" id="toggle-blur-messages" ${p.blur_messages ? 'checked' : ''} ${!p.anti_peeping ? 'disabled' : ''}>
+              <input type="checkbox" id="toggle-blur-messages" ${p.anti_peeping && p.blur_messages ? 'checked' : ''} ${!p.anti_peeping ? 'disabled' : ''}>
               <span class="tadaza-slider"></span>
             </label>
           </div>
 
-          <div class="tadaza-item">
+          <div class="tadaza-item sub-item ${!p.anti_peeping ? 'tadaza-item-disabled' : ''}">
             <div class="tadaza-item-info">
               <span class="tadaza-item-title">Làm mờ hình ảnh & video</span>
               <span class="tadaza-item-desc">Bảo vệ hình ảnh nhạy cảm khi ở nơi công cộng</span>
             </div>
             <label class="tadaza-switch">
-              <input type="checkbox" id="toggle-blur-media" ${p.blur_media ? 'checked' : ''} ${!p.anti_peeping ? 'disabled' : ''}>
+              <input type="checkbox" id="toggle-blur-media" ${p.anti_peeping && p.blur_media ? 'checked' : ''} ${!p.anti_peeping ? 'disabled' : ''}>
               <span class="tadaza-slider"></span>
             </label>
           </div>
 
-          <div class="tadaza-item">
+          <div class="tadaza-item sub-item ${!p.anti_peeping ? 'tadaza-item-disabled' : ''}">
             <div class="tadaza-item-info">
               <span class="tadaza-item-title">Làm mờ tên & Avatar người gửi</span>
-              <span class="tadaza-item-desc">Giữ kín danh tính người đang nhắn</span>
+              <span class="tadaza-item-desc">Giữ kín danh tính người đang trò chuyện</span>
             </div>
             <label class="tadaza-switch">
-              <input type="checkbox" id="toggle-blur-names" ${p.blur_names ? 'checked' : ''} ${!p.anti_peeping ? 'disabled' : ''}>
+              <input type="checkbox" id="toggle-blur-names" ${p.anti_peeping && p.blur_names ? 'checked' : ''} ${!p.anti_peeping ? 'disabled' : ''}>
               <span class="tadaza-slider"></span>
             </label>
           </div>
@@ -927,28 +927,51 @@
       if (antiPeeping) {
         antiPeeping.addEventListener('change', () => {
           const enabled = antiPeeping.checked;
-          if (blurMsg) blurMsg.disabled = !enabled;
-          if (blurMedia) blurMedia.disabled = !enabled;
-          if (blurNames) blurNames.disabled = !enabled;
-          saveAndApply({ privacy: { ...currentConfig.privacy, anti_peeping: enabled } });
+          currentConfig.privacy.anti_peeping = enabled;
+          saveAndApply({ privacy: currentConfig.privacy });
+
+          const subItems = drawer.querySelectorAll('.tadaza-item.sub-item');
+          subItems.forEach(item => {
+            if (enabled) {
+              item.classList.remove('tadaza-item-disabled');
+            } else {
+              item.classList.add('tadaza-item-disabled');
+            }
+          });
+
+          if (blurMsg) {
+            blurMsg.disabled = !enabled;
+            blurMsg.checked = enabled && !!currentConfig.privacy.blur_messages;
+          }
+          if (blurMedia) {
+            blurMedia.disabled = !enabled;
+            blurMedia.checked = enabled && !!currentConfig.privacy.blur_media;
+          }
+          if (blurNames) {
+            blurNames.disabled = !enabled;
+            blurNames.checked = enabled && !!currentConfig.privacy.blur_names;
+          }
         });
       }
 
       if (blurMsg) {
         blurMsg.addEventListener('change', () => {
-          saveAndApply({ privacy: { ...currentConfig.privacy, blur_messages: blurMsg.checked } });
+          currentConfig.privacy.blur_messages = blurMsg.checked;
+          saveAndApply({ privacy: currentConfig.privacy });
         });
       }
 
       if (blurMedia) {
         blurMedia.addEventListener('change', () => {
-          saveAndApply({ privacy: { ...currentConfig.privacy, blur_media: blurMedia.checked } });
+          currentConfig.privacy.blur_media = blurMedia.checked;
+          saveAndApply({ privacy: currentConfig.privacy });
         });
       }
 
       if (blurNames) {
         blurNames.addEventListener('change', () => {
-          saveAndApply({ privacy: { ...currentConfig.privacy, blur_names: blurNames.checked } });
+          currentConfig.privacy.blur_names = blurNames.checked;
+          saveAndApply({ privacy: currentConfig.privacy });
         });
       }
 

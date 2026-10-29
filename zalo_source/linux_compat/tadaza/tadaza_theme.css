@@ -47,24 +47,40 @@ body.dark ::-webkit-scrollbar-thumb:hover {
 /* --------------------------------------------------------------------------
    2. Privacy & Anti-Peeping (Blur on hover)
    -------------------------------------------------------------------------- */
+/* Message text blur (chat bubbles & preview in conversation thread list) */
 body.tadaza-blur-msg-active [class*="message-content"],
 body.tadaza-blur-msg-active [class*="msg-content"],
-body.tadaza-blur-msg-active [class*="bubble-content"] {
+body.tadaza-blur-msg-active [class*="bubble-content"],
+body.tadaza-blur-msg-active .text-message__container,
+body.tadaza-blur-msg-active .conv-message,
+body.tadaza-blur-msg-active [class*="conv-message"],
+body.tadaza-blur-msg-active [class*="z-conv-message"],
+body.tadaza-blur-msg-active .conv-item-message,
+body.tadaza-blur-msg-active .z-conv-message__preview-message {
   filter: blur(6px) !important;
   transition: filter 0.18s ease-in-out !important;
 }
 
 body.tadaza-blur-msg-active [class*="message-content"]:hover,
 body.tadaza-blur-msg-active [class*="msg-content"]:hover,
-body.tadaza-blur-msg-active [class*="bubble-content"]:hover {
+body.tadaza-blur-msg-active [class*="bubble-content"]:hover,
+body.tadaza-blur-msg-active .text-message__container:hover,
+body.tadaza-blur-msg-active .conv-message:hover,
+body.tadaza-blur-msg-active [class*="conv-message"]:hover,
+body.tadaza-blur-msg-active [class*="z-conv-message"]:hover,
+body.tadaza-blur-msg-active .conv-item:hover .conv-message,
+body.tadaza-blur-msg-active .conv-item:hover [class*="conv-message"],
+body.tadaza-blur-msg-active .conv-item:hover [class*="z-conv-message"] {
   filter: blur(0px) !important;
 }
 
+/* Media blur */
 body.tadaza-blur-media-active [class*="message-item"] img,
 body.tadaza-blur-media-active [class*="msg-item"] img,
 body.tadaza-blur-media-active [class*="chat-message"] img,
 body.tadaza-blur-media-active [class*="message-item"] video,
-body.tadaza-blur-media-active [class*="msg-item"] video {
+body.tadaza-blur-media-active [class*="msg-item"] video,
+body.tadaza-blur-media-active .chat-message-picture__photo {
   filter: blur(14px) !important;
   transition: filter 0.2s ease-in-out !important;
 }
@@ -73,22 +89,54 @@ body.tadaza-blur-media-active [class*="message-item"] img:hover,
 body.tadaza-blur-media-active [class*="msg-item"] img:hover,
 body.tadaza-blur-media-active [class*="chat-message"] img:hover,
 body.tadaza-blur-media-active [class*="message-item"] video:hover,
-body.tadaza-blur-media-active [class*="msg-item"] video:hover {
+body.tadaza-blur-media-active [class*="msg-item"] video:hover,
+body.tadaza-blur-media-active .chat-message-picture__photo:hover {
   filter: blur(0px) !important;
 }
 
-body.tadaza-blur-names-active [class*="conv-item__name"],
-body.tadaza-blur-names-active [class*="chat-box__header__title"],
+/* Name & avatar blur (chat header, conversation list & input placeholder) */
+body.tadaza-blur-names-active .header-title,
+body.tadaza-blur-names-active [class*="header-title"],
+body.tadaza-blur-names-active .main-title-container,
+body.tadaza-blur-names-active .header-conv-name,
+body.tadaza-blur-names-active .header-info__name,
+body.tadaza-blur-names-active .conv-item-title__name,
+body.tadaza-blur-names-active [class*="conv-item-title"],
+body.tadaza-blur-names-active [class*="conv-title"],
+body.tadaza-blur-names-active [class*="conv-name"],
+body.tadaza-blur-names-active .conv-title-name,
+body.tadaza-blur-names-active .chat-data-conv-item-name,
+body.tadaza-blur-names-active .pin_conv-name,
 body.tadaza-blur-names-active [class*="avatar"] img,
-body.tadaza-blur-names-active .chat-item__avatar {
-  filter: blur(5px) !important;
+body.tadaza-blur-names-active .chat-item__avatar,
+body.tadaza-blur-names-active .conv-item__avatar,
+body.tadaza-blur-names-active .header-info__ava,
+body.tadaza-blur-names-active [class*="rtf-placeholder"],
+body.tadaza-blur-names-active #input_chat::placeholder {
+  filter: blur(6px) !important;
   transition: filter 0.18s ease-in-out !important;
 }
 
-body.tadaza-blur-names-active [class*="conv-item__name"]:hover,
-body.tadaza-blur-names-active [class*="chat-box__header__title"]:hover,
+body.tadaza-blur-names-active .header-title:hover,
+body.tadaza-blur-names-active [class*="header-title"]:hover,
+body.tadaza-blur-names-active .main-title-container:hover,
+body.tadaza-blur-names-active .header-conv-name:hover,
+body.tadaza-blur-names-active .header-info__name:hover,
+body.tadaza-blur-names-active .conv-item-title__name:hover,
+body.tadaza-blur-names-active [class*="conv-item-title"]:hover,
+body.tadaza-blur-names-active [class*="conv-title"]:hover,
+body.tadaza-blur-names-active [class*="conv-name"]:hover,
+body.tadaza-blur-names-active .conv-title-name:hover,
+body.tadaza-blur-names-active .conv-item:hover [class*="conv-item-title"],
+body.tadaza-blur-names-active .conv-item:hover [class*="conv-title"],
+body.tadaza-blur-names-active .conv-item:hover [class*="conv-name"],
+body.tadaza-blur-names-active .conv-item:hover [class*="avatar"] img,
 body.tadaza-blur-names-active [class*="avatar"] img:hover,
-body.tadaza-blur-names-active .chat-item__avatar:hover {
+body.tadaza-blur-names-active .chat-item__avatar:hover,
+body.tadaza-blur-names-active .conv-item__avatar:hover,
+body.tadaza-blur-names-active .header-info__ava:hover,
+body.tadaza-blur-names-active [class*="rtf-placeholder"]:hover,
+body.tadaza-blur-names-active #input_chat:focus::placeholder {
   filter: blur(0px) !important;
 }
 
@@ -463,6 +511,29 @@ body.dark .tadaza-switch input:checked + .tadaza-slider {
 
 .tadaza-switch input:checked + .tadaza-slider:before {
   transform: translateX(20px);
+}
+
+/* Disabled Switch & Sub-Items */
+.tadaza-item.tadaza-item-disabled {
+  opacity: 0.45;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.tadaza-switch input:disabled + .tadaza-slider {
+  background-color: rgba(128, 128, 128, 0.18) !important;
+  cursor: not-allowed !important;
+  opacity: 0.5 !important;
+}
+
+body.dark .tadaza-switch input:disabled + .tadaza-slider {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.tadaza-switch input:disabled + .tadaza-slider:before {
+  background-color: #999999 !important;
+  box-shadow: none !important;
+  transform: translateX(0) !important;
 }
 
 /* Theme 3-State Buttons */
