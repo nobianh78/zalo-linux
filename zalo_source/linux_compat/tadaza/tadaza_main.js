@@ -116,6 +116,51 @@ function initTadazaMain() {
     });
   }
 
+  // Intercept and block network requests at Electron session level for typing, seen, delivered
+  const setupWebRequest = () => {
+    try {
+      if (electron.session && electron.session.defaultSession && electron.session.defaultSession.webRequest) {
+        const filter = {
+          urls: [
+            '*://*/*typing*',
+            '*://*/*seen*',
+            '*://*/*delivered*'
+          ]
+        };
+        electron.session.defaultSession.webRequest.onBeforeRequest(filter, (details, callback) => {
+          try {
+            const cfg = configManager.get().privacy || {};
+            const url = details.url || '';
+            if (cfg.hide_typing && /\/api\/(message|group)\/typing(?:\?|\/|#|$)/i.test(url)) {
+              console.log('[TADaZa Main WebRequest] Blocked typing:', url);
+              return callback({ cancel: true });
+            }
+            if (cfg.hide_seen && /\/api\/(?:e2ee\/pc\/t\/)?(message|group)\/(?:seen|seenv2|react_seen)(?:\?|\/|#|$)/i.test(url)) {
+              console.log('[TADaZa Main WebRequest] Blocked seen:', url);
+              return callback({ cancel: true });
+            }
+            if (cfg.hide_delivered && /\/api\/(?:e2ee\/pc\/t\/)?(message|group)\/(?:delivered|deliveredv2|react_delivered)(?:\?|\/|#|$)/i.test(url)) {
+              console.log('[TADaZa Main WebRequest] Blocked delivered:', url);
+              return callback({ cancel: true });
+            }
+          } catch (e) {}
+          callback({ cancel: false });
+        });
+        console.log('[TADaZa Main] WebRequest filter registered for privacy features');
+      }
+    } catch (e) {
+      console.warn('[TADaZa Main] WebRequest filter registration failed:', e.message);
+    }
+  };
+
+  if (electron.app) {
+    if (electron.app.isReady()) {
+      setupWebRequest();
+    } else {
+      electron.app.whenReady().then(setupWebRequest);
+    }
+  }
+
   console.log('[TADaZa Main] Initialized successfully');
 }
 
