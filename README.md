@@ -89,13 +89,13 @@ npm run dist:appimage
 ```
 
 Tập tin sau khi đóng gói sẽ nằm tại thư mục `dist/`:
-- `dist/zalo-linux_26.10.10_amd64.deb`
-- `dist/Zalo-26.10.10.AppImage`
+- `dist/zalo-linux_26.10.11_amd64.deb`
+- `dist/Zalo-26.10.11.AppImage`
 
 ### 3. Cài đặt tập tin .deb đã build
 
 ```bash
-sudo dpkg -i dist/zalo-linux_26.10.10_amd64.deb
+sudo dpkg -i dist/zalo-linux_26.10.11_amd64.deb
 ```
 
 ---

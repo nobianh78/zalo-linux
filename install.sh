@@ -5,7 +5,7 @@ set -e
 # Repository: https://github.com/nobianh78/zalo-linux
 
 REPO="nobianh78/zalo-linux"
-FALLBACK_DEB_URL="https://github.com/nobianh78/zalo-linux/releases/download/v26.10.10/zalo-linux_26.10.10_amd64.deb"
+FALLBACK_DEB_URL="https://github.com/nobianh78/zalo-linux/releases/download/v26.10.11/zalo-linux_26.10.11_amd64.deb"
 
 # Colors for terminal output
 RED='\033[0;31m'

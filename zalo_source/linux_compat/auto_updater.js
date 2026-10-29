@@ -25,9 +25,9 @@ const INITIAL_DELAY_MS = 8000; // 8 seconds after app start
 function getCurrentVersion() {
   try {
     const pkg = require('../../package.json');
-    return pkg.version || '26.10.10';
+    return pkg.version || '26.10.11';
   } catch (e) {
-    return '26.10.10';
+    return '26.10.11';
   }
 }
 
