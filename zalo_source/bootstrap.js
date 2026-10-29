@@ -21,6 +21,17 @@ try {
   const electron = require('electron');
   if (electron) {
     if (electron.app) {
+      // Multi-Profile configuration for independent sessions
+      try {
+        const { getCurrentProfileId, getProfileUserDataDir } = require('./linux_compat/tadaza/profiles_manager');
+        const currentProfile = getCurrentProfileId();
+        const profileUserData = getProfileUserDataDir(currentProfile);
+        electron.app.setPath('userData', profileUserData);
+        console.log(`[Multi-Profile] Running with profile: "${currentProfile}" (${profileUserData})`);
+      } catch (profErr) {
+        console.warn('[Multi-Profile] Error setting profile userData:', profErr.message);
+      }
+
       electron.app.setName('Zalo');
       if (process.platform === 'linux' && typeof electron.app.setDesktopName === 'function') {
         electron.app.setDesktopName('zalo.desktop');
@@ -229,7 +240,13 @@ const handleEntryCompactApp = () => {
 };
 
 function bootstrap() {
-  const hasLock = require('electron').app.requestSingleInstanceLock();
+  let profileLockData = {};
+  try {
+    const { getCurrentProfileId } = require('./linux_compat/tadaza/profiles_manager');
+    profileLockData = { profile: getCurrentProfileId() };
+  } catch (e) {}
+
+  const hasLock = require('electron').app.requestSingleInstanceLock(profileLockData);
   if (!hasLock) {
     return require('./main-dist/second-instance');
   }

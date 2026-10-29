@@ -36,6 +36,14 @@ try {
           if (typeof cb === 'function') cb(state);
         });
       },
+      // Multi-Account Profiles Bridge
+      getProfiles: () => electron.ipcRenderer.invoke('tadaza:get-profiles'),
+      addProfile: (name) => electron.ipcRenderer.invoke('tadaza:add-profile', { name }),
+      renameProfile: (profileId, newName) => electron.ipcRenderer.invoke('tadaza:rename-profile', { profileId, newName }),
+      updateProfileInfo: (info) => electron.ipcRenderer.invoke('tadaza:update-profile-info', info),
+      deleteProfile: (profileId, deleteFiles) => electron.ipcRenderer.invoke('tadaza:delete-profile', { profileId, deleteFiles }),
+      switchProfile: (profileId) => electron.ipcRenderer.invoke('tadaza:switch-profile', { profileId }),
+      launchDualProfile: (profileId) => electron.ipcRenderer.invoke('tadaza:launch-dual-profile', { profileId }),
       onConfigChanged: (cb) => {
         electron.ipcRenderer.on('tadaza:config-changed', (event, cfg) => {
           if (typeof cb === 'function') cb(cfg);

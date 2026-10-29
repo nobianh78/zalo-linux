@@ -126,6 +126,55 @@ function initTadazaMain() {
   });
 
   /* --------------------------------------------------------------------------
+     Multi-Account Profiles Management (IPC Handlers)
+     -------------------------------------------------------------------------- */
+  const {
+    getProfilesData,
+    getCurrentProfileId,
+    createProfile,
+    renameProfile,
+    updateProfileInfo,
+    deleteProfile,
+    switchProfile,
+    launchDualProfile
+  } = require('./profiles_manager');
+
+  ipcMain.handle('tadaza:get-profiles', () => {
+    const data = getProfilesData();
+    const currentId = getCurrentProfileId();
+    return {
+      currentProfileId: currentId,
+      activeProfile: data.activeProfile || 'default',
+      profiles: data.profiles || []
+    };
+  });
+
+  ipcMain.handle('tadaza:add-profile', (event, { name }) => {
+    return createProfile(name);
+  });
+
+  ipcMain.handle('tadaza:rename-profile', (event, { profileId, newName }) => {
+    return renameProfile(profileId, newName);
+  });
+
+  ipcMain.handle('tadaza:update-profile-info', (event, { profileId, name, avatar }) => {
+    const targetId = profileId || getCurrentProfileId();
+    return updateProfileInfo(targetId, { name, avatar });
+  });
+
+  ipcMain.handle('tadaza:delete-profile', (event, { profileId, deleteFiles }) => {
+    return deleteProfile(profileId, deleteFiles);
+  });
+
+  ipcMain.handle('tadaza:switch-profile', (event, { profileId }) => {
+    return switchProfile(profileId);
+  });
+
+  ipcMain.handle('tadaza:launch-dual-profile', (event, { profileId }) => {
+    return launchDualProfile(profileId);
+  });
+
+  /* --------------------------------------------------------------------------
      Floating Chat Heads (PiP Window Management)
      -------------------------------------------------------------------------- */
   const { screen } = electron;
