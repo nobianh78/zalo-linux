@@ -41,6 +41,11 @@ Script sẽ tự động:
 - Thông báo hệ thống qua D-Bus / Desktop Notifications (libnotify).
 - Định danh cửa sổ chuẩn (`WM_CLASS`) tương thích GNOME Shell, KDE Plasma, XFCE.
 
+### 5. Tự động kiểm tra và cập nhật (In-app Auto-Update)
+- Tự động kiểm tra phiên bản mới từ GitHub Releases khi ứng dụng khởi chạy và định kỳ trong nền.
+- Hiển thị hộp thoại thông báo cập nhật trực tiếp trong ứng dụng khi có phiên bản mới.
+- Hỗ trợ tải và tự động cài đặt nâng cấp cho cả định dạng `.deb` (qua PolicyKit/pkexec) và `.AppImage` (tự động ghi đè in-place).
+
 ---
 
 ## Hướng dẫn cho nhà phát triển

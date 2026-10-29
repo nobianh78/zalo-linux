@@ -46,6 +46,14 @@ const handleEntryCompactApp = () => {
 };
 
 function bootstrap() {
+  // Initialize Linux Native Auto-Updater
+  try {
+    const { initAutoUpdater } = require('./linux_compat/auto_updater');
+    initAutoUpdater();
+  } catch (e) {
+    console.warn('[AutoUpdater] Failed to initialize:', e.message);
+  }
+
   require('./libs/perf-tracing/runtime');
   perf.record(perf.STARTUP);
   require('./main-dist/migration');
