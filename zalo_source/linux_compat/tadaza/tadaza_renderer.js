@@ -19,7 +19,7 @@
     saveConfig: async (cfg) => {
       try {
         localStorage.setItem('tadaza_config', JSON.stringify(cfg));
-      } catch (e) {}
+      } catch (e) { }
       return cfg;
     },
     translate: async ({ text, targetLang }) => {
@@ -30,7 +30,7 @@
     openExternal: async (url) => {
       try { window.open(url, '_blank'); return { success: true }; } catch (e) { return { success: false }; }
     },
-    onConfigChanged: () => {}
+    onConfigChanged: () => { }
   };
 
   let currentConfig = {
@@ -139,7 +139,7 @@
       try {
         this._tadazaUrl = (url && typeof url.toString === 'function') ? url.toString() : String(url || '');
         this._tadazaMethod = method;
-      } catch (e) {}
+      } catch (e) { }
       return origOpen.apply(this, arguments);
     };
 
@@ -186,7 +186,7 @@
               this.onreadystatechange(readyEvt);
             }
             this.dispatchEvent(readyEvt);
-          } catch (e) {}
+          } catch (e) { }
 
           try {
             const loadEvt = new ProgressEvent('load');
@@ -194,7 +194,7 @@
               this.onload(loadEvt);
             }
             this.dispatchEvent(loadEvt);
-          } catch (e) {}
+          } catch (e) { }
 
           try {
             const loadEndEvt = new ProgressEvent('loadend');
@@ -202,7 +202,7 @@
               this.onloadend(loadEndEvt);
             }
             this.dispatchEvent(loadEndEvt);
-          } catch (e) {}
+          } catch (e) { }
         }, 10);
 
         return;
@@ -239,9 +239,9 @@
       if (typeof data === 'string') {
         str = data;
       } else if (data instanceof ArrayBuffer) {
-        try { str = new TextDecoder().decode(new Uint8Array(data)); } catch (e) {}
+        try { str = new TextDecoder().decode(new Uint8Array(data)); } catch (e) { }
       } else if (ArrayBuffer.isView(data)) {
-        try { str = new TextDecoder().decode(new Uint8Array(data.buffer, data.byteOffset, data.byteLength)); } catch (e) {}
+        try { str = new TextDecoder().decode(new Uint8Array(data.buffer, data.byteOffset, data.byteLength)); } catch (e) { }
       }
 
       if (str) {
@@ -277,13 +277,13 @@
       }
       try {
         localStorage.setItem('za_theme', JSON.stringify({ theme: 'dark' }));
-      } catch (e) {}
+      } catch (e) { }
     } else {
       document.body.classList.remove('dark');
       document.body.classList.remove('tadaza-deep-dark');
       try {
         localStorage.setItem('za_theme', JSON.stringify({ theme: 'light' }));
-      } catch (e) {}
+      } catch (e) { }
     }
 
     // Font family style
@@ -405,7 +405,7 @@
     selectorsToRemove.forEach(sel => {
       try {
         clone.querySelectorAll(sel).forEach(el => el.remove());
-      } catch (e) {}
+      } catch (e) { }
     });
 
     const rawText = (clone.innerText || clone.textContent || '').trim();
@@ -946,7 +946,7 @@
           if (blob) {
             try {
               await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
-            } catch (e) {}
+            } catch (e) { }
           }
           const textSpan = imgBtn.querySelector('.btn-text');
           textSpan.textContent = 'Đã chép!';
@@ -1236,7 +1236,7 @@
         if (blob) {
           try {
             await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
-          } catch (e) {}
+          } catch (e) { }
         }
         const label = studioModal.querySelector('#label-studio-copy-img');
         if (label) {
@@ -1968,7 +1968,6 @@
   function getActiveConversation() {
     let name = '';
 
-    // 1. Check document.title (e.g. "Zalo - Tuấn Anh")
     if (document.title && document.title.includes('-')) {
       const parts = document.title.split(/[-–—]/);
       if (parts.length > 1) {
