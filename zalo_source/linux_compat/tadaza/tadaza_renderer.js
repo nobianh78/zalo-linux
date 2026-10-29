@@ -2358,8 +2358,7 @@
 
     const triggerBtn = document.getElementById('tadaza-btn-profiles');
     if (triggerBtn) {
-      const label = triggerBtn.querySelector('.profile-name-text');
-      if (label) label.textContent = name;
+      triggerBtn.remove();
     }
 
     const profNavBtn = document.getElementById('nav-item-tadaza-profiles');
@@ -2391,43 +2390,9 @@
       }
     });
 
-    // 3. Insert trigger button into DOM
-    const insertTriggerButton = () => {
-      if (document.getElementById('tadaza-btn-profiles')) return;
-
-      const btn = document.createElement('div');
-      btn.id = 'tadaza-btn-profiles';
-      btn.className = 'tadaza-profiles-trigger-btn';
-      btn.title = 'Quản lý Đa tài khoản (Chuyển đổi 1-click & Mở song song) [Ctrl+Shift+P]';
-      btn.innerHTML = `
-        <span class="profile-dot"></span>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
-          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-          <circle cx="9" cy="7" r="4"></circle>
-          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-        </svg>
-        <span class="profile-name-text">Tài khoản</span>
-      `;
-
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        openProfilesModal();
-      });
-
-      // Target placement: top search area or left sidebar top
-      const searchBox = document.querySelector('#search-contact-input, .search-box, [class*="search-box"]');
-      if (searchBox && searchBox.parentElement) {
-        searchBox.parentElement.insertBefore(btn, searchBox);
-      } else {
-        const header = document.querySelector('.main-title-container, .header-info, [class*="header-title"]');
-        if (header && header.parentElement) {
-          header.parentElement.appendChild(btn);
-        }
-      }
-
-      updateTriggerButton();
-    };
+    // 3. Remove any lingering floating trigger button
+    const oldBtn = document.getElementById('tadaza-btn-profiles');
+    if (oldBtn) oldBtn.remove();
 
     const syncProfileMeta = () => {
       try {
@@ -2452,15 +2417,7 @@
       }
     }).catch(() => {});
 
-    insertTriggerButton();
     setInterval(syncProfileMeta, 5000);
-
-    const profObs = new MutationObserver(() => {
-      if (!document.getElementById('tadaza-btn-profiles')) {
-        insertTriggerButton();
-      }
-    });
-    profObs.observe(document.body, { childList: true, subtree: true });
   }
 
 /* ==========================================================================

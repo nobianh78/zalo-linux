@@ -1,46 +1,9 @@
 /* --------------------------------------------------------------------------
    9. Multi-Account Switcher (Profiles System)
    -------------------------------------------------------------------------- */
+#tadaza-btn-profiles,
 .tadaza-profiles-trigger-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  height: 28px;
-  border-radius: 14px;
-  font-size: 11.5px;
-  font-weight: 600;
-  cursor: pointer;
-  border: 1px solid rgba(0, 104, 255, 0.2);
-  background: rgba(0, 104, 255, 0.08);
-  color: #0068ff;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  margin-right: 6px;
-}
-
-body.dark .tadaza-profiles-trigger-btn {
-  border-color: rgba(137, 180, 250, 0.25);
-  background: rgba(137, 180, 250, 0.12);
-  color: #89b4fa;
-}
-
-.tadaza-profiles-trigger-btn:hover {
-  background: rgba(0, 104, 255, 0.16);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 104, 255, 0.15);
-}
-
-body.dark .tadaza-profiles-trigger-btn:hover {
-  background: rgba(137, 180, 250, 0.22);
-  box-shadow: 0 2px 8px rgba(137, 180, 250, 0.2);
-}
-
-.tadaza-profiles-trigger-btn .profile-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #10b981;
-  box-shadow: 0 0 6px #10b981;
+  display: none !important;
 }
 
 /* Multi-Account Modal */
