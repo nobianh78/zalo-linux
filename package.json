@@ -1,6 +1,6 @@
 {
   "name": "zalo-linux",
-  "version": "26.10.14",
+  "version": "26.10.15",
   "description": "Zalo PC Native Linux",
   "homepage": "https://github.com/nobianh78/zalo-linux",
   "author": {
@@ -38,20 +38,6 @@
       "maintainer": "nobianh78 <nobianh78@users.noreply.github.com>",
       "category": "Network",
       "icon": "zalo_source/pc-dist/android-icon-192x192.png"
-    },
-    "deb": {
-      "depends": [
-        "gconf2",
-        "gconf-service",
-        "libnotify4",
-        "libappindicator1",
-        "libxtst6",
-        "libnss3",
-        "libasound2",
-        "alsa-utils",
-        "python3",
-        "libopus0"
-      ]
     }
   },
   "devDependencies": {
