@@ -637,7 +637,7 @@ class EngineCore {
       c.video = new VideoAssembler((f) => {
         if (f.key) c.videoCodec = avcCodecString(f.data) || c.videoCodec;
         this._noteVideoRx(c);
-        this.ui.video({ key: f.key, codec: c.videoCodec || 'avc1.64001e', data: f.data });
+        this.ui.video({ key: f.key, codec: c.videoCodec || 'avc1.42e02a', data: f.data });
       }, undefined, { onGap: () => this._askPeerKey('gap') });
     }
     c.video.push(pkt);

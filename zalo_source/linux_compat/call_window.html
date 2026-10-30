@@ -772,11 +772,15 @@
     });
 
     // Remote Video Decoder
+    let currentDecoderCodec = null;
     function initVideoDecoder(codec) {
-      if (videoDecoder) {
+      const targetCodec = codec || 'avc1.42e02a';
+      if (videoDecoder && videoDecoder.state === 'configured' && currentDecoderCodec === targetCodec) return;
+      if (videoDecoder && videoDecoder.state !== 'closed') {
         try { videoDecoder.close(); } catch(e) {}
       }
       if (!window.VideoDecoder) return;
+      currentDecoderCodec = targetCodec;
 
       videoDecoder = new VideoDecoder({
         output: (frame) => {
@@ -800,7 +804,7 @@
 
       try {
         videoDecoder.configure({
-          codec: codec,
+          codec: targetCodec,
           optimizeForLatency: true
         });
       } catch(err) {
@@ -809,8 +813,9 @@
     }
 
     ipcRenderer.on('remote-video-frame', (e, { key, codec, data }) => {
-      if (!videoDecoder || videoDecoder.state !== 'configured') {
-        initVideoDecoder(codec || 'avc1.64001e');
+      const targetCodec = codec || 'avc1.42e02a';
+      if (!videoDecoder || videoDecoder.state !== 'configured' || currentDecoderCodec !== targetCodec) {
+        initVideoDecoder(targetCodec);
       }
       if (videoDecoder && videoDecoder.state === 'configured') {
         try {
@@ -844,6 +849,15 @@
       }
     });
 
+    function getAvcCodecString(w, h) {
+      const mbs = Math.ceil((w || 1280) / 16) * Math.ceil((h || 720) / 16);
+      if (mbs > 22080) return 'avc1.42e033'; // Level 5.1 (up to 4K / 3840x2160)
+      if (mbs > 8704) return 'avc1.42e032';  // Level 5.0 (up to 2K / 2560x1440)
+      if (mbs > 3600) return 'avc1.42e02a';  // Level 4.2 (up to 1080p / 1920x1080)
+      if (mbs > 1620) return 'avc1.42e01f';  // Level 3.1 (up to 720p / 1280x720)
+      return 'avc1.42e01e';                  // Level 3.0 (up to 720x480)
+    }
+
     // Local Camera Video Encoding (WebCodecs)
     async function startCamera(deviceId = null) {
       try {
@@ -866,6 +880,7 @@
         const settings = track.getSettings();
         const w = settings.width || 640;
         const h = settings.height || 480;
+        const camCodec = getAvcCodecString(w, h);
 
         if (window.VideoEncoder) {
           videoEncoder = new VideoEncoder({
@@ -875,6 +890,7 @@
               ipcRenderer.send('call-action-video-frame', {
                 key: chunk.type === 'key',
                 data: buf,
+                codec: camCodec,
                 w: w,
                 h: h
               });
@@ -883,7 +899,7 @@
           });
 
           videoEncoder.configure({
-            codec: 'avc1.64001e',
+            codec: camCodec,
             width: w,
             height: h,
             bitrate: 450_000,
@@ -1136,6 +1152,9 @@
         const w = settings.width || 1280;
         const h = settings.height || 720;
 
+        const screenCodec = getAvcCodecString(w, h);
+        const screenBitrate = (w * h > 2000000) ? 2_000_000 : 1_200_000;
+
         if (window.VideoEncoder) {
           screenEncoder = new VideoEncoder({
             output: (chunk) => {
@@ -1144,6 +1163,7 @@
               ipcRenderer.send('call-action-video-frame', {
                 key: chunk.type === 'key',
                 data: buf,
+                codec: screenCodec,
                 screen: true,
                 w: w,
                 h: h
@@ -1152,14 +1172,26 @@
             error: (e) => console.warn('[ScreenEncoder] error:', e)
           });
 
-          screenEncoder.configure({
-            codec: 'avc1.64001e',
-            width: w,
-            height: h,
-            bitrate: 1_200_000,
-            framerate: 20,
-            avc: { format: 'annexb' }
-          });
+          try {
+            screenEncoder.configure({
+              codec: screenCodec,
+              width: w,
+              height: h,
+              bitrate: screenBitrate,
+              framerate: 20,
+              avc: { format: 'annexb' }
+            });
+          } catch (cfgErr) {
+            console.warn('[ScreenEncoder] configure fallback to Level 5.2:', cfgErr);
+            screenEncoder.configure({
+              codec: 'avc1.42e034',
+              width: w,
+              height: h,
+              bitrate: screenBitrate,
+              framerate: 20,
+              avc: { format: 'annexb' }
+            });
+          }
 
           if (window.MediaStreamTrackProcessor) {
             const processor = new MediaStreamTrackProcessor({ track });

@@ -187,6 +187,7 @@ class ZaloCallDaemon {
       if (this.videoFrameCb && frame && frame.data) {
         this.videoFrameCb({
           key: !!frame.key,
+          codec: frame.codec || "avc1.42e02a",
           data: Buffer.from(frame.data),
           screen: !!frame.screen,
           w: frame.w || 640,
@@ -254,7 +255,7 @@ class ZaloCallDaemon {
         if (this.callWindow && !this.callWindow.isDestroyed()) {
           this.callWindow.webContents.send("remote-video-frame", {
             key: f.key,
-            codec: f.codec || "avc1.64001e",
+            codec: f.codec || "avc1.42e02a",
             data: f.data
           });
         }
