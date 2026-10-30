@@ -410,10 +410,16 @@ try {
           if (win && win.webContents) {
             const injectTadaza = () => {
               try {
+                if (!win || win.isDestroyed() || !win.webContents) return;
                 checkAndMark();
-                if (!isMainWindow(win)) {
+
+                const currentUrl = (win.webContents.getURL() || '').toLowerCase();
+                // Never inject TADaZa into login.html, child popups, workers, or notifications.
+                // TADaZa is strictly for the logged-in main chat interface (index.html).
+                if (!currentUrl.includes('index.html')) {
                   return;
                 }
+
                 if (win._tadazaInjected) {
                   return;
                 }
@@ -448,7 +454,13 @@ try {
               }
             };
 
+            win.webContents.on('did-start-navigation', (event, url, isInPlace, isMainFrame) => {
+              if (isMainFrame) {
+                win._tadazaInjected = false;
+              }
+            });
             win.webContents.on('dom-ready', injectTadaza);
+            win.webContents.on('did-finish-load', injectTadaza);
           }
         } catch (e) {}
       });
