@@ -1,7 +1,7 @@
 {
   "name": "Zalo",
   "homepage": "https://zalo.me/",
-  "version": "26.10.18",
+  "version": "26.10.19",
   "description": "Zalo - Nhắn gửi yêu thương",
   "engines": {
     "npm": ">=3"
