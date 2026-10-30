@@ -1,0 +1,305 @@
+/* --------------------------------------------------------------------------
+   TADaZa Ecosystem Theme: Bioluminescent Forest (Rừng Ánh Sáng Sinh Học Đêm)
+   Aesthetic: Nocturnal enchanted forest, glowing flora, spore motes & spirit fauna
+   -------------------------------------------------------------------------- */
+
+/* 1. Theme Variables */
+body.tadaza-theme-bioforest,
+body.dark.tadaza-theme-bioforest,
+body.tadaza-deep-dark.tadaza-theme-bioforest {
+  background-color: #021216 !important;
+  color: #ffffff !important;
+
+  --surface-background: rgba(4, 24, 30, 0.72) !important;
+  --surface-background-subtle: rgba(3, 18, 22, 0.8) !important;
+  --surface-background-overlay: rgba(2, 12, 16, 0.9) !important;
+  --surface-alt: rgba(6, 32, 40, 0.6) !important;
+  --layer-background: rgba(4, 24, 30, 0.72) !important;
+  --layer-background-subtle: rgba(3, 18, 22, 0.8) !important;
+  --layer-background-hover: rgba(6, 214, 160, 0.12) !important;
+  --layer-background-selected: rgba(6, 214, 160, 0.22) !important;
+  --layer-background-navbar-normal: rgba(3, 18, 22, 0.88) !important;
+  --layer-background-navbar-sublevel-normal: rgba(4, 24, 30, 0.72) !important;
+  --layer-background-leftmenu: rgba(3, 18, 22, 0.88) !important;
+  --bg-default: transparent !important;
+  --title-bar: rgba(3, 18, 22, 0.96) !important;
+
+  /* Messages */
+  --white-message: rgba(5, 22, 28, 0.9) !important;
+  --white-message-selected: rgba(6, 214, 160, 0.25) !important;
+  --blue-message: linear-gradient(135deg, rgba(6, 182, 160, 0.9), rgba(12, 130, 135, 0.94)) !important;
+  --blue-message-selected: rgba(6, 214, 160, 0.35) !important;
+  --layer-accent-message: rgba(6, 214, 160, 0.2) !important;
+  --self-bubble-chat-shadow: 0 4px 18px rgba(6, 182, 160, 0.28) !important;
+  --shadow-bubble: 0 4px 18px rgba(0, 0, 0, 0.35) !important;
+
+  /* Buttons */
+  --button-tertiary-neutral-normal: rgba(255, 255, 255, 0.08) !important;
+  --button-tertiary-neutral-hover: rgba(6, 214, 160, 0.2) !important;
+  --button-tertiary-neutral-pressed: rgba(6, 214, 160, 0.35) !important;
+  --button-tertiary-neutral-text: #ffffff !important;
+  --button-secondary-neutral-normal: rgba(6, 214, 160, 0.16) !important;
+  --button-secondary-neutral-hover: rgba(6, 214, 160, 0.3) !important;
+  --button-secondary-neutral-pressed: rgba(6, 214, 160, 0.45) !important;
+  --button-secondary-neutral-text: #ffffff !important;
+  --button-ghost-neutral-normal: transparent !important;
+  --button-ghost-neutral-hover: rgba(110, 245, 220, 0.15) !important;
+  --button-ghost-neutral-text: #ffffff !important;
+
+  /* Text & Contrast */
+  --text-primary: #ffffff !important;
+  --text-secondary: #a7f3d0 !important;
+  --text-placeholder: #508d88 !important;
+  --text-disabled: #376461 !important;
+  --text-on-color: #ffffff !important;
+
+  /* Icons */
+  --icon-primary: #06d6a0 !important;
+  --icon-secondary: #c084fc !important;
+
+  /* Borders */
+  --divider: rgba(6, 214, 160, 0.12) !important;
+  --divider-subtle: rgba(255, 255, 255, 0.06) !important;
+  --border: rgba(6, 214, 160, 0.22) !important;
+  --border-subtle: rgba(255, 255, 255, 0.08) !important;
+  --border-bold: rgba(6, 214, 160, 0.42) !important;
+
+  /* Inputs */
+  --input-field-bg-filled: rgba(255, 255, 255, 0.07) !important;
+  --input-field-bg-outline: rgba(6, 214, 160, 0.2) !important;
+}
+
+/* 2. Structural Layout & Transparency */
+body.tadaza-theme-bioforest,
+body.tadaza-theme-bioforest #app,
+body.tadaza-theme-bioforest #app-layout,
+body.tadaza-theme-bioforest .app-page,
+body.tadaza-theme-bioforest .main-content,
+body.tadaza-theme-bioforest #chat-layout,
+body.tadaza-theme-bioforest #chatView,
+body.tadaza-theme-bioforest .chat-conversation,
+body.tadaza-theme-bioforest .chat-conversation-history,
+body.tadaza-theme-bioforest .chat-box,
+body.tadaza-theme-bioforest #messageViewContainer,
+body.tadaza-theme-bioforest #messageViewScroll {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+/* 3. Header & Search Bar */
+body.tadaza-theme-bioforest header,
+body.tadaza-theme-bioforest #header,
+body.tadaza-theme-bioforest .chat-bar,
+body.tadaza-theme-bioforest #contact-search {
+  background: rgba(3, 18, 22, 0.96) !important;
+  backdrop-filter: blur(24px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(140%) !important;
+  border-bottom: 1px solid rgba(6, 214, 160, 0.28) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+}
+
+body.tadaza-theme-bioforest .main-title-container,
+body.tadaza-theme-bioforest .header-title,
+body.tadaza-theme-bioforest .threadChat,
+body.tadaza-theme-bioforest .threadChat__title,
+body.tadaza-theme-bioforest .threadChat__avatar {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+body.tadaza-theme-bioforest .threadChat__title [class*="title"],
+body.tadaza-theme-bioforest .truncate.header-title {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  text-shadow: 0 0 10px rgba(6, 214, 160, 0.35) !important;
+}
+
+body.tadaza-theme-bioforest #headerBtns button,
+body.tadaza-theme-bioforest #headerBtns .z--btn--v2,
+body.tadaza-theme-bioforest #headerBtns [class*="btn"] {
+  background: transparent !important;
+  border: none !important;
+  color: #06d6a0 !important;
+  border-radius: 8px !important;
+  transition: all 0.15s ease !important;
+}
+
+body.tadaza-theme-bioforest #headerBtns button:hover,
+body.tadaza-theme-bioforest #headerBtns .z--btn--v2:hover {
+  background: rgba(6, 214, 160, 0.18) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 12px rgba(6, 214, 160, 0.3) !important;
+}
+
+/* 4. Left Navigation & Sidebar */
+body.tadaza-theme-bioforest #nav-tab,
+body.tadaza-theme-bioforest .left-sidebar,
+body.tadaza-theme-bioforest #sidebar-nav {
+  background: rgba(3, 18, 22, 0.92) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-right: 1px solid rgba(6, 214, 160, 0.18) !important;
+}
+
+body.tadaza-theme-bioforest #nav-tab .tab-item.active,
+body.tadaza-theme-bioforest .left-sidebar .tab-item.active {
+  color: #06d6a0 !important;
+  background: rgba(6, 214, 160, 0.15) !important;
+  box-shadow: inset 3px 0 0 #06d6a0, 0 0 15px rgba(6, 214, 160, 0.3) !important;
+}
+
+/* 5. Conversation List */
+body.tadaza-theme-bioforest #conversationList,
+body.tadaza-theme-bioforest .conv-list,
+body.tadaza-theme-bioforest .sub-layout-chat-list {
+  background: rgba(4, 20, 26, 0.82) !important;
+  backdrop-filter: blur(18px) !important;
+  -webkit-backdrop-filter: blur(18px) !important;
+  border-right: 1px solid rgba(6, 214, 160, 0.14) !important;
+}
+
+body.tadaza-theme-bioforest .conv-item:hover,
+body.tadaza-theme-bioforest [class*="conv-item"]:hover {
+  background: rgba(6, 214, 160, 0.08) !important;
+}
+
+body.tadaza-theme-bioforest .conv-item.active,
+body.tadaza-theme-bioforest [class*="conv-item"].active,
+body.tadaza-theme-bioforest .conv-item.selected {
+  background: rgba(6, 214, 160, 0.2) !important;
+  border-left: 3px solid #06d6a0 !important;
+  box-shadow: 0 0 14px rgba(6, 214, 160, 0.25) !important;
+}
+
+/* 6. Message Bubbles */
+body.tadaza-theme-bioforest .chat-item,
+body.tadaza-theme-bioforest .chat-message {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Incoming Friend Messages */
+body.tadaza-theme-bioforest .chat-message:not(.me) .card,
+body.tadaza-theme-bioforest .chat-message:not(.me) .card-bubble,
+body.tadaza-theme-bioforest .card--friend > [class*="message-content"],
+body.tadaza-theme-bioforest .card--friend > .card-bubble,
+body.tadaza-theme-bioforest .white-message {
+  background: rgba(5, 22, 28, 0.9) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border: 1px solid rgba(6, 214, 160, 0.28) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35) !important;
+  color: #ffffff !important;
+}
+
+body.tadaza-theme-bioforest .card--friend [class*="message-content"] *:not(.tadaza-code-card *):not(.CodeMirror *):not(.tadaza-inline-code):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]),
+body.tadaza-theme-bioforest [class*="friend-message"] [class*="message-content"] *:not(.tadaza-code-card *):not(.CodeMirror *):not(.tadaza-inline-code):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]),
+body.tadaza-theme-bioforest .chat-message:not(.me) .card *:not(.tadaza-code-card *):not(.CodeMirror *):not(.tadaza-inline-code):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]),
+body.tadaza-theme-bioforest .white-message *:not(.tadaza-code-card *):not(.CodeMirror *):not(.tadaza-inline-code):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]) {
+  color: #ffffff !important;
+}
+
+/* Outgoing My Messages */
+body.tadaza-theme-bioforest .chat-message.me .card,
+body.tadaza-theme-bioforest .chat-message.me .card-bubble,
+body.tadaza-theme-bioforest .card--me > [class*="message-content"],
+body.tadaza-theme-bioforest .card--me > .card-bubble,
+body.tadaza-theme-bioforest .blue-message {
+  background: linear-gradient(135deg, rgba(6, 182, 160, 0.9), rgba(12, 130, 135, 0.94)) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border: 1px solid rgba(110, 245, 220, 0.45) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 4px 20px rgba(6, 182, 160, 0.3) !important;
+  color: #ffffff !important;
+}
+
+body.tadaza-theme-bioforest .card--me [class*="message-content"] *:not(.tadaza-code-card *):not(.CodeMirror *):not(.tadaza-inline-code):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]),
+body.tadaza-theme-bioforest .chat-message.me .card *:not(.tadaza-code-card *):not(.CodeMirror *):not(.tadaza-inline-code):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]),
+body.tadaza-theme-bioforest .blue-message *:not(.tadaza-code-card *):not(.CodeMirror *):not(.tadaza-inline-code):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]) {
+  color: #ffffff !important;
+}
+
+/* 7. Code Blocks & Syntax Highlighting */
+body.tadaza-theme-bioforest .tadaza-code-card {
+  background: rgba(2, 14, 18, 0.94) !important;
+  border: 1px solid rgba(6, 214, 160, 0.3) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45) !important;
+  margin: 8px 0 !important;
+  overflow: hidden !important;
+}
+
+body.tadaza-theme-bioforest .tadaza-code-header {
+  background: rgba(1, 10, 14, 0.8) !important;
+  border-bottom: 1px solid rgba(6, 214, 160, 0.16) !important;
+  padding: 6px 12px !important;
+}
+
+body.tadaza-theme-bioforest .tadaza-code-lang {
+  color: #06d6a0 !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.8px !important;
+}
+
+body.tadaza-theme-bioforest .tadaza-code-pre,
+body.tadaza-theme-bioforest .file-preview__content pre {
+  background: rgba(1, 8, 12, 0.9) !important;
+  color: #e0f2fe !important;
+  font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace !important;
+  border-bottom: 1px solid rgba(6, 214, 160, 0.2) !important;
+}
+
+body.tadaza-theme-bioforest .tadaza-inline-code {
+  background: rgba(6, 214, 160, 0.16) !important;
+  color: #00f5d4 !important;
+  border: 1px solid rgba(6, 214, 160, 0.35) !important;
+  border-radius: 4px !important;
+  padding: 2px 6px !important;
+  font-weight: 600 !important;
+}
+
+body.tadaza-theme-bioforest .hl-keyword { color: #c084fc !important; font-weight: 700 !important; }
+body.tadaza-theme-bioforest .hl-string { color: #00f5d4 !important; }
+body.tadaza-theme-bioforest .hl-number { color: #fde047 !important; font-weight: 600 !important; }
+body.tadaza-theme-bioforest .hl-boolean { color: #f472b6 !important; font-weight: 700 !important; }
+body.tadaza-theme-bioforest .hl-comment { color: #508d88 !important; font-style: italic !important; }
+body.tadaza-theme-bioforest .hl-function { color: #06d6a0 !important; font-weight: 600 !important; }
+body.tadaza-theme-bioforest .hl-operator { color: #38bdf8 !important; }
+body.tadaza-theme-bioforest .hl-punctuation { color: #94a3b8 !important; }
+
+/* 8. Call Cards */
+body.tadaza-theme-bioforest .call-msg__callback,
+body.tadaza-theme-bioforest .call-message__callback-wrapper,
+body.tadaza-theme-bioforest [class*="call-msg"] [class*="callback"] {
+  background: rgba(6, 214, 160, 0.22) !important;
+  border: 1px solid rgba(6, 214, 160, 0.5) !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 0 14px rgba(6, 214, 160, 0.25) !important;
+}
+
+body.tadaza-theme-bioforest .call-msg__callback:hover {
+  background: rgba(6, 214, 160, 0.4) !important;
+  box-shadow: 0 0 20px rgba(6, 214, 160, 0.5) !important;
+}
+
+/* 9. Bottom Chat Box Toolbar */
+body.tadaza-theme-bioforest .chat-box-bar,
+body.tadaza-theme-bioforest .chat-input-container {
+  background: rgba(3, 18, 22, 0.94) !important;
+  border-top: 1px solid rgba(6, 214, 160, 0.2) !important;
+}
+
+body.tadaza-theme-bioforest .left-chat-box-bar i,
+body.tadaza-theme-bioforest .left-chat-box-bar svg {
+  color: #06d6a0 !important;
+  fill: #06d6a0 !important;
+  opacity: 0.95 !important;
+}

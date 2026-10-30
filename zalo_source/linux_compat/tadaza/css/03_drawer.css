@@ -479,3 +479,95 @@ body.dark .tadaza-select {
   background: rgba(128, 128, 128, 0.15);
   color: inherit;
 }
+
+/* --------------------------------------------------------------------------
+   Dynamic Theme Gallery Cards Grid
+   -------------------------------------------------------------------------- */
+.tadaza-theme-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.tadaza-theme-card {
+  position: relative;
+  border-radius: 10px;
+  border: 2px solid rgba(128, 128, 128, 0.2);
+  background: rgba(128, 128, 128, 0.06);
+  padding: 10px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+  user-select: none;
+}
+
+body.dark .tadaza-theme-card {
+  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.tadaza-theme-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(15, 195, 255, 0.5);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+}
+
+.tadaza-theme-card.active {
+  border-color: #0fc3ff;
+  background: rgba(15, 195, 255, 0.12);
+  box-shadow: 0 0 16px rgba(15, 195, 255, 0.3);
+}
+
+.tadaza-theme-preview {
+  width: 100%;
+  height: 48px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.15);
+}
+
+.tadaza-theme-preview.hawaiian {
+  background: linear-gradient(135deg, #022b3a, #1a759f, #34a0a4);
+}
+
+.tadaza-theme-preview.rainforest {
+  background: linear-gradient(135deg, #021a12, #059669, #34d399);
+}
+
+.tadaza-theme-preview.bioforest {
+  background: linear-gradient(135deg, #021418, #06d6a0, #a855f7);
+}
+
+.tadaza-theme-preview.none {
+  background: linear-gradient(135deg, #2b303c, #4b5563);
+}
+
+.tadaza-theme-card-title {
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tadaza-theme-card-tag {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: rgba(15, 195, 255, 0.2);
+  color: #0fc3ff;
+}
+
+.tadaza-theme-card.active .tadaza-theme-card-tag {
+  background: #0fc3ff;
+  color: #ffffff;
+}
+

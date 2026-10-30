@@ -45,7 +45,10 @@ window.__TADAZA_INITIALIZED__ = true;
       font_size: 14,
       wallpaper: '',
       wallpaper_opacity: 0.85,
-      wallpaper_blur: 0
+      wallpaper_blur: 0,
+      hawaiian_theme: false,
+      hawaiian_opacity: 0.85,
+      hawaiian_fps: 15
     },
     privacy: {
       anti_peeping: false,

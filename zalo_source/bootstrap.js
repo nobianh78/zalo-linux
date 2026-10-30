@@ -36,6 +36,21 @@ if (process.argv.some(e => e.startsWith('--launch-call-daemon'))) {
 try {
   const electron = require('electron');
   if (electron) {
+    if (electron.utilityProcess && typeof electron.utilityProcess.fork === 'function') {
+      const origUtilityFork = electron.utilityProcess.fork;
+      electron.utilityProcess.fork = function(modulePath, args, options) {
+        options = Object.assign({}, options, { stdio: 'inherit' });
+        console.warn(`[Bootstrap] utilityProcess.fork: ${modulePath}`);
+        const child = origUtilityFork.call(this, modulePath, args, options);
+        child.on('spawn', () => {
+          console.warn(`[Bootstrap] utilityProcess (${modulePath}) SPAWNED with PID: ${child.pid}`);
+        });
+        child.on('exit', (code) => {
+          console.warn(`[Bootstrap] utilityProcess (${modulePath}) EXITED with code: ${code}`);
+        });
+        return child;
+      };
+    }
     if (electron.app) {
       // Multi-Profile configuration for independent sessions
       try {
@@ -45,9 +60,32 @@ try {
 
         // Ensure user data directory exists
         const fs = require('fs');
+        const path = require('path');
         if (!fs.existsSync(profileUserData)) {
           try { fs.mkdirSync(profileUserData, { recursive: true }); } catch (e) {}
         }
+
+        // Ensure migrate-config.json exists with zalopc_m_c: true so media paths resolve correctly on Linux
+        try {
+          const migrateConfigPath = path.join(profileUserData, 'migrate-config.json');
+          let mConfig = {};
+          if (fs.existsSync(migrateConfigPath)) {
+            try { mConfig = JSON.parse(fs.readFileSync(migrateConfigPath, 'utf8')); } catch (e) {}
+          }
+          if (!mConfig.zalopc_m_c) {
+            mConfig.zalopc_m_c = true;
+            fs.writeFileSync(migrateConfigPath, JSON.stringify(mConfig, null, 2), 'utf8');
+          }
+          const mediaPath = path.join(profileUserData, 'media');
+          if (!fs.existsSync(mediaPath)) {
+            const defaultMedia = path.join(require('os').homedir(), '.config', 'ZaloData', 'media');
+            if (fs.existsSync(defaultMedia) && currentProfile !== 'default') {
+              try { fs.symlinkSync(defaultMedia, mediaPath); } catch (e) { fs.mkdirSync(mediaPath, { recursive: true }); }
+            } else {
+              try { fs.mkdirSync(mediaPath, { recursive: true }); } catch (e) {}
+            }
+          }
+        } catch (e) {}
 
         // Hook electron.app.setPath so migration.js or other code cannot overwrite userData back to default ZaloData
         const origSetPath = electron.app.setPath.bind(electron.app);
@@ -81,15 +119,52 @@ try {
       try {
         const net = require('net');
         const cp = require('child_process');
+        const fs = require('fs');
         const { getCurrentProfileId } = require('./linux_compat/tadaza/profiles_manager');
         const curProfile = getCurrentProfileId();
 
+        const patchSocketPath = (p) => {
+          if (typeof p !== 'string') return p;
+          if (p.includes('socketzalorecv') || p.includes('socketzalosend')) {
+            if (curProfile && curProfile !== 'default') {
+              if (!p.endsWith(`_${curProfile}`)) {
+                return `${p}_${curProfile}`;
+              }
+            }
+          }
+          return p;
+        };
+
+        // Clean up stale sockets for current profile on startup
+        try {
+          const s1 = patchSocketPath('/tmp/socketzalorecv2021');
+          const s2 = patchSocketPath('/tmp/socketzalosend2021');
+          if (fs.existsSync(s1)) fs.unlinkSync(s1);
+          if (fs.existsSync(s2)) fs.unlinkSync(s2);
+        } catch (e) {}
+
         if (curProfile && curProfile !== 'default') {
+          // Wrap fs.unlink and fs.unlinkSync so main.js EADDRINUSE recovery unlinks the correct socket!
+          const origUnlink = fs.unlink.bind(fs);
+          fs.unlink = function(filePath, cb) {
+            return origUnlink(patchSocketPath(filePath), cb);
+          };
+
+          const origUnlinkSync = fs.unlinkSync.bind(fs);
+          fs.unlinkSync = function(filePath) {
+            return origUnlinkSync(patchSocketPath(filePath));
+          };
+
           // Wrap Server.prototype.listen
           const origListen = net.Server.prototype.listen;
           net.Server.prototype.listen = function(...args) {
-            if (typeof args[0] === 'string' && (args[0].includes('socketzalorecv') || args[0].includes('socketzalosend'))) {
-              args[0] = `${args[0]}_${curProfile}`;
+            if (typeof args[0] === 'string') {
+              args[0] = patchSocketPath(args[0]);
+              try {
+                if (fs.existsSync(args[0])) {
+                  fs.unlinkSync(args[0]);
+                }
+              } catch (e) {}
             }
             return origListen.apply(this, args);
           };
@@ -97,10 +172,10 @@ try {
           // Wrap Socket.prototype.connect
           const origConnect = net.Socket.prototype.connect;
           net.Socket.prototype.connect = function(...args) {
-            if (typeof args[0] === 'string' && (args[0].includes('socketzalorecv') || args[0].includes('socketzalosend'))) {
-              args[0] = `${args[0]}_${curProfile}`;
-            } else if (args[0] && typeof args[0] === 'object' && typeof args[0].path === 'string' && (args[0].path.includes('socketzalorecv') || args[0].path.includes('socketzalosend'))) {
-              args[0].path = `${args[0].path}_${curProfile}`;
+            if (typeof args[0] === 'string') {
+              args[0] = patchSocketPath(args[0]);
+            } else if (args[0] && typeof args[0] === 'object' && typeof args[0].path === 'string') {
+              args[0].path = patchSocketPath(args[0].path);
             }
             return origConnect.apply(this, args);
           };
@@ -109,12 +184,7 @@ try {
           const origSpawn = cp.spawn;
           cp.spawn = function(command, args, options) {
             if (Array.isArray(args)) {
-              args = args.map(arg => {
-                if (typeof arg === 'string' && (arg.includes('socketzalorecv') || arg.includes('socketzalosend'))) {
-                  return `${arg}_${curProfile}`;
-                }
-                return arg;
-              });
+              args = args.map(arg => patchSocketPath(arg));
             }
             return origSpawn.call(this, command, args, options);
           };
@@ -134,16 +204,16 @@ try {
       function isMainWindow(w) {
         if (!w || w.isDestroyed()) return false;
         try {
-          if (w.isMainWindowCandidate === true) {
-            return true;
-          }
           const url = (w.webContents ? w.webContents.getURL() : '').toLowerCase();
-          if (url.includes('sqlite') || url.includes('worker') || url.includes('notification') || url.includes('call_window')) {
+          if (url.includes('sqlite') || url.includes('worker') || url.includes('notification') || url.includes('call_window') || url.includes('chat_head') || url.includes('popup-viewer') || url.includes('child.html')) {
             return false;
           }
           const title = (w.getTitle() || '').toLowerCase();
           if (title.includes('sqlite') || title.includes('worker') || title.includes('notification') || title.includes('call_window')) {
             return false;
+          }
+          if (w.isMainWindowCandidate === true) {
+            return true;
           }
           if (url.includes('index.html') || url.includes('login.html') || url.includes('compact-app.html')) {
             return true;
@@ -168,7 +238,7 @@ try {
           try {
             const url = (w.webContents ? w.webContents.getURL() : '').toLowerCase();
             const title = (w.getTitle() || '').toLowerCase();
-            if (url.includes('sqlite') || url.includes('worker') || url.includes('notification') || url.includes('call_window')) continue;
+            if (url.includes('sqlite') || url.includes('worker') || url.includes('notification') || url.includes('call_window') || url.includes('chat_head') || url.includes('popup-viewer') || url.includes('child.html')) continue;
             if (title.includes('sqlite') || title.includes('worker') || title.includes('notification') || title.includes('call_window')) continue;
             mainAppWindow = w;
             return w;
@@ -255,6 +325,9 @@ try {
           try {
             if (!win || win.isDestroyed()) return;
             const url = (win.webContents ? win.webContents.getURL() : '').toLowerCase();
+            if (url.includes('sqlite') || url.includes('worker') || url.includes('notification') || url.includes('call_window') || url.includes('chat_head') || url.includes('popup-viewer') || url.includes('child.html')) {
+              return;
+            }
             if (url.includes('index.html') || url.includes('login.html') || url.includes('compact-app.html')) {
               win.isMainWindowCandidate = true;
               mainAppWindow = win;
@@ -335,19 +408,31 @@ try {
 
         try {
           if (win && win.webContents) {
-            win.webContents.on('dom-ready', () => {
+            const injectTadaza = () => {
               try {
+                checkAndMark();
+                if (!isMainWindow(win)) {
+                  return;
+                }
+                if (win._tadazaInjected) {
+                  return;
+                }
+                win._tadazaInjected = true;
+
                 const fs = require('fs');
                 const path = require('path');
-                try {
-                  const { buildTadaza } = require('./linux_compat/tadaza/build');
-                  buildTadaza();
-                } catch (bErr) {}
                 const themeCssPath = path.join(__dirname, 'linux_compat', 'tadaza', 'tadaza_theme.css');
                 const rendererJsPath = path.join(__dirname, 'linux_compat', 'tadaza', 'tadaza_renderer.js');
-                win.webContents.on('console-message', (event, level, message, line, sourceId) => {
-                  console.log(`[Renderer L${level}] ${message}`);
-                });
+
+                if (!win._tadazaConsoleHooked) {
+                  win._tadazaConsoleHooked = true;
+                  win.webContents.on('console-message', (event, level, message, line, sourceId) => {
+                    if (level >= 2 || (message && (message.includes('TADaZa') || message.includes('Error')))) {
+                      console.log(`[Renderer L${level}] ${message}`);
+                    }
+                  });
+                }
+
                 if (fs.existsSync(themeCssPath)) {
                   const css = fs.readFileSync(themeCssPath, 'utf8');
                   win.webContents.insertCSS(css);
@@ -361,7 +446,9 @@ try {
               } catch (err) {
                 console.warn('[TADaZa Injector] Injection error:', err.message);
               }
-            });
+            };
+
+            win.webContents.on('dom-ready', injectTadaza);
           }
         } catch (e) {}
       });
@@ -401,7 +488,14 @@ function bootstrap() {
     console.warn('[AutoUpdater] Failed to initialize:', e.message);
   }
 
-  // Initialize TADaZa Extension Main Process
+  // Initialize TADaZa Extension Main Process & Build Bundles Once
+  try {
+    const { buildTadaza } = require('./linux_compat/tadaza/build');
+    buildTadaza();
+  } catch (bErr) {
+    console.warn('[Bootstrap] buildTadaza error:', bErr.message);
+  }
+
   try {
     const { initTadazaMain } = require('./linux_compat/tadaza/tadaza_main');
     initTadazaMain();

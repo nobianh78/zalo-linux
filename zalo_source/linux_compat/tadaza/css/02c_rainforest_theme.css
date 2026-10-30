@@ -1,0 +1,305 @@
+/* --------------------------------------------------------------------------
+   TADaZa Ecosystem Theme: Tropical Rain (Cơn Mưa Rừng Nhiệt Đới)
+   Aesthetic: Rain-soaked tropical canopy, falling drizzle, ripples & jade glass
+   -------------------------------------------------------------------------- */
+
+/* 1. Theme Variables */
+body.tadaza-theme-rainforest,
+body.dark.tadaza-theme-rainforest,
+body.tadaza-deep-dark.tadaza-theme-rainforest {
+  background-color: #03160f !important;
+  color: #ffffff !important;
+
+  --surface-background: rgba(5, 26, 18, 0.7) !important;
+  --surface-background-subtle: rgba(3, 18, 12, 0.8) !important;
+  --surface-background-overlay: rgba(2, 14, 9, 0.9) !important;
+  --surface-alt: rgba(8, 34, 24, 0.6) !important;
+  --layer-background: rgba(5, 26, 18, 0.7) !important;
+  --layer-background-subtle: rgba(3, 18, 12, 0.8) !important;
+  --layer-background-hover: rgba(16, 185, 129, 0.12) !important;
+  --layer-background-selected: rgba(16, 185, 129, 0.22) !important;
+  --layer-background-navbar-normal: rgba(3, 18, 12, 0.88) !important;
+  --layer-background-navbar-sublevel-normal: rgba(5, 26, 18, 0.7) !important;
+  --layer-background-leftmenu: rgba(3, 18, 12, 0.88) !important;
+  --bg-default: transparent !important;
+  --title-bar: rgba(4, 24, 18, 0.96) !important;
+
+  /* Messages */
+  --white-message: rgba(6, 28, 20, 0.9) !important;
+  --white-message-selected: rgba(16, 185, 129, 0.25) !important;
+  --blue-message: linear-gradient(135deg, rgba(5, 150, 105, 0.9), rgba(4, 120, 87, 0.94)) !important;
+  --blue-message-selected: rgba(16, 185, 129, 0.35) !important;
+  --layer-accent-message: rgba(16, 185, 129, 0.2) !important;
+  --self-bubble-chat-shadow: 0 4px 18px rgba(4, 120, 87, 0.3) !important;
+  --shadow-bubble: 0 4px 18px rgba(0, 0, 0, 0.35) !important;
+
+  /* Buttons */
+  --button-tertiary-neutral-normal: rgba(255, 255, 255, 0.08) !important;
+  --button-tertiary-neutral-hover: rgba(16, 185, 129, 0.2) !important;
+  --button-tertiary-neutral-pressed: rgba(16, 185, 129, 0.35) !important;
+  --button-tertiary-neutral-text: #ffffff !important;
+  --button-secondary-neutral-normal: rgba(16, 185, 129, 0.16) !important;
+  --button-secondary-neutral-hover: rgba(16, 185, 129, 0.3) !important;
+  --button-secondary-neutral-pressed: rgba(16, 185, 129, 0.45) !important;
+  --button-secondary-neutral-text: #ffffff !important;
+  --button-ghost-neutral-normal: transparent !important;
+  --button-ghost-neutral-hover: rgba(110, 231, 183, 0.15) !important;
+  --button-ghost-neutral-text: #ffffff !important;
+
+  /* Text & Contrast */
+  --text-primary: #ffffff !important;
+  --text-secondary: #a7f3d0 !important;
+  --text-placeholder: #529477 !important;
+  --text-disabled: #376853 !important;
+  --text-on-color: #ffffff !important;
+
+  /* Icons */
+  --icon-primary: #10b981 !important;
+  --icon-secondary: #6ee7b7 !important;
+
+  /* Borders */
+  --divider: rgba(16, 185, 129, 0.12) !important;
+  --divider-subtle: rgba(255, 255, 255, 0.06) !important;
+  --border: rgba(16, 185, 129, 0.22) !important;
+  --border-subtle: rgba(255, 255, 255, 0.08) !important;
+  --border-bold: rgba(16, 185, 129, 0.42) !important;
+
+  /* Inputs */
+  --input-field-bg-filled: rgba(255, 255, 255, 0.07) !important;
+  --input-field-bg-outline: rgba(16, 185, 129, 0.2) !important;
+}
+
+/* 2. Structural Layout & Transparency */
+body.tadaza-theme-rainforest,
+body.tadaza-theme-rainforest #app,
+body.tadaza-theme-rainforest #app-layout,
+body.tadaza-theme-rainforest .app-page,
+body.tadaza-theme-rainforest .main-content,
+body.tadaza-theme-rainforest #chat-layout,
+body.tadaza-theme-rainforest #chatView,
+body.tadaza-theme-rainforest .chat-conversation,
+body.tadaza-theme-rainforest .chat-conversation-history,
+body.tadaza-theme-rainforest .chat-box,
+body.tadaza-theme-rainforest #messageViewContainer,
+body.tadaza-theme-rainforest #messageViewScroll {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+/* 3. Header & Search Bar */
+body.tadaza-theme-rainforest header,
+body.tadaza-theme-rainforest #header,
+body.tadaza-theme-rainforest .chat-bar,
+body.tadaza-theme-rainforest #contact-search {
+  background: rgba(4, 24, 18, 0.96) !important;
+  backdrop-filter: blur(24px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(140%) !important;
+  border-bottom: 1px solid rgba(16, 185, 129, 0.28) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+}
+
+body.tadaza-theme-rainforest .main-title-container,
+body.tadaza-theme-rainforest .header-title,
+body.tadaza-theme-rainforest .threadChat,
+body.tadaza-theme-rainforest .threadChat__title,
+body.tadaza-theme-rainforest .threadChat__avatar {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+body.tadaza-theme-rainforest .threadChat__title [class*="title"],
+body.tadaza-theme-rainforest .truncate.header-title {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  text-shadow: 0 0 10px rgba(16, 185, 129, 0.35) !important;
+}
+
+body.tadaza-theme-rainforest #headerBtns button,
+body.tadaza-theme-rainforest #headerBtns .z--btn--v2,
+body.tadaza-theme-rainforest #headerBtns [class*="btn"] {
+  background: transparent !important;
+  border: none !important;
+  color: #6ee7b7 !important;
+  border-radius: 8px !important;
+  transition: all 0.15s ease !important;
+}
+
+body.tadaza-theme-rainforest #headerBtns button:hover,
+body.tadaza-theme-rainforest #headerBtns .z--btn--v2:hover {
+  background: rgba(16, 185, 129, 0.18) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.3) !important;
+}
+
+/* 4. Left Navigation & Sidebar */
+body.tadaza-theme-rainforest #nav-tab,
+body.tadaza-theme-rainforest .left-sidebar,
+body.tadaza-theme-rainforest #sidebar-nav {
+  background: rgba(3, 18, 12, 0.92) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-right: 1px solid rgba(16, 185, 129, 0.18) !important;
+}
+
+body.tadaza-theme-rainforest #nav-tab .tab-item.active,
+body.tadaza-theme-rainforest .left-sidebar .tab-item.active {
+  color: #6ee7b7 !important;
+  background: rgba(16, 185, 129, 0.15) !important;
+  box-shadow: inset 3px 0 0 #10b981, 0 0 15px rgba(16, 185, 129, 0.3) !important;
+}
+
+/* 5. Conversation List */
+body.tadaza-theme-rainforest #conversationList,
+body.tadaza-theme-rainforest .conv-list,
+body.tadaza-theme-rainforest .sub-layout-chat-list {
+  background: rgba(4, 22, 15, 0.82) !important;
+  backdrop-filter: blur(18px) !important;
+  -webkit-backdrop-filter: blur(18px) !important;
+  border-right: 1px solid rgba(16, 185, 129, 0.14) !important;
+}
+
+body.tadaza-theme-rainforest .conv-item:hover,
+body.tadaza-theme-rainforest [class*="conv-item"]:hover {
+  background: rgba(16, 185, 129, 0.08) !important;
+}
+
+body.tadaza-theme-rainforest .conv-item.active,
+body.tadaza-theme-rainforest [class*="conv-item"].active,
+body.tadaza-theme-rainforest .conv-item.selected {
+  background: rgba(16, 185, 129, 0.2) !important;
+  border-left: 3px solid #10b981 !important;
+  box-shadow: 0 0 14px rgba(16, 185, 129, 0.25) !important;
+}
+
+/* 6. Message Bubbles */
+body.tadaza-theme-rainforest .chat-item,
+body.tadaza-theme-rainforest .chat-message {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Incoming Friend Messages */
+body.tadaza-theme-rainforest .chat-message:not(.me) .card,
+body.tadaza-theme-rainforest .chat-message:not(.me) .card-bubble,
+body.tadaza-theme-rainforest .card--friend > [class*="message-content"],
+body.tadaza-theme-rainforest .card--friend > .card-bubble,
+body.tadaza-theme-rainforest .white-message {
+  background: rgba(6, 28, 20, 0.9) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border: 1px solid rgba(52, 211, 153, 0.3) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35) !important;
+  color: #ffffff !important;
+}
+
+body.tadaza-theme-rainforest .card--friend [class*="message-content"] *:not(.tadaza-code-card *):not(.CodeMirror *):not(.tadaza-inline-code):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]),
+body.tadaza-theme-rainforest [class*="friend-message"] [class*="message-content"] *:not(.tadaza-code-card *):not(.CodeMirror *):not(.tadaza-inline-code):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]),
+body.tadaza-theme-rainforest .chat-message:not(.me) .card *:not(.tadaza-code-card *):not(.CodeMirror *):not(.tadaza-inline-code):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]),
+body.tadaza-theme-rainforest .white-message *:not(.tadaza-code-card *):not(.CodeMirror *):not(.tadaza-inline-code):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]) {
+  color: #ffffff !important;
+}
+
+/* Outgoing My Messages */
+body.tadaza-theme-rainforest .chat-message.me .card,
+body.tadaza-theme-rainforest .chat-message.me .card-bubble,
+body.tadaza-theme-rainforest .card--me > [class*="message-content"],
+body.tadaza-theme-rainforest .card--me > .card-bubble,
+body.tadaza-theme-rainforest .blue-message {
+  background: linear-gradient(135deg, rgba(5, 150, 105, 0.9), rgba(4, 120, 87, 0.94)) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border: 1px solid rgba(110, 231, 183, 0.45) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 4px 20px rgba(5, 150, 105, 0.3) !important;
+  color: #ffffff !important;
+}
+
+body.tadaza-theme-rainforest .card--me [class*="message-content"] *:not(.tadaza-code-card *):not(.CodeMirror *):not(.tadaza-inline-code):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]),
+body.tadaza-theme-rainforest .chat-message.me .card *:not(.tadaza-code-card *):not(.CodeMirror *):not(.tadaza-inline-code):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]),
+body.tadaza-theme-rainforest .blue-message *:not(.tadaza-code-card *):not(.CodeMirror *):not(.tadaza-inline-code):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]) {
+  color: #ffffff !important;
+}
+
+/* 7. Code Blocks & Syntax Highlighting */
+body.tadaza-theme-rainforest .tadaza-code-card {
+  background: rgba(3, 16, 11, 0.94) !important;
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45) !important;
+  margin: 8px 0 !important;
+  overflow: hidden !important;
+}
+
+body.tadaza-theme-rainforest .tadaza-code-header {
+  background: rgba(2, 12, 8, 0.8) !important;
+  border-bottom: 1px solid rgba(16, 185, 129, 0.16) !important;
+  padding: 6px 12px !important;
+}
+
+body.tadaza-theme-rainforest .tadaza-code-lang {
+  color: #10b981 !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.8px !important;
+}
+
+body.tadaza-theme-rainforest .tadaza-code-pre,
+body.tadaza-theme-rainforest .file-preview__content pre {
+  background: rgba(2, 10, 7, 0.9) !important;
+  color: #d1fae5 !important;
+  font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace !important;
+  border-bottom: 1px solid rgba(16, 185, 129, 0.2) !important;
+}
+
+body.tadaza-theme-rainforest .tadaza-inline-code {
+  background: rgba(16, 185, 129, 0.16) !important;
+  color: #34d399 !important;
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
+  border-radius: 4px !important;
+  padding: 2px 6px !important;
+  font-weight: 600 !important;
+}
+
+body.tadaza-theme-rainforest .hl-keyword { color: #6ee7b7 !important; font-weight: 700 !important; }
+body.tadaza-theme-rainforest .hl-string { color: #a7f3d0 !important; }
+body.tadaza-theme-rainforest .hl-number { color: #fde047 !important; font-weight: 600 !important; }
+body.tadaza-theme-rainforest .hl-boolean { color: #f472b6 !important; font-weight: 700 !important; }
+body.tadaza-theme-rainforest .hl-comment { color: #529477 !important; font-style: italic !important; }
+body.tadaza-theme-rainforest .hl-function { color: #34d399 !important; font-weight: 600 !important; }
+body.tadaza-theme-rainforest .hl-operator { color: #6ee7b7 !important; }
+body.tadaza-theme-rainforest .hl-punctuation { color: #94a3b8 !important; }
+
+/* 8. Call Cards */
+body.tadaza-theme-rainforest .call-msg__callback,
+body.tadaza-theme-rainforest .call-message__callback-wrapper,
+body.tadaza-theme-rainforest [class*="call-msg"] [class*="callback"] {
+  background: rgba(16, 185, 129, 0.22) !important;
+  border: 1px solid rgba(16, 185, 129, 0.5) !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 0 14px rgba(16, 185, 129, 0.25) !important;
+}
+
+body.tadaza-theme-rainforest .call-msg__callback:hover {
+  background: rgba(16, 185, 129, 0.4) !important;
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.5) !important;
+}
+
+/* 9. Bottom Chat Box Toolbar */
+body.tadaza-theme-rainforest .chat-box-bar,
+body.tadaza-theme-rainforest .chat-input-container {
+  background: rgba(4, 24, 18, 0.94) !important;
+  border-top: 1px solid rgba(16, 185, 129, 0.2) !important;
+}
+
+body.tadaza-theme-rainforest .left-chat-box-bar i,
+body.tadaza-theme-rainforest .left-chat-box-bar svg {
+  color: #6ee7b7 !important;
+  fill: #6ee7b7 !important;
+  opacity: 0.95 !important;
+}

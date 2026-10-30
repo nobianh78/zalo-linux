@@ -6,7 +6,7 @@
 
     if (isDark) {
       document.body.classList.add('dark');
-      if (cfg.theme.deep_dark) {
+      if (cfg.theme.deep_dark && !cfg.theme.hawaiian_theme) {
         document.body.classList.add('tadaza-deep-dark');
       } else {
         document.body.classList.remove('tadaza-deep-dark');
@@ -81,7 +81,12 @@
       document.body.classList.remove('tadaza-blur-names-active');
     }
 
-
+    // Dynamic Animated Themes (Hawaiian, Cyberpunk, Sakura, Aurora, Synthwave)
+    if (typeof updateDynamicThemes === 'function') {
+      updateDynamicThemes(cfg.theme);
+    } else if (typeof updateHawaiianTheme === 'function') {
+      updateHawaiianTheme(cfg.theme);
+    }
   }
 
   function updateWallpaper(wallpaperUri, opacity = 0.85, blur = 0) {

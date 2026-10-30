@@ -4,10 +4,20 @@
 const fs = require('fs');
 const path = require('path');
 
+function normalizePath(p) {
+  if (!p || typeof p !== 'string') return '';
+  let clean = p.replace(/\\/g, '/');
+  if (/^[A-Za-z]:\//.test(clean)) {
+    clean = clean.replace(/^[A-Za-z]:\//, '/');
+  }
+  return clean;
+}
+
 function walk(dirPath, fileCallback) {
   let count = 0;
   let totalSize = 0;
-  const tracking = {};
+
+  const targetPath = normalizePath(dirPath);
 
   function traverse(currentDir) {
     let entries = [];
@@ -26,32 +36,56 @@ function walk(dirPath, fileCallback) {
           const stat = fs.statSync(fullPath);
           count++;
           totalSize += stat.size;
-          tracking[fullPath] = stat.size;
           if (fileCallback) fileCallback(fullPath, stat);
         }
       } catch (err) {}
     }
   }
 
-  if (fs.existsSync(dirPath)) {
-    traverse(dirPath);
+  if (targetPath && fs.existsSync(targetPath)) {
+    traverse(targetPath);
   }
 
-  return { count, totalSize, tracking };
+  return { count, totalSize };
 }
 
 async function scanDirectory(dirPath, options) {
-  const { count, totalSize, tracking } = walk(dirPath);
+  const normDir = normalizePath(dirPath);
+  const trackingFolders = Array.isArray(options) ? options : [];
+  const trackingFolderData = {};
+
+  let totalFiles = 0;
+  let totalBytes = 0;
+
+  if (trackingFolders.length > 0) {
+    for (const tf of trackingFolders) {
+      const normTf = normalizePath(tf);
+      const res = walk(normTf);
+      trackingFolderData[normTf] = {
+        size: res.totalSize,
+        file_number: res.count
+      };
+      totalFiles += res.count;
+      totalBytes += res.totalSize;
+    }
+  }
+
+  if (trackingFolders.length === 0) {
+    const mainRes = walk(normDir);
+    totalFiles = mainRes.count;
+    totalBytes = mainRes.totalSize;
+  }
+
   return {
-    fileNumber: count,
-    size: totalSize,
-    trackingPath: JSON.stringify(tracking)
+    fileNumber: totalFiles,
+    size: totalBytes,
+    trackingPath: JSON.stringify(trackingFolderData)
   };
 }
 
 async function updateReferenceMessageId(dirPath, options) {
   return {
-    fileNumber: 0
+    fileNumber: Array.isArray(options) ? options.length : 0
   };
 }
 
@@ -64,12 +98,37 @@ async function deleteHomelessFiles(dirPath, r, i, o) {
   };
 }
 
-async function statUnmarkedFiles(dirPath, r, i, o) {
-  const { count, totalSize, tracking } = walk(dirPath);
+async function statUnmarkedFiles(dirPath, ignorePaths, trackingPaths, times) {
+  const normDir = normalizePath(dirPath);
+  const trackingFolders = Array.isArray(trackingPaths) ? trackingPaths : [];
+  const trackingFolderData = {};
+
+  let totalFiles = 0;
+  let totalBytes = 0;
+
+  if (trackingFolders.length > 0) {
+    for (const tf of trackingFolders) {
+      const normTf = normalizePath(tf);
+      const res = walk(normTf);
+      trackingFolderData[normTf] = {
+        size: res.totalSize,
+        file_number: res.count
+      };
+      totalFiles += res.count;
+      totalBytes += res.totalSize;
+    }
+  }
+
+  if (trackingFolders.length === 0) {
+    const mainRes = walk(normDir);
+    totalFiles = mainRes.count;
+    totalBytes = mainRes.totalSize;
+  }
+
   return {
-    fileNumber: count,
-    size: totalSize,
-    trackingPath: JSON.stringify(tracking),
+    fileNumber: totalFiles,
+    size: totalBytes,
+    trackingPath: JSON.stringify(trackingFolderData),
     trackingATime: "{}"
   };
 }
@@ -77,6 +136,7 @@ async function statUnmarkedFiles(dirPath, r, i, o) {
 async function deleteEmptyFolders(dirPath) {
   let deletedCount = 0;
   const deletedDirs = [];
+  const targetPath = normalizePath(dirPath);
 
   function clean(currentDir) {
     let entries = [];
@@ -95,7 +155,7 @@ async function deleteEmptyFolders(dirPath) {
 
     try {
       const remaining = fs.readdirSync(currentDir);
-      if (remaining.length === 0 && currentDir !== dirPath) {
+      if (remaining.length === 0 && currentDir !== targetPath) {
         fs.rmdirSync(currentDir);
         deletedCount++;
         deletedDirs.push(currentDir);
@@ -103,8 +163,8 @@ async function deleteEmptyFolders(dirPath) {
     } catch (e) {}
   }
 
-  if (fs.existsSync(dirPath)) {
-    clean(dirPath);
+  if (targetPath && fs.existsSync(targetPath)) {
+    clean(targetPath);
   }
 
   return {

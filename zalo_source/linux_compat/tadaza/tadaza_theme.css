@@ -50,6 +50,60 @@ body.dark ::-webkit-scrollbar-thumb:hover {
   background: #484f58;
 }
 
+/* --------------------------------------------------------------------------
+   2. Data Management & Storage Contrast Fixes
+   -------------------------------------------------------------------------- */
+.disk-overview-container {
+  color: #e2e8f0 !important;
+}
+
+.disk-usage-chart {
+  background: rgba(255, 255, 255, 0.16) !important;
+  border-radius: 8px !important;
+  height: 10px !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.disk-usage-chart .zalo-usage {
+  background: #0088ff !important;
+  border-radius: 4px 0 0 4px !important;
+  box-shadow: 0 0 8px rgba(0, 136, 255, 0.5) !important;
+}
+
+.disk-usage-chart .another-app-usage {
+  background: #00d2ff !important;
+  box-shadow: 0 0 8px rgba(0, 210, 255, 0.4) !important;
+}
+
+.disk-usage-desc {
+  display: flex !important;
+  align-items: center !important;
+  margin-top: 8px !important;
+  font-size: 13px !important;
+}
+
+.disk-usage-desc [style*="var(--N300)"],
+.disk-usage-desc span {
+  color: #cbd5e1 !important;
+  font-weight: 500 !important;
+  opacity: 1 !important;
+}
+
+.disk-usage-desc-zalo {
+  background: #0088ff !important;
+  box-shadow: 0 0 6px rgba(0, 136, 255, 0.6) !important;
+}
+
+.disk-usage-desc-another {
+  background: #00d2ff !important;
+  box-shadow: 0 0 6px rgba(0, 210, 255, 0.5) !important;
+}
+
+.setting-section-content {
+  color: #e2e8f0 !important;
+}
+
 /* ==========================================================================
    MODULE: 02_privacy_and_wallpaper.css
    ========================================================================== */
@@ -165,6 +219,1945 @@ body.tadaza-blur-names-active #input_chat:focus::placeholder {
   pointer-events: none;
   z-index: 0;
   transition: opacity 0.3s ease;
+}
+
+/* ==========================================================================
+   MODULE: 02b_hawaiian_theme.css
+   ========================================================================== */
+
+/* ==========================================================================
+   TADaZa Hawaiian Lagoon Theme - Frosted Glass & ASCII Live Aquarium
+   Cohesive, Synchronized, High-Contrast Glassmorphism Design
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@500&family=Manrope:wght@300;500;600;700&display=swap');
+
+/* Container for the live animated Hawaiian Lagoon Canvas */
+#tadaza-hawaiian-container {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+  background: #04222c;
+  display: none;
+  opacity: 0.85;
+  transition: opacity 0.4s ease;
+}
+
+#tadaza-hawaiian-canvas {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 1944px;
+  height: 1760px;
+  transform-origin: center;
+  pointer-events: none;
+}
+
+/* --------------------------------------------------------------------------
+   0. Global Chromium Focus / Active Outline & Underline Reset
+   Eliminates blue/black focus rings, outlines and underlines on click
+   -------------------------------------------------------------------------- */
+body.tadaza-theme-hawaiian *:focus,
+body.tadaza-theme-hawaiian *:focus-visible,
+body.tadaza-theme-hawaiian *:active,
+body.tadaza-theme-hawaiian *:focus-within {
+  outline: none !important;
+  outline-color: transparent !important;
+  outline-style: none !important;
+  outline-width: 0 !important;
+  -webkit-focus-ring-color: transparent !important;
+}
+
+body.tadaza-theme-hawaiian .conv-item:focus,
+body.tadaza-theme-hawaiian .conv-item:active,
+body.tadaza-theme-hawaiian .conv-item:focus-visible,
+body.tadaza-theme-hawaiian [class*="conv-item"]:focus,
+body.tadaza-theme-hawaiian [class*="conv-item"]:active,
+body.tadaza-theme-hawaiian [class*="conv-item"]:focus-visible,
+body.tadaza-theme-hawaiian #input_chat:focus,
+body.tadaza-theme-hawaiian #input_chat:active,
+body.tadaza-theme-hawaiian .rich-input:focus,
+body.tadaza-theme-hawaiian .rich-input:active,
+body.tadaza-theme-hawaiian [id^="richInput"]:focus,
+body.tadaza-theme-hawaiian [id^="richInput"]:active,
+body.tadaza-theme-hawaiian .chat-input__content:focus,
+body.tadaza-theme-hawaiian .chat-input__content:focus-within,
+body.tadaza-theme-hawaiian #chatView:focus,
+body.tadaza-theme-hawaiian #messageViewContainer:focus {
+  outline: none !important;
+  outline-offset: 0 !important;
+  box-shadow: none !important;
+  text-decoration: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   1. Unified Theme Tokens (Synchronized across Light & Dark Modes)
+   -------------------------------------------------------------------------- */
+body.tadaza-theme-hawaiian,
+body.dark.tadaza-theme-hawaiian,
+body.tadaza-deep-dark.tadaza-theme-hawaiian {
+  background-color: #04222c !important;
+  color: #ffffff !important;
+
+  /* Surfaces & Layers - Unified Frosted Deep Teal Palette */
+  --surface-background: rgba(6, 30, 42, 0.65) !important;
+  --surface-background-subtle: rgba(4, 24, 34, 0.75) !important;
+  --surface-background-overlay: rgba(4, 20, 28, 0.85) !important;
+  --surface-alt: rgba(8, 38, 52, 0.55) !important;
+  --layer-background: rgba(6, 30, 42, 0.65) !important;
+  --layer-background-subtle: rgba(4, 24, 34, 0.75) !important;
+  --layer-background-hover: rgba(255, 255, 255, 0.1) !important;
+  --layer-background-selected: rgba(15, 195, 255, 0.18) !important;
+  --layer-background-navbar-normal: rgba(4, 24, 34, 0.8) !important;
+  --layer-background-navbar-sublevel-normal: rgba(6, 30, 42, 0.65) !important;
+  --layer-background-leftmenu: rgba(4, 24, 34, 0.8) !important;
+  --bg-default: transparent !important;
+  --title-bar: rgba(4, 22, 32, 0.96) !important;
+
+  /* Zalo Message Bubble Variables - Eliminate white background boxes */
+  --white-message: rgba(10, 44, 58, 0.9) !important;
+  --white-message-selected: rgba(15, 195, 255, 0.28) !important;
+  --blue-message: linear-gradient(135deg, rgba(16, 140, 180, 0.92), rgba(10, 105, 138, 0.96)) !important;
+  --blue-message-selected: rgba(15, 195, 255, 0.35) !important;
+  --layer-accent-message: rgba(15, 195, 255, 0.2) !important;
+  --self-bubble-chat-shadow: 0 4px 18px rgba(0, 0, 0, 0.35) !important;
+  --shadow-bubble: 0 4px 18px rgba(0, 0, 0, 0.35) !important;
+
+  /* Button Variables - Prevent white-on-white button invisibility */
+  --button-tertiary-neutral-normal: rgba(255, 255, 255, 0.12) !important;
+  --button-tertiary-neutral-hover: rgba(15, 195, 255, 0.25) !important;
+  --button-tertiary-neutral-pressed: rgba(15, 195, 255, 0.35) !important;
+  --button-tertiary-neutral-text: #ffffff !important;
+  --button-secondary-neutral-normal: rgba(15, 195, 255, 0.18) !important;
+  --button-secondary-neutral-hover: rgba(15, 195, 255, 0.3) !important;
+  --button-secondary-neutral-pressed: rgba(15, 195, 255, 0.42) !important;
+  --button-secondary-neutral-text: #ffffff !important;
+  --button-ghost-neutral-normal: transparent !important;
+  --button-ghost-neutral-hover: rgba(255, 255, 255, 0.1) !important;
+  --button-ghost-neutral-text: #ffffff !important;
+
+  /* Text Contrast - Crisp White & Soft Lagoon Pastel */
+  --text-primary: #ffffff !important;
+  --text-secondary: #9fc7d5 !important;
+  --text-placeholder: #729ba9 !important;
+  --text-disabled: #527a8a !important;
+  --text-on-color: #ffffff !important;
+
+  /* Icons */
+  --icon-primary: #e6f7fa !important;
+  --icon-secondary: #8ec2d2 !important;
+
+  /* Borders & Dividers */
+  --divider: rgba(255, 255, 255, 0.08) !important;
+  --divider-subtle: rgba(255, 255, 255, 0.05) !important;
+  --border: rgba(255, 255, 255, 0.12) !important;
+  --border-subtle: rgba(255, 255, 255, 0.08) !important;
+  --border-bold: rgba(255, 255, 255, 0.22) !important;
+
+  /* Inputs */
+  --input-field-bg-filled: rgba(255, 255, 255, 0.08) !important;
+  --input-field-bg-outline: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* --------------------------------------------------------------------------
+   2. App Roots & Structural Layouts (Transparent Base)
+   -------------------------------------------------------------------------- */
+body.tadaza-theme-hawaiian #app,
+body.tadaza-theme-hawaiian #app-layout,
+body.tadaza-theme-hawaiian #app-page,
+body.tadaza-theme-hawaiian #container,
+body.tadaza-theme-hawaiian .app-container,
+body.tadaza-theme-hawaiian .main-page,
+body.tadaza-theme-hawaiian .page-container,
+body.tadaza-theme-hawaiian main {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+/* --------------------------------------------------------------------------
+   3. Chat Center Area (Pure Transparent Viewport)
+   Allows the animated Hawaiian Lagoon Live Canvas to shine through 100%
+   -------------------------------------------------------------------------- */
+body.tadaza-theme-hawaiian #chatViewContainer {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+body.tadaza-theme-hawaiian #chatView,
+body.tadaza-theme-hawaiian #messageViewContainer,
+body.tadaza-theme-hawaiian #messageViewScroll,
+body.tadaza-theme-hawaiian #messageView,
+body.tadaza-theme-hawaiian #innerScrollContainerId,
+body.tadaza-theme-hawaiian .main__center,
+body.tadaza-theme-hawaiian .chat-content,
+body.tadaza-theme-hawaiian .chat-content-audit,
+body.tadaza-theme-hawaiian .chat-box-list,
+body.tadaza-theme-hawaiian .chat-list-scroll,
+body.tadaza-theme-hawaiian .chat-list,
+body.tadaza-theme-hawaiian .chat-item-spacing,
+body.tadaza-theme-hawaiian .chat-box,
+body.tadaza-theme-hawaiian .main-chat,
+body.tadaza-theme-hawaiian .chat-area,
+body.tadaza-theme-hawaiian .chat-view,
+body.tadaza-theme-hawaiian .message-view,
+body.tadaza-theme-hawaiian .message-view__scroll,
+body.tadaza-theme-hawaiian .chat-conversation-history,
+body.tadaza-theme-hawaiian .chat-message-list,
+body.tadaza-theme-hawaiian .messages-container,
+body.tadaza-theme-hawaiian .new-messages-container,
+body.tadaza-theme-hawaiian .conversation-viewport,
+body.tadaza-theme-hawaiian article,
+body.tadaza-theme-hawaiian article#chatView {
+  background: transparent !important;
+  background-color: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   4. Synchronized Panels: Left Menu, Thread List, Right Sidebar
+   Unified frosted dark ocean aesthetic without patched-up colors
+   -------------------------------------------------------------------------- */
+
+/* A. Left Navigation Bar */
+body.tadaza-theme-hawaiian nav,
+body.tadaza-theme-hawaiian .nav__tabs,
+body.tadaza-theme-hawaiian .nav {
+  background: rgba(4, 24, 34, 0.8) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+/* B. Conversation Thread List (Middle-Left Column) */
+body.tadaza-theme-hawaiian .conv-list,
+body.tadaza-theme-hawaiian [class*="conv-list"],
+body.tadaza-theme-hawaiian [class*="thread-list"],
+body.tadaza-theme-hawaiian #conversationList,
+body.tadaza-theme-hawaiian .main-tab__content {
+  background: rgba(6, 30, 42, 0.65) !important;
+  backdrop-filter: blur(20px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(140%) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+/* C. Right Sidebar ("Thông tin hội thoại" - Chat Info Panel) */
+body.tadaza-theme-hawaiian aside,
+body.tadaza-theme-hawaiian #chatInfoGeneral,
+body.tadaza-theme-hawaiian [class*="chat-info"],
+body.tadaza-theme-hawaiian #sideBodyScrollBox,
+body.tadaza-theme-hawaiian .side-body,
+body.tadaza-theme-hawaiian .side-body-scroll-box {
+  background: rgba(6, 30, 42, 0.65) !important;
+  backdrop-filter: blur(20px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(140%) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+/* D. Top Chat Header & Search Bar Harmonization */
+body.tadaza-theme-hawaiian header,
+body.tadaza-theme-hawaiian #header,
+body.tadaza-theme-hawaiian .chat-bar,
+body.tadaza-theme-hawaiian #contact-search {
+  background: rgba(4, 22, 32, 0.96) !important;
+  backdrop-filter: blur(24px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(140%) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25) !important;
+}
+
+/* Ensure avatar, name and inner title elements have NO isolated background box */
+body.tadaza-theme-hawaiian .threadChat,
+body.tadaza-theme-hawaiian .threadChat__title,
+body.tadaza-theme-hawaiian .threadChat__avatar,
+body.tadaza-theme-hawaiian .main-title-container,
+body.tadaza-theme-hawaiian .header-title,
+body.tadaza-theme-hawaiian [class*="chat-header"],
+body.tadaza-theme-hawaiian .chat-title,
+body.tadaza-theme-hawaiian .header-title-container,
+body.tadaza-theme-hawaiian .header-subtitle {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Header Buttons Container & Tool Buttons (Call, Search, Sidebar) */
+body.tadaza-theme-hawaiian #headerBtns,
+body.tadaza-theme-hawaiian header #headerBtns {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+body.tadaza-theme-hawaiian header button,
+body.tadaza-theme-hawaiian #header button,
+body.tadaza-theme-hawaiian #headerBtns button,
+body.tadaza-theme-hawaiian #headerBtns .z--btn--v2,
+body.tadaza-theme-hawaiian #headerBtns [class*="btn"],
+body.tadaza-theme-hawaiian #headerBtns .rel,
+body.tadaza-theme-hawaiian header .z--btn--v2,
+body.tadaza-theme-hawaiian header [class*="btn"],
+body.tadaza-theme-hawaiian .chat-bar button {
+  background: transparent !important;
+  background-color: transparent !important;
+  color: #c4e9f5 !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 8px !important;
+  transition: all 0.2s ease !important;
+}
+
+body.tadaza-theme-hawaiian header button:hover,
+body.tadaza-theme-hawaiian #header button:hover,
+body.tadaza-theme-hawaiian #headerBtns button:hover,
+body.tadaza-theme-hawaiian #headerBtns .z--btn--v2:hover,
+body.tadaza-theme-hawaiian #headerBtns [class*="btn"]:hover,
+body.tadaza-theme-hawaiian header .z--btn--v2:hover,
+body.tadaza-theme-hawaiian header [class*="btn"]:hover,
+body.tadaza-theme-hawaiian .chat-bar button:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: #ffffff !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+}
+
+body.tadaza-theme-hawaiian #headerBtns .z--btn--v2.active,
+body.tadaza-theme-hawaiian #headerBtns button.active,
+body.tadaza-theme-hawaiian #headerBtns [class*="active"],
+body.tadaza-theme-hawaiian header .z--btn--v2.active {
+  background: rgba(15, 195, 255, 0.2) !important;
+  border: 1px solid rgba(15, 195, 255, 0.45) !important;
+  color: #0fc3ff !important;
+  border-radius: 8px !important;
+}
+
+body.tadaza-theme-hawaiian #headerBtns svg,
+body.tadaza-theme-hawaiian #headerBtns i,
+body.tadaza-theme-hawaiian header svg,
+body.tadaza-theme-hawaiian header i {
+  color: #c4e9f5 !important;
+  fill: #c4e9f5 !important;
+  transition: color 0.2s ease, fill 0.2s ease !important;
+}
+
+body.tadaza-theme-hawaiian #headerBtns .z--btn--v2:hover svg,
+body.tadaza-theme-hawaiian #headerBtns .z--btn--v2:hover i,
+body.tadaza-theme-hawaiian #headerBtns button:hover svg,
+body.tadaza-theme-hawaiian #headerBtns button:hover i {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+}
+
+/* E. Bottom Chat Input Bar */
+body.tadaza-theme-hawaiian #chatInput,
+body.tadaza-theme-hawaiian .chat-input-container,
+body.tadaza-theme-hawaiian .chat-input__content,
+body.tadaza-theme-hawaiian .chat-box-input,
+body.tadaza-theme-hawaiian .chat-box-bar {
+  background: rgba(4, 28, 38, 0.88) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Bottom Chat Toolbar - High Visibility & Contrast for Media/Sticker/File Icons */
+body.tadaza-theme-hawaiian .chat-box-bar,
+body.tadaza-theme-hawaiian .left-chat-box-bar,
+body.tadaza-theme-hawaiian .right-chat-box-bar {
+  background: transparent !important;
+}
+
+body.tadaza-theme-hawaiian .left-chat-box-bar .chat-box-toolbar-button,
+body.tadaza-theme-hawaiian .left-chat-box-bar .z--btn--v2,
+body.tadaza-theme-hawaiian .left-chat-box-bar button,
+body.tadaza-theme-hawaiian .left-chat-box-bar [class*="btn"],
+body.tadaza-theme-hawaiian .chat-box-toolbar-button {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 6px !important;
+  transition: all 0.2s ease !important;
+}
+
+body.tadaza-theme-hawaiian .left-chat-box-bar i,
+body.tadaza-theme-hawaiian .left-chat-box-bar svg,
+body.tadaza-theme-hawaiian .left-chat-box-bar path,
+body.tadaza-theme-hawaiian .left-chat-box-bar [class*="fa-"],
+body.tadaza-theme-hawaiian .chat-box-toolbar-button i,
+body.tadaza-theme-hawaiian .chat-box-toolbar-button svg,
+body.tadaza-theme-hawaiian .chat-box-toolbar-button path {
+  color: #e2f1f8 !important;
+  fill: #e2f1f8 !important;
+  opacity: 0.95 !important;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4)) !important;
+  transition: all 0.18s ease !important;
+}
+
+body.tadaza-theme-hawaiian .left-chat-box-bar .chat-box-toolbar-button:hover,
+body.tadaza-theme-hawaiian .left-chat-box-bar .z--btn--v2:hover,
+body.tadaza-theme-hawaiian .left-chat-box-bar button:hover,
+body.tadaza-theme-hawaiian .left-chat-box-bar [class*="btn"]:hover,
+body.tadaza-theme-hawaiian .chat-box-toolbar-button:hover {
+  background: rgba(255, 255, 255, 0.14) !important;
+}
+
+body.tadaza-theme-hawaiian .left-chat-box-bar .chat-box-toolbar-button:hover i,
+body.tadaza-theme-hawaiian .left-chat-box-bar .chat-box-toolbar-button:hover svg,
+body.tadaza-theme-hawaiian .left-chat-box-bar .chat-box-toolbar-button:hover path,
+body.tadaza-theme-hawaiian .chat-box-toolbar-button:hover i,
+body.tadaza-theme-hawaiian .chat-box-toolbar-button:hover svg {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+  opacity: 1 !important;
+  transform: translateY(-1px);
+}
+
+body.tadaza-theme-hawaiian .left-chat-box-bar .chat-box-toolbar-button.active,
+body.tadaza-theme-hawaiian .chat-box-toolbar-button.active {
+  background: rgba(15, 195, 255, 0.22) !important;
+  border-radius: 6px !important;
+}
+
+body.tadaza-theme-hawaiian .left-chat-box-bar .chat-box-toolbar-button.active i,
+body.tadaza-theme-hawaiian .left-chat-box-bar .chat-box-toolbar-button.active svg {
+  color: #0fc3ff !important;
+  fill: #0fc3ff !important;
+  opacity: 1 !important;
+}
+
+/* --------------------------------------------------------------------------
+   5. Clean Typography, Contrast & Interactive Elements
+   -------------------------------------------------------------------------- */
+
+/* Thread list contact names & text */
+body.tadaza-theme-hawaiian .conv-item-title__name,
+body.tadaza-theme-hawaiian .conv-item-title,
+body.tadaza-theme-hawaiian [class*="conv-item-title"],
+body.tadaza-theme-hawaiian [class*="conv-title"],
+body.tadaza-theme-hawaiian [class*="conv-name"],
+body.tadaza-theme-hawaiian .conv-title-name {
+  color: #ffffff !important;
+  font-weight: 600 !important;
+}
+
+body.tadaza-theme-hawaiian .conv-message,
+body.tadaza-theme-hawaiian [class*="conv-message"],
+body.tadaza-theme-hawaiian [class*="z-conv-message"],
+body.tadaza-theme-hawaiian .conv-item-message,
+body.tadaza-theme-hawaiian [class*="preview-message"] {
+  color: #9fc7d5 !important;
+}
+
+body.tadaza-theme-hawaiian [class*="time"],
+body.tadaza-theme-hawaiian [class*="send-time"],
+body.tadaza-theme-hawaiian [class*="chat-timestamp"] {
+  color: #729ba9 !important;
+}
+
+/* Conversation List Items - Zero out all gray borders/outlines */
+body.tadaza-theme-hawaiian .conv-item,
+body.tadaza-theme-hawaiian [class*="conv-item"],
+body.tadaza-theme-hawaiian .conversation-item,
+body.tadaza-theme-hawaiian [class*="conversation-item"],
+body.tadaza-theme-hawaiian .conv-item-padding,
+body.tadaza-theme-hawaiian [class*="conv-item-padding"] {
+  border: none !important;
+  border-color: transparent !important;
+  outline: none !important;
+  outline-color: transparent !important;
+  outline-style: none !important;
+  outline-width: 0 !important;
+  box-shadow: none !important;
+  -webkit-focus-ring-color: transparent !important;
+}
+
+body.tadaza-theme-hawaiian .conv-item:hover,
+body.tadaza-theme-hawaiian .conv-item:focus,
+body.tadaza-theme-hawaiian .conv-item:active,
+body.tadaza-theme-hawaiian .conv-item:focus-visible,
+body.tadaza-theme-hawaiian [class*="conv-item"]:hover,
+body.tadaza-theme-hawaiian [class*="conv-item"]:focus,
+body.tadaza-theme-hawaiian [class*="conv-item"]:active,
+body.tadaza-theme-hawaiian [class*="conv-item"]:focus-visible,
+body.tadaza-theme-hawaiian .conv-item.active,
+body.tadaza-theme-hawaiian [class*="conv-item"].active {
+  border: none !important;
+  border-color: transparent !important;
+  outline: none !important;
+  outline-color: transparent !important;
+  outline-style: none !important;
+  outline-width: 0 !important;
+  box-shadow: none !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+body.tadaza-theme-hawaiian .conv-item.selected,
+body.tadaza-theme-hawaiian [class*="conv-item"][class*="selected"],
+body.tadaza-theme-hawaiian .chat-list-item-selected {
+  border: none !important;
+  border-left: 3px solid #0fc3ff !important;
+  outline: none !important;
+  outline-width: 0 !important;
+  box-shadow: none !important;
+  background: rgba(15, 195, 255, 0.16) !important;
+}
+
+body.tadaza-theme-hawaiian .conv-item-padding:before {
+  display: none !important;
+  border: none !important;
+}
+
+/* Search bar in conversation list */
+body.tadaza-theme-hawaiian input#contact-search-input,
+body.tadaza-theme-hawaiian [class*="search-input"] {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  border-radius: 8px !important;
+}
+
+body.tadaza-theme-hawaiian input#contact-search-input::placeholder,
+body.tadaza-theme-hawaiian [class*="search-input"]::placeholder {
+  color: #729ba9 !important;
+}
+
+/* Thread list tabs ('Tất cả', 'Chưa đọc', 'Phân loại') */
+body.tadaza-theme-hawaiian .tab-redesign,
+body.tadaza-theme-hawaiian [class*="tab-redesign"],
+body.tadaza-theme-hawaiian [class*="tab-item"] {
+  color: #92bac8 !important;
+}
+
+body.tadaza-theme-hawaiian .tab-redesign.active,
+body.tadaza-theme-hawaiian [class*="tab-item"].active,
+body.tadaza-theme-hawaiian [class*="tab-item"][class*="active"],
+body.tadaza-theme-hawaiian [class*="tab-redesign"][class*="selected"] {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  border-bottom-color: #0fc3ff !important;
+}
+
+/* Header title and icons */
+body.tadaza-theme-hawaiian .header-title *,
+body.tadaza-theme-hawaiian [class*="chat-header"] *,
+body.tadaza-theme-hawaiian .main-title-container * {
+  color: #ffffff !important;
+}
+
+body.tadaza-theme-hawaiian .header-title svg,
+body.tadaza-theme-hawaiian [class*="chat-header"] svg,
+body.tadaza-theme-hawaiian .main-title-container svg,
+body.tadaza-theme-hawaiian [class*="chat-header"] i {
+  color: #c4e9f5 !important;
+  fill: #c4e9f5 !important;
+}
+
+/* Right Sidebar typography & buttons */
+body.tadaza-theme-hawaiian aside *,
+body.tadaza-theme-hawaiian #chatInfoGeneral *,
+body.tadaza-theme-hawaiian [class*="chat-info"] *,
+body.tadaza-theme-hawaiian #sideBodyScrollBox * {
+  color: #d6eef5;
+}
+
+body.tadaza-theme-hawaiian [class*="section__header"],
+body.tadaza-theme-hawaiian [class*="section__header--title"],
+body.tadaza-theme-hawaiian [class*="section-title"],
+body.tadaza-theme-hawaiian [class*="chat-info"] h3,
+body.tadaza-theme-hawaiian [class*="chat-info"] h4 {
+  color: #ffffff !important;
+  font-weight: 600 !important;
+}
+
+/* Unified Clean Buttons in Sidebar & Modals */
+body.tadaza-theme-hawaiian aside button,
+body.tadaza-theme-hawaiian #chatInfoGeneral button,
+body.tadaza-theme-hawaiian [class*="chat-info"] button,
+body.tadaza-theme-hawaiian .chat-info__btn,
+body.tadaza-theme-hawaiian [class*="action-btn"] {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  border-radius: 8px !important;
+  transition: all 0.2s ease !important;
+}
+
+body.tadaza-theme-hawaiian aside button:hover,
+body.tadaza-theme-hawaiian #chatInfoGeneral button:hover,
+body.tadaza-theme-hawaiian [class*="chat-info"] button:hover {
+  background: rgba(15, 195, 255, 0.25) !important;
+  border-color: rgba(15, 195, 255, 0.5) !important;
+}
+
+/* Right Sidebar Circular Tool Buttons ("Tắt thông báo", "Ghim hội thoại", "Tạo nhóm") */
+body.tadaza-theme-hawaiian .header-info__tool,
+body.tadaza-theme-hawaiian .header-info__tool__button {
+  background: transparent !important;
+}
+
+body.tadaza-theme-hawaiian .header-info__tool .z--btn--v2,
+body.tadaza-theme-hawaiian .header-info__tool button,
+body.tadaza-theme-hawaiian .header-info__tool [class*="btn"],
+body.tadaza-theme-hawaiian .header-info__tool .--full-rounded,
+body.tadaza-theme-hawaiian .header-info__tool [class*="full-rounded"],
+body.tadaza-theme-hawaiian .header-info__edit-alias,
+body.tadaza-theme-hawaiian .header-info__icon,
+body.tadaza-theme-hawaiian .edit-alias-icon {
+  background: rgba(15, 195, 255, 0.18) !important;
+  border: 1px solid rgba(15, 195, 255, 0.4) !important;
+  color: #0fc3ff !important;
+  border-radius: 999px !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25) !important;
+  transition: all 0.2s ease !important;
+}
+
+body.tadaza-theme-hawaiian .header-info__tool .z--btn--v2:hover,
+body.tadaza-theme-hawaiian .header-info__tool button:hover,
+body.tadaza-theme-hawaiian .header-info__tool [class*="btn"]:hover,
+body.tadaza-theme-hawaiian .header-info__edit-alias:hover {
+  background: rgba(15, 195, 255, 0.35) !important;
+  border-color: #0fc3ff !important;
+  box-shadow: 0 0 14px rgba(15, 195, 255, 0.5) !important;
+}
+
+body.tadaza-theme-hawaiian .header-info__tool i,
+body.tadaza-theme-hawaiian .header-info__tool svg,
+body.tadaza-theme-hawaiian .header-info__tool [class*="fa-"],
+body.tadaza-theme-hawaiian .header-info__edit-alias i,
+body.tadaza-theme-hawaiian .header-info__edit-alias svg {
+  color: #0fc3ff !important;
+  fill: #0fc3ff !important;
+}
+
+body.tadaza-theme-hawaiian .header-info__tool [class*="div-12"],
+body.tadaza-theme-hawaiian .header-info__tool span,
+body.tadaza-theme-hawaiian .header-info__tool p {
+  color: #c4e9f5 !important;
+  font-weight: 500 !important;
+}
+
+/* Right Sidebar "Xem thêm" Button (under "Thông tin kinh doanh") */
+body.tadaza-theme-hawaiian aside button.view-more__full,
+body.tadaza-theme-hawaiian aside .view-more__full,
+body.tadaza-theme-hawaiian #chatInfoGeneral .view-more__full,
+body.tadaza-theme-hawaiian .view-more__full,
+body.tadaza-theme-hawaiian .view-more__btn,
+body.tadaza-theme-hawaiian [class*="view-more"] button,
+body.tadaza-theme-hawaiian [class*="view-more"].z--btn--v2,
+body.tadaza-theme-hawaiian [class*="view-more"] [class*="btn"],
+body.tadaza-theme-hawaiian .chat-info-general button,
+body.tadaza-theme-hawaiian .chat-info-general .z--btn--v2,
+body.tadaza-theme-hawaiian [class*="friend-profile"] button,
+body.tadaza-theme-hawaiian [class*="user-profile"] button {
+  background: rgba(15, 195, 255, 0.22) !important;
+  border: 1px solid rgba(15, 195, 255, 0.45) !important;
+  border-radius: 8px !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  padding: 8px 18px !important;
+  transition: all 0.2s ease !important;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5) !important;
+}
+
+body.tadaza-theme-hawaiian .view-more__full:hover,
+body.tadaza-theme-hawaiian [class*="view-more"] button:hover,
+body.tadaza-theme-hawaiian [class*="view-more"].z--btn--v2:hover,
+body.tadaza-theme-hawaiian .chat-info-general button:hover,
+body.tadaza-theme-hawaiian .chat-info-general .z--btn--v2:hover {
+  background: rgba(15, 195, 255, 0.38) !important;
+  border-color: #0fc3ff !important;
+  box-shadow: 0 0 12px rgba(15, 195, 255, 0.45) !important;
+  color: #ffffff !important;
+}
+
+/* Chat Input field */
+body.tadaza-theme-hawaiian .rich-input,
+body.tadaza-theme-hawaiian [id^="richInput"],
+body.tadaza-theme-hawaiian #input_chat {
+  color: #ffffff !important;
+  background: transparent !important;
+}
+
+body.tadaza-theme-hawaiian .rich-input::placeholder,
+body.tadaza-theme-hawaiian [id^="richInput"]::placeholder,
+body.tadaza-theme-hawaiian #input_chat::placeholder {
+  color: #729ba9 !important;
+}
+
+body.tadaza-theme-hawaiian [class*="chat-box-input__tools"],
+body.tadaza-theme-hawaiian [class*="chat-input__tools"] {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+
+body.tadaza-theme-hawaiian [class*="chat-box-input__tools__btn"],
+body.tadaza-theme-hawaiian [class*="chat-box-input-button"],
+body.tadaza-theme-hawaiian [class*="chat-input-menu"] i,
+body.tadaza-theme-hawaiian [class*="chat-input-menu"] svg {
+  color: #a0c7d5 !important;
+  fill: #a0c7d5 !important;
+}
+
+body.tadaza-theme-hawaiian [class*="chat-box-input__tools__btn"]:hover,
+body.tadaza-theme-hawaiian [class*="chat-box-input-button"]:hover {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+}
+
+/* --------------------------------------------------------------------------
+   6. Message Bubbles, File Preview Cards & Code Blocks
+   Fix "White Text on White Background" completely
+   -------------------------------------------------------------------------- */
+
+body.tadaza-theme-hawaiian [class*="message-content"],
+body.tadaza-theme-hawaiian [class*="msg-content"],
+body.tadaza-theme-hawaiian [class*="bubble-content"] {
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border-radius: 18px !important;
+}
+
+/* Incoming Friend Messages */
+body.tadaza-theme-hawaiian .card--friend [class*="message-content"],
+body.tadaza-theme-hawaiian [class*="friend-message"] [class*="message-content"],
+body.tadaza-theme-hawaiian .chat-message:not(.me) .card,
+body.tadaza-theme-hawaiian .chat-message:not(.me) .card-bubble,
+body.tadaza-theme-hawaiian .chat-message:not(.me) .card-content,
+body.tadaza-theme-hawaiian .white-message,
+body.tadaza-theme-hawaiian .card.card--friend,
+body.tadaza-theme-hawaiian .card--friend .card-bubble,
+body.tadaza-theme-hawaiian .card--friend .card-message {
+  background: rgba(10, 44, 58, 0.88) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(130, 220, 240, 0.28) !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35) !important;
+}
+
+body.tadaza-theme-hawaiian .card--friend [class*="message-content"] *:not(.tadaza-code-card *):not(.CodeMirror *):not(.tadaza-inline-code):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]),
+body.tadaza-theme-hawaiian [class*="friend-message"] [class*="message-content"] *:not(.tadaza-code-card *):not(.CodeMirror *):not(.tadaza-inline-code):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]),
+body.tadaza-theme-hawaiian .chat-message:not(.me) .card *:not(.tadaza-code-card *):not(.CodeMirror *):not(.tadaza-inline-code):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]),
+body.tadaza-theme-hawaiian .white-message *:not(.tadaza-code-card *):not(.CodeMirror *):not(.tadaza-inline-code):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]) {
+  color: #ffffff !important;
+}
+
+/* Message Wrappers - Reset outer wrappers to prevent nested borders */
+body.tadaza-theme-hawaiian .chat-item,
+body.tadaza-theme-hawaiian .chat-message {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Incoming Friend Messages - Single Outer Border */
+body.tadaza-theme-hawaiian .chat-message:not(.me) .card,
+body.tadaza-theme-hawaiian .chat-message:not(.me) .card-bubble,
+body.tadaza-theme-hawaiian .card--friend > [class*="message-content"],
+body.tadaza-theme-hawaiian .card--friend > .card-bubble,
+body.tadaza-theme-hawaiian .card--friend > .card-message,
+body.tadaza-theme-hawaiian .card--friend.card--file,
+body.tadaza-theme-hawaiian .card--friend > .card--file,
+body.tadaza-theme-hawaiian .card--friend > .file-message,
+body.tadaza-theme-hawaiian .white-message {
+  background: rgba(10, 44, 58, 0.88) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(130, 220, 240, 0.3) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35) !important;
+  overflow: hidden !important;
+}
+
+/* Outgoing My Messages - Single Outer Border */
+body.tadaza-theme-hawaiian .chat-message.me .card,
+body.tadaza-theme-hawaiian .chat-message.me .card-bubble,
+body.tadaza-theme-hawaiian .card--me > [class*="message-content"],
+body.tadaza-theme-hawaiian .card--me > .card-bubble,
+body.tadaza-theme-hawaiian .card--me > .card-message,
+body.tadaza-theme-hawaiian .card--me.card--file,
+body.tadaza-theme-hawaiian .card--me > .card--file,
+body.tadaza-theme-hawaiian .card--me > .file-message,
+body.tadaza-theme-hawaiian .blue-message {
+  background: linear-gradient(135deg, rgba(16, 150, 190, 0.92), rgba(12, 115, 150, 0.96)) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.35) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 6px 22px rgba(4, 40, 52, 0.35) !important;
+  overflow: hidden !important;
+}
+
+body.tadaza-theme-hawaiian .card--me [class*="message-content"] *:not(.tadaza-code-card *):not(.CodeMirror *):not(.tadaza-inline-code):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]),
+body.tadaza-theme-hawaiian .chat-message.me .card *:not(.tadaza-code-card *):not(.CodeMirror *):not(.tadaza-inline-code):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]),
+body.tadaza-theme-hawaiian .blue-message *:not(.tadaza-code-card *):not(.CodeMirror *):not(.tadaza-inline-code):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]) {
+  color: #ffffff !important;
+}
+
+/* Loading skeleton & spinner safeguards - ensure loading is never blocked or hidden */
+body.tadaza-theme-hawaiian .loading-msg,
+body.tadaza-theme-hawaiian .chat-loading,
+body.tadaza-theme-hawaiian .z-chat-loading,
+body.tadaza-theme-hawaiian .z-chat-loading-pined,
+body.tadaza-theme-hawaiian .loadingDefault,
+body.tadaza-theme-hawaiian [class*="loading-msg"],
+body.tadaza-theme-hawaiian [class*="chat-loading"],
+body.tadaza-theme-hawaiian [class*="loading-spinner"] {
+  display: flex !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+
+/* File Preview Card & Containers - Remove all inner nested borders */
+body.tadaza-theme-hawaiian .file-message,
+body.tadaza-theme-hawaiian .file-message-v2,
+body.tadaza-theme-hawaiian .file-message__container,
+body.tadaza-theme-hawaiian .file-message__content-container,
+body.tadaza-theme-hawaiian .file-message__content,
+body.tadaza-theme-hawaiian .file-message__content-info-container,
+body.tadaza-theme-hawaiian .card-content-file,
+body.tadaza-theme-hawaiian .card--file,
+body.tadaza-theme-hawaiian .card.card--file,
+body.tadaza-theme-hawaiian .card-bubble,
+body.tadaza-theme-hawaiian .file-preview,
+body.tadaza-theme-hawaiian .file-preview__main,
+body.tadaza-theme-hawaiian .card-send-file {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+body.tadaza-theme-hawaiian .file-message *:not(.CodeMirror *):not(.tadaza-code-card *):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]),
+body.tadaza-theme-hawaiian .file-preview *:not(.CodeMirror *):not(.tadaza-code-card *):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]),
+body.tadaza-theme-hawaiian .card-send-file *:not(.CodeMirror *):not(.tadaza-code-card *):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]) {
+  color: #d8f3fa !important;
+}
+
+/* File name & title (Crisp White with shadow) */
+body.tadaza-theme-hawaiian .file-message__content-title,
+body.tadaza-theme-hawaiian .file-name,
+body.tadaza-theme-hawaiian .card-title,
+body.tadaza-theme-hawaiian .cb-info-file-item__file-name,
+body.tadaza-theme-hawaiian [class*="file-name"],
+body.tadaza-theme-hawaiian [class*="file-title"],
+body.tadaza-theme-hawaiian [class*="file-message__content-title"] {
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6) !important;
+  border: none !important;
+}
+
+/* File size and status (Đã có trên máy, size, ticks) */
+body.tadaza-theme-hawaiian .file-message__content-info-size,
+body.tadaza-theme-hawaiian .card-size,
+body.tadaza-theme-hawaiian .file-size,
+body.tadaza-theme-hawaiian .cb-info-file-item__file-size,
+body.tadaza-theme-hawaiian [class*="file-message__content-info"],
+body.tadaza-theme-hawaiian [class*="file-message__content-info-size"],
+body.tadaza-theme-hawaiian [class*="tick-text"],
+body.tadaza-theme-hawaiian [class*="file-progress-no"] {
+  color: #8ec2d2 !important;
+  font-size: 12px !important;
+  border: none !important;
+}
+
+/* Status icon checkmark (Đã có trên máy) */
+body.tadaza-theme-hawaiian [class*="file-message__content-info-tick-text--status-downloaded"],
+body.tadaza-theme-hawaiian [class*="status-downloaded"] {
+  color: #38ef7d !important;
+}
+
+/* Action icons on file card (View, Open folder, Download) - Clean small buttons */
+body.tadaza-theme-hawaiian .file-message__actions-icon,
+body.tadaza-theme-hawaiian .file-action-item i,
+body.tadaza-theme-hawaiian .file-actions-row__wrap,
+body.tadaza-theme-hawaiian .file-actions-row__icon,
+body.tadaza-theme-hawaiian [class*="file-message__actions-icon"],
+body.tadaza-theme-hawaiian [class*="file-action-item"] i {
+  background: rgba(15, 195, 255, 0.16) !important;
+  border: 1px solid rgba(15, 195, 255, 0.35) !important;
+  color: #e6f7fa !important;
+  fill: #e6f7fa !important;
+  border-radius: 6px !important;
+  transition: all 0.15s ease !important;
+}
+
+body.tadaza-theme-hawaiian .file-message__actions-icon:hover,
+body.tadaza-theme-hawaiian .file-action-item i:hover,
+body.tadaza-theme-hawaiian .file-actions-row__wrap:hover {
+  background: rgba(15, 195, 255, 0.35) !important;
+  border-color: #0fc3ff !important;
+  color: #ffffff !important;
+  fill: #ffffff !important;
+}
+
+/* --------------------------------------------------------------------------
+   Syntax Highlighting & Code Blocks Preservation (TADaZa & CodeMirror)
+   Restore vivid syntax colors for all code tokens in Hawaiian Theme
+   -------------------------------------------------------------------------- */
+
+/* Code Card Container in chat messages */
+body.tadaza-theme-hawaiian .tadaza-code-card {
+  background: rgba(3, 16, 25, 0.92) !important;
+  border: 1px solid rgba(15, 195, 255, 0.3) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45) !important;
+  margin: 8px 0 !important;
+  overflow: hidden !important;
+  text-align: left !important;
+}
+
+body.tadaza-theme-hawaiian .tadaza-code-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  background: rgba(2, 10, 16, 0.75) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  padding: 6px 12px !important;
+}
+
+body.tadaza-theme-hawaiian .tadaza-code-lang,
+body.tadaza-theme-hawaiian .tadaza-code-lang-badge {
+  color: #38bdf8 !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px !important;
+  text-transform: uppercase !important;
+  font-size: 11px !important;
+}
+
+body.tadaza-theme-hawaiian .tadaza-code-copy-btn {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  color: #e2f1f8 !important;
+  border-radius: 5px !important;
+  padding: 3px 8px !important;
+  font-size: 11.5px !important;
+  transition: all 0.15s ease !important;
+}
+
+body.tadaza-theme-hawaiian .tadaza-code-copy-btn:hover {
+  background: rgba(15, 195, 255, 0.22) !important;
+  border-color: #0fc3ff !important;
+  color: #ffffff !important;
+}
+
+body.tadaza-theme-hawaiian .tadaza-code-copy-btn.copied {
+  background: #238636 !important;
+  border-color: #2ea043 !important;
+  color: #ffffff !important;
+}
+
+/* Code Pre and Content */
+body.tadaza-theme-hawaiian .tadaza-code-pre,
+body.tadaza-theme-hawaiian .file-preview__content,
+body.tadaza-theme-hawaiian .file-preview__content pre,
+body.tadaza-theme-hawaiian .file-preview__main pre,
+body.tadaza-theme-hawaiian .file-message pre,
+body.tadaza-theme-hawaiian .card--file pre,
+body.tadaza-theme-hawaiian pre.CodeMirror-line {
+  background: rgba(2, 9, 14, 0.88) !important;
+  color: #e2f1f8 !important;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Geist Mono', Consolas, monospace !important;
+  font-size: 12.5px !important;
+  line-height: 1.55 !important;
+  border: none !important;
+  border-bottom: 1px solid rgba(130, 220, 240, 0.2) !important;
+}
+
+body.tadaza-theme-hawaiian .tadaza-code-content,
+body.tadaza-theme-hawaiian .tadaza-code-line,
+body.tadaza-theme-hawaiian .line-code {
+  color: #e2f1f8 !important;
+}
+
+/* Line numbers */
+body.tadaza-theme-hawaiian .line-num,
+body.tadaza-theme-hawaiian .CodeMirror-linenumber {
+  color: #557b8b !important;
+  opacity: 0.85 !important;
+  user-select: none !important;
+}
+
+/* Inline Code Snippets */
+body.tadaza-theme-hawaiian .tadaza-inline-code,
+body.tadaza-theme-hawaiian code:not(pre code) {
+  background: rgba(15, 195, 255, 0.16) !important;
+  color: #ff7b72 !important;
+  border: 1px solid rgba(15, 195, 255, 0.3) !important;
+  border-radius: 4px !important;
+  padding: 2px 6px !important;
+  font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace !important;
+  font-size: 0.9em !important;
+  font-weight: 600 !important;
+  word-break: break-word !important;
+}
+
+/* Rich text input / composer code formatting */
+body.tadaza-theme-hawaiian .rich-text-input code,
+body.tadaza-theme-hawaiian .rich-input code,
+body.tadaza-theme-hawaiian .chat-input-container code,
+body.tadaza-theme-hawaiian [contenteditable] code {
+  background: rgba(15, 195, 255, 0.18) !important;
+  color: #ff7b72 !important;
+  border: 1px solid rgba(15, 195, 255, 0.35) !important;
+  border-radius: 4px !important;
+  padding: 1px 5px !important;
+  font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace !important;
+  font-size: 0.9em !important;
+}
+
+body.tadaza-theme-hawaiian .rich-text-input pre,
+body.tadaza-theme-hawaiian .rich-input pre,
+body.tadaza-theme-hawaiian .chat-input-container pre,
+body.tadaza-theme-hawaiian [contenteditable] pre {
+  background: rgba(3, 16, 25, 0.85) !important;
+  color: #e2f1f8 !important;
+  border: 1px solid rgba(15, 195, 255, 0.25) !important;
+  border-radius: 6px !important;
+  padding: 8px !important;
+  font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace !important;
+}
+
+/* TADaZa Syntax Highlighting (hl-*) */
+body.tadaza-theme-hawaiian .hl-keyword {
+  color: #cba6f7 !important;
+  font-weight: 700 !important;
+}
+body.tadaza-theme-hawaiian .hl-string {
+  color: #a6e3a1 !important;
+}
+body.tadaza-theme-hawaiian .hl-number {
+  color: #fab387 !important;
+  font-weight: 600 !important;
+}
+body.tadaza-theme-hawaiian .hl-boolean {
+  color: #f38ba8 !important;
+  font-weight: 700 !important;
+}
+body.tadaza-theme-hawaiian .hl-comment {
+  color: #6c7086 !important;
+  font-style: italic !important;
+}
+body.tadaza-theme-hawaiian .hl-function {
+  color: #89b4fa !important;
+  font-weight: 600 !important;
+}
+body.tadaza-theme-hawaiian .hl-operator {
+  color: #89dceb !important;
+}
+body.tadaza-theme-hawaiian .hl-punctuation {
+  color: #9399b2 !important;
+}
+
+/* CodeMirror Syntax Tokens (cm-*) - Zalo Snippets / File Previews */
+body.tadaza-theme-hawaiian .cm-keyword,
+body.tadaza-theme-hawaiian span.cm-keyword {
+  color: #cba6f7 !important;
+  font-weight: 700 !important;
+}
+body.tadaza-theme-hawaiian .cm-string,
+body.tadaza-theme-hawaiian span.cm-string,
+body.tadaza-theme-hawaiian .cm-string-2,
+body.tadaza-theme-hawaiian span.cm-string-2 {
+  color: #a6e3a1 !important;
+}
+body.tadaza-theme-hawaiian .cm-number,
+body.tadaza-theme-hawaiian span.cm-number {
+  color: #fab387 !important;
+  font-weight: 600 !important;
+}
+body.tadaza-theme-hawaiian .cm-comment,
+body.tadaza-theme-hawaiian span.cm-comment {
+  color: #6c7086 !important;
+  font-style: italic !important;
+}
+body.tadaza-theme-hawaiian .cm-def,
+body.tadaza-theme-hawaiian span.cm-def {
+  color: #89b4fa !important;
+  font-weight: 600 !important;
+}
+body.tadaza-theme-hawaiian .cm-variable,
+body.tadaza-theme-hawaiian span.cm-variable {
+  color: #cdd6f4 !important;
+}
+body.tadaza-theme-hawaiian .cm-variable-2,
+body.tadaza-theme-hawaiian span.cm-variable-2 {
+  color: #94e2d5 !important;
+}
+body.tadaza-theme-hawaiian .cm-variable-3,
+body.tadaza-theme-hawaiian span.cm-variable-3 {
+  color: #f5c2e7 !important;
+}
+body.tadaza-theme-hawaiian .cm-type,
+body.tadaza-theme-hawaiian span.cm-type {
+  color: #f9e2af !important;
+  font-weight: 600 !important;
+}
+body.tadaza-theme-hawaiian .cm-property,
+body.tadaza-theme-hawaiian span.cm-property {
+  color: #89b4fa !important;
+}
+body.tadaza-theme-hawaiian .cm-operator,
+body.tadaza-theme-hawaiian span.cm-operator {
+  color: #89dceb !important;
+}
+body.tadaza-theme-hawaiian .cm-atom,
+body.tadaza-theme-hawaiian span.cm-atom,
+body.tadaza-theme-hawaiian .cm-builtin,
+body.tadaza-theme-hawaiian span.cm-builtin {
+  color: #f38ba8 !important;
+  font-weight: 600 !important;
+}
+body.tadaza-theme-hawaiian .cm-tag,
+body.tadaza-theme-hawaiian span.cm-tag {
+  color: #f38ba8 !important;
+  font-weight: 700 !important;
+}
+body.tadaza-theme-hawaiian .cm-attribute,
+body.tadaza-theme-hawaiian span.cm-attribute {
+  color: #fab387 !important;
+}
+body.tadaza-theme-hawaiian .cm-meta,
+body.tadaza-theme-hawaiian span.cm-meta {
+  color: #f9e2af !important;
+}
+body.tadaza-theme-hawaiian .cm-bracket,
+body.tadaza-theme-hawaiian span.cm-bracket {
+  color: #9399b2 !important;
+}
+body.tadaza-theme-hawaiian .CodeMirror {
+  background: rgba(3, 16, 25, 0.94) !important;
+  color: #e2f1f8 !important;
+  border-radius: 8px !important;
+  border: 1px solid rgba(15, 195, 255, 0.25) !important;
+}
+body.tadaza-theme-hawaiian .CodeMirror-gutters {
+  background: rgba(2, 10, 16, 0.8) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Reaction pill badge on messages */
+body.tadaza-theme-hawaiian .card-send-time,
+body.tadaza-theme-hawaiian .card-with-reaction-v2,
+body.tadaza-theme-hawaiian [class*="card-with-reaction"],
+body.tadaza-theme-hawaiian [class*="react-list"] {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Call Notification Cards - Reset wrappers so only 1 single pill border exists */
+body.tadaza-theme-hawaiian .call-msg-wrapper,
+body.tadaza-theme-hawaiian [class*="call-msg-wrapper"],
+body.tadaza-theme-hawaiian .chat-item:has(.call-msg),
+body.tadaza-theme-hawaiian .chat-message:has(.call-msg),
+body.tadaza-theme-hawaiian .card:has(.call-msg),
+body.tadaza-theme-hawaiian .card:has(.call-message),
+body.tadaza-theme-hawaiian .chat-message:has(.call-message) {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Only the actual .call-msg / .call-message has border & background */
+body.tadaza-theme-hawaiian .call-msg,
+body.tadaza-theme-hawaiian .call-message {
+  border-radius: 14px !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+}
+
+/* Callee / Incoming call (Left side) */
+body.tadaza-theme-hawaiian .call-msg.--callee,
+body.tadaza-theme-hawaiian .call-message.call-message--callee,
+body.tadaza-theme-hawaiian [class*="call-message"][class*="callee"],
+body.tadaza-theme-hawaiian [class*="call-msg"][class*="callee"] {
+  background: rgba(10, 44, 58, 0.9) !important;
+  border: 1px solid rgba(130, 220, 240, 0.35) !important;
+}
+
+/* Caller / Outgoing call (Right side) */
+body.tadaza-theme-hawaiian .call-msg.--caller,
+body.tadaza-theme-hawaiian .call-message.call-message--caller,
+body.tadaza-theme-hawaiian [class*="call-message"][class*="caller"],
+body.tadaza-theme-hawaiian [class*="call-msg"][class*="caller"] {
+  background: linear-gradient(135deg, rgba(16, 140, 180, 0.92), rgba(10, 105, 138, 0.96)) !important;
+  border: 1px solid rgba(130, 220, 240, 0.45) !important;
+}
+
+/* Remove all nested borders inside call messages */
+body.tadaza-theme-hawaiian .call-msg *,
+body.tadaza-theme-hawaiian .call-message * {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+body.tadaza-theme-hawaiian .call-message__title-wrapper,
+body.tadaza-theme-hawaiian .call-msg__title,
+body.tadaza-theme-hawaiian [class*="call-message"] [class*="title"],
+body.tadaza-theme-hawaiian [class*="call-msg"] [class*="title"] {
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  font-size: 13.5px !important;
+}
+
+body.tadaza-theme-hawaiian .call-message__content-container,
+body.tadaza-theme-hawaiian .call-msg__content,
+body.tadaza-theme-hawaiian .call-message__content-txt-wrapper,
+body.tadaza-theme-hawaiian [class*="call-message"] [class*="content"],
+body.tadaza-theme-hawaiian [class*="call-msg"] [class*="content"] {
+  color: #d6eef5 !important;
+  font-size: 13px !important;
+}
+
+body.tadaza-theme-hawaiian .call-message__icon-wrapper,
+body.tadaza-theme-hawaiian .call-msg__content__icon,
+body.tadaza-theme-hawaiian [class*="call-msg"] i,
+body.tadaza-theme-hawaiian [class*="call-message"] i,
+body.tadaza-theme-hawaiian [class*="call-msg"] svg,
+body.tadaza-theme-hawaiian [class*="call-message"] svg {
+  color: #38ef7d !important;
+  fill: #38ef7d !important;
+}
+
+/* Button "Gọi lại" - High contrast glassmorphic pill button */
+body.tadaza-theme-hawaiian .call-message__callback-wrapper,
+body.tadaza-theme-hawaiian .call-msg__callback,
+body.tadaza-theme-hawaiian .call-message__callback-wrapper button,
+body.tadaza-theme-hawaiian .call-msg__callback button,
+body.tadaza-theme-hawaiian .call-message button,
+body.tadaza-theme-hawaiian .call-msg button,
+body.tadaza-theme-hawaiian [class*="call-card"] button,
+body.tadaza-theme-hawaiian .card-call__btn,
+body.tadaza-theme-hawaiian [class*="call-msg"] [class*="callback"] {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: rgba(255, 255, 255, 0.22) !important;
+  border: 1px solid rgba(255, 255, 255, 0.45) !important;
+  color: #ffffff !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  letter-spacing: 0.3px !important;
+  padding: 6px 16px !important;
+  margin-top: 6px !important;
+  cursor: pointer !important;
+  text-decoration: none !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
+  transition: all 0.2s ease !important;
+}
+
+body.tadaza-theme-hawaiian .call-message__callback-wrapper:hover,
+body.tadaza-theme-hawaiian .call-msg__callback:hover,
+body.tadaza-theme-hawaiian .call-message__callback-wrapper button:hover,
+body.tadaza-theme-hawaiian .call-msg__callback button:hover,
+body.tadaza-theme-hawaiian .call-message button:hover,
+body.tadaza-theme-hawaiian .call-msg button:hover,
+body.tadaza-theme-hawaiian [class*="call-msg"] [class*="callback"]:hover {
+  background: rgba(15, 195, 255, 0.4) !important;
+  border-color: #0fc3ff !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 12px rgba(15, 195, 255, 0.5) !important;
+}
+
+body.tadaza-theme-hawaiian .call-message__callback-wrapper *,
+body.tadaza-theme-hawaiian .call-msg__callback *,
+body.tadaza-theme-hawaiian .card-call__btn *,
+body.tadaza-theme-hawaiian [class*="call-msg"] [class*="callback"] * {
+  color: #ffffff !important;
+  font-weight: 600 !important;
+}
+
+body.tadaza-theme-hawaiian .call-msg__separator,
+body.tadaza-theme-hawaiian .call-message__separator {
+  margin: 6px 0 !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.15) !important;
+  width: 100% !important;
+}
+
+/* Date divider badge */
+body.tadaza-theme-hawaiian .chat-date,
+body.tadaza-theme-hawaiian [class*="chat-date"] {
+  background: rgba(4, 28, 38, 0.65) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  color: #a0c7d5 !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 12px !important;
+}
+
+/* --------------------------------------------------------------------------
+   7. Landing Page & Empty State Screen (High Visibility)
+   -------------------------------------------------------------------------- */
+body.tadaza-theme-hawaiian .empty-view,
+body.tadaza-theme-hawaiian .z-empty-view,
+body.tadaza-theme-hawaiian .conv-list-empty-wrapper,
+body.tadaza-theme-hawaiian .qm-empty-hint,
+body.tadaza-theme-hawaiian [class*="empty-view"],
+body.tadaza-theme-hawaiian [class*="emptyScreen"],
+body.tadaza-theme-hawaiian .chat-empty-container {
+  background: transparent !important;
+}
+
+body.tadaza-theme-hawaiian .empty-view *,
+body.tadaza-theme-hawaiian .z-empty-view *,
+body.tadaza-theme-hawaiian .conv-list-empty-wrapper *,
+body.tadaza-theme-hawaiian .qm-empty-hint *,
+body.tadaza-theme-hawaiian [class*="empty-view"] *,
+body.tadaza-theme-hawaiian [class*="emptyScreen"] *,
+body.tadaza-theme-hawaiian .chat-empty-container * {
+  color: #ffffff !important;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6) !important;
+}
+
+body.tadaza-theme-hawaiian .empty-view [class*="sub-text"],
+body.tadaza-theme-hawaiian .z-empty-view [class*="sub-text"],
+body.tadaza-theme-hawaiian .qm-empty-hint__txt,
+body.tadaza-theme-hawaiian [class*="empty-view"] p,
+body.tadaza-theme-hawaiian [class*="emptyScreen"] p,
+body.tadaza-theme-hawaiian [class*="empty-view"] [class*="desc"],
+body.tadaza-theme-hawaiian [class*="empty"] [class*="desc"],
+body.tadaza-theme-hawaiian [class*="empty-hint"] {
+  color: #e2f7fc !important;
+  font-weight: 500 !important;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.85) !important;
+  letter-spacing: 0.3px !important;
+}
+
+/* Ensure chat message view transparency allows Hawaiian Lagoon ASCII live aquarium to show */
+body.tadaza-theme-hawaiian .message-view__blur__overlay_noavatar,
+body.tadaza-theme-hawaiian .message-view__blur__overlay,
+.message-view__blur__overlay_noavatar,
+.message-view__blur__overlay {
+  background: transparent !important;
+  display: none !important;
+  opacity: 0 !important;
+}
+
+/* ==========================================================================
+   MODULE: 02c_rainforest_theme.css
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   TADaZa Ecosystem Theme: Tropical Rain (Cơn Mưa Rừng Nhiệt Đới)
+   Aesthetic: Rain-soaked tropical canopy, falling drizzle, ripples & jade glass
+   -------------------------------------------------------------------------- */
+
+/* 1. Theme Variables */
+body.tadaza-theme-rainforest,
+body.dark.tadaza-theme-rainforest,
+body.tadaza-deep-dark.tadaza-theme-rainforest {
+  background-color: #03160f !important;
+  color: #ffffff !important;
+
+  --surface-background: rgba(5, 26, 18, 0.7) !important;
+  --surface-background-subtle: rgba(3, 18, 12, 0.8) !important;
+  --surface-background-overlay: rgba(2, 14, 9, 0.9) !important;
+  --surface-alt: rgba(8, 34, 24, 0.6) !important;
+  --layer-background: rgba(5, 26, 18, 0.7) !important;
+  --layer-background-subtle: rgba(3, 18, 12, 0.8) !important;
+  --layer-background-hover: rgba(16, 185, 129, 0.12) !important;
+  --layer-background-selected: rgba(16, 185, 129, 0.22) !important;
+  --layer-background-navbar-normal: rgba(3, 18, 12, 0.88) !important;
+  --layer-background-navbar-sublevel-normal: rgba(5, 26, 18, 0.7) !important;
+  --layer-background-leftmenu: rgba(3, 18, 12, 0.88) !important;
+  --bg-default: transparent !important;
+  --title-bar: rgba(4, 24, 18, 0.96) !important;
+
+  /* Messages */
+  --white-message: rgba(6, 28, 20, 0.9) !important;
+  --white-message-selected: rgba(16, 185, 129, 0.25) !important;
+  --blue-message: linear-gradient(135deg, rgba(5, 150, 105, 0.9), rgba(4, 120, 87, 0.94)) !important;
+  --blue-message-selected: rgba(16, 185, 129, 0.35) !important;
+  --layer-accent-message: rgba(16, 185, 129, 0.2) !important;
+  --self-bubble-chat-shadow: 0 4px 18px rgba(4, 120, 87, 0.3) !important;
+  --shadow-bubble: 0 4px 18px rgba(0, 0, 0, 0.35) !important;
+
+  /* Buttons */
+  --button-tertiary-neutral-normal: rgba(255, 255, 255, 0.08) !important;
+  --button-tertiary-neutral-hover: rgba(16, 185, 129, 0.2) !important;
+  --button-tertiary-neutral-pressed: rgba(16, 185, 129, 0.35) !important;
+  --button-tertiary-neutral-text: #ffffff !important;
+  --button-secondary-neutral-normal: rgba(16, 185, 129, 0.16) !important;
+  --button-secondary-neutral-hover: rgba(16, 185, 129, 0.3) !important;
+  --button-secondary-neutral-pressed: rgba(16, 185, 129, 0.45) !important;
+  --button-secondary-neutral-text: #ffffff !important;
+  --button-ghost-neutral-normal: transparent !important;
+  --button-ghost-neutral-hover: rgba(110, 231, 183, 0.15) !important;
+  --button-ghost-neutral-text: #ffffff !important;
+
+  /* Text & Contrast */
+  --text-primary: #ffffff !important;
+  --text-secondary: #a7f3d0 !important;
+  --text-placeholder: #529477 !important;
+  --text-disabled: #376853 !important;
+  --text-on-color: #ffffff !important;
+
+  /* Icons */
+  --icon-primary: #10b981 !important;
+  --icon-secondary: #6ee7b7 !important;
+
+  /* Borders */
+  --divider: rgba(16, 185, 129, 0.12) !important;
+  --divider-subtle: rgba(255, 255, 255, 0.06) !important;
+  --border: rgba(16, 185, 129, 0.22) !important;
+  --border-subtle: rgba(255, 255, 255, 0.08) !important;
+  --border-bold: rgba(16, 185, 129, 0.42) !important;
+
+  /* Inputs */
+  --input-field-bg-filled: rgba(255, 255, 255, 0.07) !important;
+  --input-field-bg-outline: rgba(16, 185, 129, 0.2) !important;
+}
+
+/* 2. Structural Layout & Transparency */
+body.tadaza-theme-rainforest,
+body.tadaza-theme-rainforest #app,
+body.tadaza-theme-rainforest #app-layout,
+body.tadaza-theme-rainforest .app-page,
+body.tadaza-theme-rainforest .main-content,
+body.tadaza-theme-rainforest #chat-layout,
+body.tadaza-theme-rainforest #chatView,
+body.tadaza-theme-rainforest .chat-conversation,
+body.tadaza-theme-rainforest .chat-conversation-history,
+body.tadaza-theme-rainforest .chat-box,
+body.tadaza-theme-rainforest #messageViewContainer,
+body.tadaza-theme-rainforest #messageViewScroll {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+/* 3. Header & Search Bar */
+body.tadaza-theme-rainforest header,
+body.tadaza-theme-rainforest #header,
+body.tadaza-theme-rainforest .chat-bar,
+body.tadaza-theme-rainforest #contact-search {
+  background: rgba(4, 24, 18, 0.96) !important;
+  backdrop-filter: blur(24px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(140%) !important;
+  border-bottom: 1px solid rgba(16, 185, 129, 0.28) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+}
+
+body.tadaza-theme-rainforest .main-title-container,
+body.tadaza-theme-rainforest .header-title,
+body.tadaza-theme-rainforest .threadChat,
+body.tadaza-theme-rainforest .threadChat__title,
+body.tadaza-theme-rainforest .threadChat__avatar {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+body.tadaza-theme-rainforest .threadChat__title [class*="title"],
+body.tadaza-theme-rainforest .truncate.header-title {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  text-shadow: 0 0 10px rgba(16, 185, 129, 0.35) !important;
+}
+
+body.tadaza-theme-rainforest #headerBtns button,
+body.tadaza-theme-rainforest #headerBtns .z--btn--v2,
+body.tadaza-theme-rainforest #headerBtns [class*="btn"] {
+  background: transparent !important;
+  border: none !important;
+  color: #6ee7b7 !important;
+  border-radius: 8px !important;
+  transition: all 0.15s ease !important;
+}
+
+body.tadaza-theme-rainforest #headerBtns button:hover,
+body.tadaza-theme-rainforest #headerBtns .z--btn--v2:hover {
+  background: rgba(16, 185, 129, 0.18) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.3) !important;
+}
+
+/* 4. Left Navigation & Sidebar */
+body.tadaza-theme-rainforest #nav-tab,
+body.tadaza-theme-rainforest .left-sidebar,
+body.tadaza-theme-rainforest #sidebar-nav {
+  background: rgba(3, 18, 12, 0.92) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-right: 1px solid rgba(16, 185, 129, 0.18) !important;
+}
+
+body.tadaza-theme-rainforest #nav-tab .tab-item.active,
+body.tadaza-theme-rainforest .left-sidebar .tab-item.active {
+  color: #6ee7b7 !important;
+  background: rgba(16, 185, 129, 0.15) !important;
+  box-shadow: inset 3px 0 0 #10b981, 0 0 15px rgba(16, 185, 129, 0.3) !important;
+}
+
+/* 5. Conversation List */
+body.tadaza-theme-rainforest #conversationList,
+body.tadaza-theme-rainforest .conv-list,
+body.tadaza-theme-rainforest .sub-layout-chat-list {
+  background: rgba(4, 22, 15, 0.82) !important;
+  backdrop-filter: blur(18px) !important;
+  -webkit-backdrop-filter: blur(18px) !important;
+  border-right: 1px solid rgba(16, 185, 129, 0.14) !important;
+}
+
+body.tadaza-theme-rainforest .conv-item:hover,
+body.tadaza-theme-rainforest [class*="conv-item"]:hover {
+  background: rgba(16, 185, 129, 0.08) !important;
+}
+
+body.tadaza-theme-rainforest .conv-item.active,
+body.tadaza-theme-rainforest [class*="conv-item"].active,
+body.tadaza-theme-rainforest .conv-item.selected {
+  background: rgba(16, 185, 129, 0.2) !important;
+  border-left: 3px solid #10b981 !important;
+  box-shadow: 0 0 14px rgba(16, 185, 129, 0.25) !important;
+}
+
+/* 6. Message Bubbles */
+body.tadaza-theme-rainforest .chat-item,
+body.tadaza-theme-rainforest .chat-message {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Incoming Friend Messages */
+body.tadaza-theme-rainforest .chat-message:not(.me) .card,
+body.tadaza-theme-rainforest .chat-message:not(.me) .card-bubble,
+body.tadaza-theme-rainforest .card--friend > [class*="message-content"],
+body.tadaza-theme-rainforest .card--friend > .card-bubble,
+body.tadaza-theme-rainforest .white-message {
+  background: rgba(6, 28, 20, 0.9) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border: 1px solid rgba(52, 211, 153, 0.3) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35) !important;
+  color: #ffffff !important;
+}
+
+body.tadaza-theme-rainforest .card--friend [class*="message-content"] *:not(.tadaza-code-card *):not(.CodeMirror *):not(.tadaza-inline-code):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]),
+body.tadaza-theme-rainforest [class*="friend-message"] [class*="message-content"] *:not(.tadaza-code-card *):not(.CodeMirror *):not(.tadaza-inline-code):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]),
+body.tadaza-theme-rainforest .chat-message:not(.me) .card *:not(.tadaza-code-card *):not(.CodeMirror *):not(.tadaza-inline-code):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]),
+body.tadaza-theme-rainforest .white-message *:not(.tadaza-code-card *):not(.CodeMirror *):not(.tadaza-inline-code):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]) {
+  color: #ffffff !important;
+}
+
+/* Outgoing My Messages */
+body.tadaza-theme-rainforest .chat-message.me .card,
+body.tadaza-theme-rainforest .chat-message.me .card-bubble,
+body.tadaza-theme-rainforest .card--me > [class*="message-content"],
+body.tadaza-theme-rainforest .card--me > .card-bubble,
+body.tadaza-theme-rainforest .blue-message {
+  background: linear-gradient(135deg, rgba(5, 150, 105, 0.9), rgba(4, 120, 87, 0.94)) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border: 1px solid rgba(110, 231, 183, 0.45) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 4px 20px rgba(5, 150, 105, 0.3) !important;
+  color: #ffffff !important;
+}
+
+body.tadaza-theme-rainforest .card--me [class*="message-content"] *:not(.tadaza-code-card *):not(.CodeMirror *):not(.tadaza-inline-code):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]),
+body.tadaza-theme-rainforest .chat-message.me .card *:not(.tadaza-code-card *):not(.CodeMirror *):not(.tadaza-inline-code):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]),
+body.tadaza-theme-rainforest .blue-message *:not(.tadaza-code-card *):not(.CodeMirror *):not(.tadaza-inline-code):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]) {
+  color: #ffffff !important;
+}
+
+/* 7. Code Blocks & Syntax Highlighting */
+body.tadaza-theme-rainforest .tadaza-code-card {
+  background: rgba(3, 16, 11, 0.94) !important;
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45) !important;
+  margin: 8px 0 !important;
+  overflow: hidden !important;
+}
+
+body.tadaza-theme-rainforest .tadaza-code-header {
+  background: rgba(2, 12, 8, 0.8) !important;
+  border-bottom: 1px solid rgba(16, 185, 129, 0.16) !important;
+  padding: 6px 12px !important;
+}
+
+body.tadaza-theme-rainforest .tadaza-code-lang {
+  color: #10b981 !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.8px !important;
+}
+
+body.tadaza-theme-rainforest .tadaza-code-pre,
+body.tadaza-theme-rainforest .file-preview__content pre {
+  background: rgba(2, 10, 7, 0.9) !important;
+  color: #d1fae5 !important;
+  font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace !important;
+  border-bottom: 1px solid rgba(16, 185, 129, 0.2) !important;
+}
+
+body.tadaza-theme-rainforest .tadaza-inline-code {
+  background: rgba(16, 185, 129, 0.16) !important;
+  color: #34d399 !important;
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
+  border-radius: 4px !important;
+  padding: 2px 6px !important;
+  font-weight: 600 !important;
+}
+
+body.tadaza-theme-rainforest .hl-keyword { color: #6ee7b7 !important; font-weight: 700 !important; }
+body.tadaza-theme-rainforest .hl-string { color: #a7f3d0 !important; }
+body.tadaza-theme-rainforest .hl-number { color: #fde047 !important; font-weight: 600 !important; }
+body.tadaza-theme-rainforest .hl-boolean { color: #f472b6 !important; font-weight: 700 !important; }
+body.tadaza-theme-rainforest .hl-comment { color: #529477 !important; font-style: italic !important; }
+body.tadaza-theme-rainforest .hl-function { color: #34d399 !important; font-weight: 600 !important; }
+body.tadaza-theme-rainforest .hl-operator { color: #6ee7b7 !important; }
+body.tadaza-theme-rainforest .hl-punctuation { color: #94a3b8 !important; }
+
+/* 8. Call Cards */
+body.tadaza-theme-rainforest .call-msg__callback,
+body.tadaza-theme-rainforest .call-message__callback-wrapper,
+body.tadaza-theme-rainforest [class*="call-msg"] [class*="callback"] {
+  background: rgba(16, 185, 129, 0.22) !important;
+  border: 1px solid rgba(16, 185, 129, 0.5) !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 0 14px rgba(16, 185, 129, 0.25) !important;
+}
+
+body.tadaza-theme-rainforest .call-msg__callback:hover {
+  background: rgba(16, 185, 129, 0.4) !important;
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.5) !important;
+}
+
+/* 9. Bottom Chat Box Toolbar */
+body.tadaza-theme-rainforest .chat-box-bar,
+body.tadaza-theme-rainforest .chat-input-container {
+  background: rgba(4, 24, 18, 0.94) !important;
+  border-top: 1px solid rgba(16, 185, 129, 0.2) !important;
+}
+
+body.tadaza-theme-rainforest .left-chat-box-bar i,
+body.tadaza-theme-rainforest .left-chat-box-bar svg {
+  color: #6ee7b7 !important;
+  fill: #6ee7b7 !important;
+  opacity: 0.95 !important;
+}
+
+/* ==========================================================================
+   MODULE: 02d_bioforest_theme.css
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   TADaZa Ecosystem Theme: Bioluminescent Forest (Rừng Ánh Sáng Sinh Học Đêm)
+   Aesthetic: Nocturnal enchanted forest, glowing flora, spore motes & spirit fauna
+   -------------------------------------------------------------------------- */
+
+/* 1. Theme Variables */
+body.tadaza-theme-bioforest,
+body.dark.tadaza-theme-bioforest,
+body.tadaza-deep-dark.tadaza-theme-bioforest {
+  background-color: #021216 !important;
+  color: #ffffff !important;
+
+  --surface-background: rgba(4, 24, 30, 0.72) !important;
+  --surface-background-subtle: rgba(3, 18, 22, 0.8) !important;
+  --surface-background-overlay: rgba(2, 12, 16, 0.9) !important;
+  --surface-alt: rgba(6, 32, 40, 0.6) !important;
+  --layer-background: rgba(4, 24, 30, 0.72) !important;
+  --layer-background-subtle: rgba(3, 18, 22, 0.8) !important;
+  --layer-background-hover: rgba(6, 214, 160, 0.12) !important;
+  --layer-background-selected: rgba(6, 214, 160, 0.22) !important;
+  --layer-background-navbar-normal: rgba(3, 18, 22, 0.88) !important;
+  --layer-background-navbar-sublevel-normal: rgba(4, 24, 30, 0.72) !important;
+  --layer-background-leftmenu: rgba(3, 18, 22, 0.88) !important;
+  --bg-default: transparent !important;
+  --title-bar: rgba(3, 18, 22, 0.96) !important;
+
+  /* Messages */
+  --white-message: rgba(5, 22, 28, 0.9) !important;
+  --white-message-selected: rgba(6, 214, 160, 0.25) !important;
+  --blue-message: linear-gradient(135deg, rgba(6, 182, 160, 0.9), rgba(12, 130, 135, 0.94)) !important;
+  --blue-message-selected: rgba(6, 214, 160, 0.35) !important;
+  --layer-accent-message: rgba(6, 214, 160, 0.2) !important;
+  --self-bubble-chat-shadow: 0 4px 18px rgba(6, 182, 160, 0.28) !important;
+  --shadow-bubble: 0 4px 18px rgba(0, 0, 0, 0.35) !important;
+
+  /* Buttons */
+  --button-tertiary-neutral-normal: rgba(255, 255, 255, 0.08) !important;
+  --button-tertiary-neutral-hover: rgba(6, 214, 160, 0.2) !important;
+  --button-tertiary-neutral-pressed: rgba(6, 214, 160, 0.35) !important;
+  --button-tertiary-neutral-text: #ffffff !important;
+  --button-secondary-neutral-normal: rgba(6, 214, 160, 0.16) !important;
+  --button-secondary-neutral-hover: rgba(6, 214, 160, 0.3) !important;
+  --button-secondary-neutral-pressed: rgba(6, 214, 160, 0.45) !important;
+  --button-secondary-neutral-text: #ffffff !important;
+  --button-ghost-neutral-normal: transparent !important;
+  --button-ghost-neutral-hover: rgba(110, 245, 220, 0.15) !important;
+  --button-ghost-neutral-text: #ffffff !important;
+
+  /* Text & Contrast */
+  --text-primary: #ffffff !important;
+  --text-secondary: #a7f3d0 !important;
+  --text-placeholder: #508d88 !important;
+  --text-disabled: #376461 !important;
+  --text-on-color: #ffffff !important;
+
+  /* Icons */
+  --icon-primary: #06d6a0 !important;
+  --icon-secondary: #c084fc !important;
+
+  /* Borders */
+  --divider: rgba(6, 214, 160, 0.12) !important;
+  --divider-subtle: rgba(255, 255, 255, 0.06) !important;
+  --border: rgba(6, 214, 160, 0.22) !important;
+  --border-subtle: rgba(255, 255, 255, 0.08) !important;
+  --border-bold: rgba(6, 214, 160, 0.42) !important;
+
+  /* Inputs */
+  --input-field-bg-filled: rgba(255, 255, 255, 0.07) !important;
+  --input-field-bg-outline: rgba(6, 214, 160, 0.2) !important;
+}
+
+/* 2. Structural Layout & Transparency */
+body.tadaza-theme-bioforest,
+body.tadaza-theme-bioforest #app,
+body.tadaza-theme-bioforest #app-layout,
+body.tadaza-theme-bioforest .app-page,
+body.tadaza-theme-bioforest .main-content,
+body.tadaza-theme-bioforest #chat-layout,
+body.tadaza-theme-bioforest #chatView,
+body.tadaza-theme-bioforest .chat-conversation,
+body.tadaza-theme-bioforest .chat-conversation-history,
+body.tadaza-theme-bioforest .chat-box,
+body.tadaza-theme-bioforest #messageViewContainer,
+body.tadaza-theme-bioforest #messageViewScroll {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+/* 3. Header & Search Bar */
+body.tadaza-theme-bioforest header,
+body.tadaza-theme-bioforest #header,
+body.tadaza-theme-bioforest .chat-bar,
+body.tadaza-theme-bioforest #contact-search {
+  background: rgba(3, 18, 22, 0.96) !important;
+  backdrop-filter: blur(24px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(140%) !important;
+  border-bottom: 1px solid rgba(6, 214, 160, 0.28) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+}
+
+body.tadaza-theme-bioforest .main-title-container,
+body.tadaza-theme-bioforest .header-title,
+body.tadaza-theme-bioforest .threadChat,
+body.tadaza-theme-bioforest .threadChat__title,
+body.tadaza-theme-bioforest .threadChat__avatar {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+body.tadaza-theme-bioforest .threadChat__title [class*="title"],
+body.tadaza-theme-bioforest .truncate.header-title {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  text-shadow: 0 0 10px rgba(6, 214, 160, 0.35) !important;
+}
+
+body.tadaza-theme-bioforest #headerBtns button,
+body.tadaza-theme-bioforest #headerBtns .z--btn--v2,
+body.tadaza-theme-bioforest #headerBtns [class*="btn"] {
+  background: transparent !important;
+  border: none !important;
+  color: #06d6a0 !important;
+  border-radius: 8px !important;
+  transition: all 0.15s ease !important;
+}
+
+body.tadaza-theme-bioforest #headerBtns button:hover,
+body.tadaza-theme-bioforest #headerBtns .z--btn--v2:hover {
+  background: rgba(6, 214, 160, 0.18) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 12px rgba(6, 214, 160, 0.3) !important;
+}
+
+/* 4. Left Navigation & Sidebar */
+body.tadaza-theme-bioforest #nav-tab,
+body.tadaza-theme-bioforest .left-sidebar,
+body.tadaza-theme-bioforest #sidebar-nav {
+  background: rgba(3, 18, 22, 0.92) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-right: 1px solid rgba(6, 214, 160, 0.18) !important;
+}
+
+body.tadaza-theme-bioforest #nav-tab .tab-item.active,
+body.tadaza-theme-bioforest .left-sidebar .tab-item.active {
+  color: #06d6a0 !important;
+  background: rgba(6, 214, 160, 0.15) !important;
+  box-shadow: inset 3px 0 0 #06d6a0, 0 0 15px rgba(6, 214, 160, 0.3) !important;
+}
+
+/* 5. Conversation List */
+body.tadaza-theme-bioforest #conversationList,
+body.tadaza-theme-bioforest .conv-list,
+body.tadaza-theme-bioforest .sub-layout-chat-list {
+  background: rgba(4, 20, 26, 0.82) !important;
+  backdrop-filter: blur(18px) !important;
+  -webkit-backdrop-filter: blur(18px) !important;
+  border-right: 1px solid rgba(6, 214, 160, 0.14) !important;
+}
+
+body.tadaza-theme-bioforest .conv-item:hover,
+body.tadaza-theme-bioforest [class*="conv-item"]:hover {
+  background: rgba(6, 214, 160, 0.08) !important;
+}
+
+body.tadaza-theme-bioforest .conv-item.active,
+body.tadaza-theme-bioforest [class*="conv-item"].active,
+body.tadaza-theme-bioforest .conv-item.selected {
+  background: rgba(6, 214, 160, 0.2) !important;
+  border-left: 3px solid #06d6a0 !important;
+  box-shadow: 0 0 14px rgba(6, 214, 160, 0.25) !important;
+}
+
+/* 6. Message Bubbles */
+body.tadaza-theme-bioforest .chat-item,
+body.tadaza-theme-bioforest .chat-message {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Incoming Friend Messages */
+body.tadaza-theme-bioforest .chat-message:not(.me) .card,
+body.tadaza-theme-bioforest .chat-message:not(.me) .card-bubble,
+body.tadaza-theme-bioforest .card--friend > [class*="message-content"],
+body.tadaza-theme-bioforest .card--friend > .card-bubble,
+body.tadaza-theme-bioforest .white-message {
+  background: rgba(5, 22, 28, 0.9) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border: 1px solid rgba(6, 214, 160, 0.28) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35) !important;
+  color: #ffffff !important;
+}
+
+body.tadaza-theme-bioforest .card--friend [class*="message-content"] *:not(.tadaza-code-card *):not(.CodeMirror *):not(.tadaza-inline-code):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]),
+body.tadaza-theme-bioforest [class*="friend-message"] [class*="message-content"] *:not(.tadaza-code-card *):not(.CodeMirror *):not(.tadaza-inline-code):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]),
+body.tadaza-theme-bioforest .chat-message:not(.me) .card *:not(.tadaza-code-card *):not(.CodeMirror *):not(.tadaza-inline-code):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]),
+body.tadaza-theme-bioforest .white-message *:not(.tadaza-code-card *):not(.CodeMirror *):not(.tadaza-inline-code):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]) {
+  color: #ffffff !important;
+}
+
+/* Outgoing My Messages */
+body.tadaza-theme-bioforest .chat-message.me .card,
+body.tadaza-theme-bioforest .chat-message.me .card-bubble,
+body.tadaza-theme-bioforest .card--me > [class*="message-content"],
+body.tadaza-theme-bioforest .card--me > .card-bubble,
+body.tadaza-theme-bioforest .blue-message {
+  background: linear-gradient(135deg, rgba(6, 182, 160, 0.9), rgba(12, 130, 135, 0.94)) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border: 1px solid rgba(110, 245, 220, 0.45) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 4px 20px rgba(6, 182, 160, 0.3) !important;
+  color: #ffffff !important;
+}
+
+body.tadaza-theme-bioforest .card--me [class*="message-content"] *:not(.tadaza-code-card *):not(.CodeMirror *):not(.tadaza-inline-code):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]),
+body.tadaza-theme-bioforest .chat-message.me .card *:not(.tadaza-code-card *):not(.CodeMirror *):not(.tadaza-inline-code):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]),
+body.tadaza-theme-bioforest .blue-message *:not(.tadaza-code-card *):not(.CodeMirror *):not(.tadaza-inline-code):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]) {
+  color: #ffffff !important;
+}
+
+/* 7. Code Blocks & Syntax Highlighting */
+body.tadaza-theme-bioforest .tadaza-code-card {
+  background: rgba(2, 14, 18, 0.94) !important;
+  border: 1px solid rgba(6, 214, 160, 0.3) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45) !important;
+  margin: 8px 0 !important;
+  overflow: hidden !important;
+}
+
+body.tadaza-theme-bioforest .tadaza-code-header {
+  background: rgba(1, 10, 14, 0.8) !important;
+  border-bottom: 1px solid rgba(6, 214, 160, 0.16) !important;
+  padding: 6px 12px !important;
+}
+
+body.tadaza-theme-bioforest .tadaza-code-lang {
+  color: #06d6a0 !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.8px !important;
+}
+
+body.tadaza-theme-bioforest .tadaza-code-pre,
+body.tadaza-theme-bioforest .file-preview__content pre {
+  background: rgba(1, 8, 12, 0.9) !important;
+  color: #e0f2fe !important;
+  font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace !important;
+  border-bottom: 1px solid rgba(6, 214, 160, 0.2) !important;
+}
+
+body.tadaza-theme-bioforest .tadaza-inline-code {
+  background: rgba(6, 214, 160, 0.16) !important;
+  color: #00f5d4 !important;
+  border: 1px solid rgba(6, 214, 160, 0.35) !important;
+  border-radius: 4px !important;
+  padding: 2px 6px !important;
+  font-weight: 600 !important;
+}
+
+body.tadaza-theme-bioforest .hl-keyword { color: #c084fc !important; font-weight: 700 !important; }
+body.tadaza-theme-bioforest .hl-string { color: #00f5d4 !important; }
+body.tadaza-theme-bioforest .hl-number { color: #fde047 !important; font-weight: 600 !important; }
+body.tadaza-theme-bioforest .hl-boolean { color: #f472b6 !important; font-weight: 700 !important; }
+body.tadaza-theme-bioforest .hl-comment { color: #508d88 !important; font-style: italic !important; }
+body.tadaza-theme-bioforest .hl-function { color: #06d6a0 !important; font-weight: 600 !important; }
+body.tadaza-theme-bioforest .hl-operator { color: #38bdf8 !important; }
+body.tadaza-theme-bioforest .hl-punctuation { color: #94a3b8 !important; }
+
+/* 8. Call Cards */
+body.tadaza-theme-bioforest .call-msg__callback,
+body.tadaza-theme-bioforest .call-message__callback-wrapper,
+body.tadaza-theme-bioforest [class*="call-msg"] [class*="callback"] {
+  background: rgba(6, 214, 160, 0.22) !important;
+  border: 1px solid rgba(6, 214, 160, 0.5) !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 0 14px rgba(6, 214, 160, 0.25) !important;
+}
+
+body.tadaza-theme-bioforest .call-msg__callback:hover {
+  background: rgba(6, 214, 160, 0.4) !important;
+  box-shadow: 0 0 20px rgba(6, 214, 160, 0.5) !important;
+}
+
+/* 9. Bottom Chat Box Toolbar */
+body.tadaza-theme-bioforest .chat-box-bar,
+body.tadaza-theme-bioforest .chat-input-container {
+  background: rgba(3, 18, 22, 0.94) !important;
+  border-top: 1px solid rgba(6, 214, 160, 0.2) !important;
+}
+
+body.tadaza-theme-bioforest .left-chat-box-bar i,
+body.tadaza-theme-bioforest .left-chat-box-bar svg {
+  color: #06d6a0 !important;
+  fill: #06d6a0 !important;
+  opacity: 0.95 !important;
 }
 
 /* ==========================================================================
@@ -653,6 +2646,97 @@ body.dark .tadaza-select {
   color: inherit;
 }
 
+/* --------------------------------------------------------------------------
+   Dynamic Theme Gallery Cards Grid
+   -------------------------------------------------------------------------- */
+.tadaza-theme-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.tadaza-theme-card {
+  position: relative;
+  border-radius: 10px;
+  border: 2px solid rgba(128, 128, 128, 0.2);
+  background: rgba(128, 128, 128, 0.06);
+  padding: 10px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+  user-select: none;
+}
+
+body.dark .tadaza-theme-card {
+  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.tadaza-theme-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(15, 195, 255, 0.5);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+}
+
+.tadaza-theme-card.active {
+  border-color: #0fc3ff;
+  background: rgba(15, 195, 255, 0.12);
+  box-shadow: 0 0 16px rgba(15, 195, 255, 0.3);
+}
+
+.tadaza-theme-preview {
+  width: 100%;
+  height: 48px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.15);
+}
+
+.tadaza-theme-preview.hawaiian {
+  background: linear-gradient(135deg, #022b3a, #1a759f, #34a0a4);
+}
+
+.tadaza-theme-preview.rainforest {
+  background: linear-gradient(135deg, #021a12, #059669, #34d399);
+}
+
+.tadaza-theme-preview.bioforest {
+  background: linear-gradient(135deg, #021418, #06d6a0, #a855f7);
+}
+
+.tadaza-theme-preview.none {
+  background: linear-gradient(135deg, #2b303c, #4b5563);
+}
+
+.tadaza-theme-card-title {
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tadaza-theme-card-tag {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: rgba(15, 195, 255, 0.2);
+  color: #0fc3ff;
+}
+
+.tadaza-theme-card.active .tadaza-theme-card-tag {
+  background: #0fc3ff;
+  color: #ffffff;
+}
+
 /* ==========================================================================
    MODULE: 04_translate.css
    ========================================================================== */
@@ -777,20 +2861,20 @@ body.dark .chat-message.me .tadaza-trans-box {
 
 /* Inline Code */
 .tadaza-inline-code {
-  font-family: 'Fira Code', 'JetBrains Mono', Consolas, Monaco, monospace;
-  background: rgba(110, 118, 129, 0.18);
-  color: #d73a49;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 0.9em;
-  border: 1px solid rgba(110, 118, 129, 0.25);
-  word-break: break-word;
+  font-family: 'Fira Code', 'JetBrains Mono', Consolas, Monaco, monospace !important;
+  background: rgba(110, 118, 129, 0.18) !important;
+  color: #d73a49 !important;
+  padding: 2px 6px !important;
+  border-radius: 4px !important;
+  font-size: 0.9em !important;
+  border: 1px solid rgba(110, 118, 129, 0.25) !important;
+  word-break: break-word !important;
 }
 
 body.dark .tadaza-inline-code {
-  background: rgba(110, 118, 129, 0.35);
-  color: #ff7b72;
-  border-color: rgba(240, 246, 252, 0.15);
+  background: rgba(110, 118, 129, 0.35) !important;
+  color: #ff7b72 !important;
+  border-color: rgba(240, 246, 252, 0.15) !important;
 }
 
 /* Code Block Card in Messages */
@@ -885,25 +2969,31 @@ body.dark .tadaza-code-card {
 
 /* Syntax Highlighting Colors */
 .hl-keyword {
-  color: #cba6f7;
-  font-weight: 600;
+  color: #cba6f7 !important;
+  font-weight: 600 !important;
 }
 .hl-string {
-  color: #a6e3a1;
+  color: #a6e3a1 !important;
 }
 .hl-number {
-  color: #fab387;
+  color: #fab387 !important;
 }
 .hl-boolean {
-  color: #f38ba8;
-  font-weight: 600;
+  color: #f38ba8 !important;
+  font-weight: 600 !important;
 }
 .hl-comment {
-  color: #6c7086;
-  font-style: italic;
+  color: #6c7086 !important;
+  font-style: italic !important;
 }
 .hl-function {
-  color: #89b4fa;
+  color: #89b4fa !important;
+}
+.hl-operator {
+  color: #89dceb !important;
+}
+.hl-punctuation {
+  color: #9399b2 !important;
 }
 
 /* Toolbar Code Button */

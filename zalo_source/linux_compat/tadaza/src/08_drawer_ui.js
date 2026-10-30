@@ -249,6 +249,9 @@
     const f = currentConfig.features;
 
     if (activeTab === 'theme') {
+      const activePreset = t.active_preset || (t.hawaiian_theme ? 'hawaiian' : 'none');
+      const themeOpacity = t.theme_opacity !== undefined ? t.theme_opacity : (t.hawaiian_opacity !== undefined ? t.hawaiian_opacity : 0.85);
+      const themeFps = t.theme_fps || t.hawaiian_fps || 20;
       return `
         <div class="tadaza-section">
           <h3 class="tadaza-section-title">Chế độ hiển thị (Theme)</h3>
@@ -333,6 +336,76 @@
               </div>
             ` : ''}
           </div>
+        </div>
+
+        <div class="tadaza-section">
+          <h3 class="tadaza-section-title" style="display:flex; align-items:center; gap:8px;">
+            <span>Hệ sinh thái động (Ecosystem Themes)</span>
+            <span style="font-size:10px; padding:2px 7px; border-radius:8px; background:linear-gradient(135deg, #10b981, #0fc3ff); color:#fff; font-weight:700;">ASCII LIVE</span>
+          </h3>
+          <div class="tadaza-item-desc" style="margin-bottom:8px;">
+            Mô phỏng hệ sinh thái sống động theo phong cách ASCII Art & kính mờ thủy sinh học.
+          </div>
+
+          <div class="tadaza-theme-grid" id="tadaza-theme-presets-grid">
+            <div class="tadaza-theme-card ${activePreset === 'hawaiian' ? 'active' : ''}" data-preset="hawaiian">
+              <div class="tadaza-theme-preview hawaiian">🏝️</div>
+              <div class="tadaza-theme-card-title">
+                <span>Hawaiian Lagoon</span>
+                <span class="tadaza-theme-card-tag">SAN HÔ</span>
+              </div>
+            </div>
+
+            <div class="tadaza-theme-card ${activePreset === 'rainforest' ? 'active' : ''}" data-preset="rainforest">
+              <div class="tadaza-theme-preview rainforest">🌧️</div>
+              <div class="tadaza-theme-card-title">
+                <span>Cơn Mưa Nhiệt Đới</span>
+                <span class="tadaza-theme-card-tag">MƯA RỪNG</span>
+              </div>
+            </div>
+
+            <div class="tadaza-theme-card ${activePreset === 'bioforest' ? 'active' : ''}" data-preset="bioforest">
+              <div class="tadaza-theme-preview bioforest">🌿</div>
+              <div class="tadaza-theme-card-title">
+                <span>Rừng Ánh Sáng Đêm</span>
+                <span class="tadaza-theme-card-tag">PHÁT QUANG</span>
+              </div>
+            </div>
+
+            <div class="tadaza-theme-card ${activePreset === 'none' ? 'active' : ''}" data-preset="none">
+              <div class="tadaza-theme-preview none">⚪</div>
+              <div class="tadaza-theme-card-title">
+                <span>Mặc định</span>
+                <span class="tadaza-theme-card-tag">OFF</span>
+              </div>
+            </div>
+          </div>
+
+          ${activePreset !== 'none' ? `
+            <div class="tadaza-item tadaza-item-col sub-item" style="margin-top:12px;">
+              <div class="tadaza-item-info">
+                <span class="tadaza-item-title">Độ rõ hình nền</span>
+                <span class="tadaza-item-desc">Độ mờ / trong suốt của hoạt ảnh nền</span>
+              </div>
+              <div class="tadaza-range-wrap">
+                <input type="range" class="tadaza-range" id="range-dynamic-theme-opacity" min="0.3" max="1" step="0.05" value="${themeOpacity}">
+                <span class="tadaza-range-val">${Math.round(themeOpacity * 100)}%</span>
+              </div>
+            </div>
+
+            <div class="tadaza-item sub-item">
+              <div class="tadaza-item-info">
+                <span class="tadaza-item-title">Tốc độ khung hình (FPS)</span>
+                <span class="tadaza-item-desc">Tự động giảm còn 5 FPS khi chuyển cửa sổ để tiết kiệm pin</span>
+              </div>
+              <select class="tadaza-select" id="select-dynamic-theme-fps">
+                <option value="15" ${themeFps === 15 ? 'selected' : ''}>15 FPS (Cực mát máy)</option>
+                <option value="20" ${themeFps === 20 ? 'selected' : ''}>20 FPS (Khuyên dùng - Chuẩn)</option>
+                <option value="30" ${themeFps === 30 ? 'selected' : ''}>30 FPS (Mượt mà tối đa)</option>
+                <option value="10" ${themeFps === 10 ? 'selected' : ''}>10 FPS (Tiết kiệm pin)</option>
+              </select>
+            </div>
+          ` : ''}
         </div>
       `;
     }
@@ -774,6 +847,65 @@
       if (rangeOpacity) {
         rangeOpacity.addEventListener('change', () => {
           saveAndApply({ theme: { ...currentConfig.theme, wallpaper_opacity: parseFloat(rangeOpacity.value) } });
+        });
+      }
+
+      // Dynamic Theme Preset Card Selection
+      const themeCards = drawer.querySelectorAll('.tadaza-theme-card');
+      themeCards.forEach(card => {
+        card.addEventListener('click', () => {
+          const preset = card.getAttribute('data-preset');
+          const isHawaiian = (preset === 'hawaiian');
+          currentConfig.theme.active_preset = preset;
+          currentConfig.theme.hawaiian_theme = isHawaiian;
+          saveAndApply({
+            theme: {
+              ...currentConfig.theme,
+              active_preset: preset,
+              hawaiian_theme: isHawaiian
+            }
+          });
+          renderDrawerContent();
+        });
+      });
+
+      // Dynamic Theme Opacity
+      const rangeDynamicOpacity = drawer.querySelector('#range-dynamic-theme-opacity');
+      if (rangeDynamicOpacity) {
+        const valSpan = rangeDynamicOpacity.parentElement?.querySelector('.tadaza-range-val');
+        rangeDynamicOpacity.addEventListener('input', () => {
+          if (valSpan) {
+            valSpan.textContent = `${Math.round(parseFloat(rangeDynamicOpacity.value) * 100)}%`;
+          }
+        });
+        rangeDynamicOpacity.addEventListener('change', () => {
+          const val = parseFloat(rangeDynamicOpacity.value);
+          currentConfig.theme.theme_opacity = val;
+          currentConfig.theme.hawaiian_opacity = val;
+          saveAndApply({
+            theme: {
+              ...currentConfig.theme,
+              theme_opacity: val,
+              hawaiian_opacity: val
+            }
+          });
+        });
+      }
+
+      // Dynamic Theme FPS
+      const selectDynamicFps = drawer.querySelector('#select-dynamic-theme-fps');
+      if (selectDynamicFps) {
+        selectDynamicFps.addEventListener('change', () => {
+          const fps = parseInt(selectDynamicFps.value, 10);
+          currentConfig.theme.theme_fps = fps;
+          currentConfig.theme.hawaiian_fps = fps;
+          saveAndApply({
+            theme: {
+              ...currentConfig.theme,
+              theme_fps: fps,
+              hawaiian_fps: fps
+            }
+          });
         });
       }
     }

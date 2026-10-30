@@ -119,33 +119,4 @@
       }
       return origFetch.apply(this, arguments);
     };
-
-    // 3. Intercept WebSocket send
-    const origWsSend = WebSocket.prototype.send;
-    WebSocket.prototype.send = function (data) {
-      let str = '';
-      if (typeof data === 'string') {
-        str = data;
-      } else if (data instanceof ArrayBuffer) {
-        try { str = new TextDecoder().decode(new Uint8Array(data)); } catch (e) { }
-      } else if (ArrayBuffer.isView(data)) {
-        try { str = new TextDecoder().decode(new Uint8Array(data.buffer, data.byteOffset, data.byteLength)); } catch (e) { }
-      }
-
-      if (str) {
-        if (currentConfig.privacy && currentConfig.privacy.hide_typing && /"typing"|typing_status|is_typing/i.test(str)) {
-          console.log('[TADaZa Privacy] Blocked WebSocket typing payload');
-          return;
-        }
-        if (currentConfig.privacy && currentConfig.privacy.hide_seen && /"seen"|ack_seen|read_msg/i.test(str)) {
-          console.log('[TADaZa Privacy] Blocked WebSocket seen payload');
-          return;
-        }
-        if (currentConfig.privacy && currentConfig.privacy.hide_delivered && /"delivered"|ack_delivered|recv_msg/i.test(str)) {
-          console.log('[TADaZa Privacy] Blocked WebSocket delivered payload');
-          return;
-        }
-      }
-      return origWsSend.apply(this, arguments);
-    };
   }

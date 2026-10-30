@@ -4,6 +4,7 @@
  */
 const fs = require('fs');
 const path = require('path');
+const cp = require('child_process');
 
 async function stat(targetPath, isFolder) {
   try {
@@ -29,74 +30,83 @@ async function stat(targetPath, isFolder) {
   }
 }
 
-async function diskInfo() {
-  try {
-    const stats = fs.statfsSync('/');
-    const bsize = stats.bsize || 4096;
-    const total = Number(BigInt(stats.blocks) * BigInt(bsize));
-    const free = Number(BigInt(stats.bfree) * BigInt(bsize));
-    const available = Number(BigInt(stats.bavail) * BigInt(bsize));
+let cachedDiskInfo = null;
+let lastDiskInfoTime = 0;
 
-    const rootDisk = {
-      caption: 'Root',
-      device: '/',
-      description: 'Root Filesystem',
-      path: '/',
-      freeSpace: free,
-      size: total,
-      totalSpace: total,
-      free: free,
-      usedSpace: total - free,
-      availableSpace: available,
-      available: available,
-      isExternal: false,
-      label: 'Root'
-    };
-
-    const drives = [rootDisk];
-    drives['/'] = rootDisk;
-    drives['C:'] = rootDisk;
-    drives['C:\\'] = rootDisk;
-
-    return new Proxy(drives, {
-      get(target, prop) {
-        if (prop in target) {
-          return target[prop];
-        }
-        if (typeof prop === 'string') {
-          return rootDisk;
-        }
-        return target[prop] || rootDisk;
-      }
-    });
-  } catch (err) {
-    const fallback = {
-      caption: 'Root',
-      device: '/',
-      description: 'Root Filesystem',
-      path: '/',
-      freeSpace: 53687091200,
-      size: 107374182400,
-      totalSpace: 107374182400,
-      free: 53687091200,
-      usedSpace: 53687091200,
-      availableSpace: 53687091200,
-      available: 53687091200,
-      isExternal: false,
-      label: 'Root'
-    };
-    const drives = [fallback];
-    drives['/'] = fallback;
-    drives['C:'] = fallback;
-    drives['C:\\'] = fallback;
-    return new Proxy(drives, {
-      get(target, prop) {
-        if (prop in target) return target[prop];
-        if (typeof prop === 'string') return fallback;
-        return target[prop] || fallback;
-      }
-    });
+function getRealDiskUsage() {
+  const now = Date.now();
+  if (cachedDiskInfo && (now - lastDiskInfoTime < 10000)) {
+    return cachedDiskInfo;
   }
+
+  if (typeof fs.statfsSync === 'function') {
+    try {
+      const stats = fs.statfsSync('/');
+      const bsize = stats.bsize || 4096;
+      const total = Number(BigInt(stats.blocks) * BigInt(bsize));
+      const free = Number(BigInt(stats.bfree) * BigInt(bsize));
+      const available = Number(BigInt(stats.bavail) * BigInt(bsize));
+      cachedDiskInfo = { total, free, available, used: total - free };
+      lastDiskInfoTime = now;
+      return cachedDiskInfo;
+    } catch (e) {}
+  }
+
+  try {
+    const output = cp.execSync('df -k /', { encoding: 'utf8', timeout: 3000 });
+    const lines = output.trim().split('\n');
+    if (lines.length >= 2) {
+      const lastLine = lines[lines.length - 1].trim().replace(/\s+/g, ' ');
+      const parts = lastLine.split(' ');
+      if (parts.length >= 4) {
+        const total = parseInt(parts[1], 10) * 1024;
+        const used = parseInt(parts[2], 10) * 1024;
+        const available = parseInt(parts[3], 10) * 1024;
+        cachedDiskInfo = { total, free: available, available, used };
+        lastDiskInfoTime = now;
+        return cachedDiskInfo;
+      }
+    }
+  } catch (err) {}
+
+  return { total: 250000000000, free: 150000000000, available: 150000000000, used: 100000000000 };
+}
+
+async function diskInfo() {
+  const usage = getRealDiskUsage();
+
+  const rootDisk = {
+    caption: 'Root',
+    device: '/',
+    description: 'Root Filesystem',
+    path: '/',
+    freeSpace: usage.free,
+    size: usage.total,
+    totalSpace: usage.total,
+    free: usage.free,
+    usedSpace: usage.used || (usage.total - usage.free),
+    availableSpace: usage.available,
+    available: usage.available,
+    isExternal: false,
+    label: 'Root'
+  };
+
+  const drives = [rootDisk];
+  drives['/'] = rootDisk;
+  drives['C:'] = rootDisk;
+  drives['C:\\'] = rootDisk;
+
+  return new Proxy(drives, {
+    get(target, prop) {
+      if (prop in target) {
+        return target[prop];
+      }
+      if (typeof prop === 'string') {
+        return rootDisk;
+      }
+      return target[prop] || rootDisk;
+    }
+  });
 }
 
 async function statFolder(folderPath) {

@@ -517,17 +517,18 @@ function initTadazaMain() {
           try {
             const cfg = configManager.get().privacy || {};
             const url = details.url || '';
+            const dummyResponse = 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify({ error_code: 0, data: { ok: true }, message: 'Success' }));
             if (cfg.hide_typing && /\/api\/(message|group)\/typing(?:\?|\/|#|$)/i.test(url)) {
               console.log('[TADaZa Main WebRequest] Blocked typing:', url);
-              return callback({ cancel: true });
+              return callback({ redirectURL: dummyResponse });
             }
             if (cfg.hide_seen && /\/api\/(?:e2ee\/pc\/t\/)?(message|group)\/(?:seen|seenv2|react_seen)(?:\?|\/|#|$)/i.test(url)) {
               console.log('[TADaZa Main WebRequest] Blocked seen:', url);
-              return callback({ cancel: true });
+              return callback({ redirectURL: dummyResponse });
             }
             if (cfg.hide_delivered && /\/api\/(?:e2ee\/pc\/t\/)?(message|group)\/(?:delivered|deliveredv2|react_delivered)(?:\?|\/|#|$)/i.test(url)) {
               console.log('[TADaZa Main WebRequest] Blocked delivered:', url);
-              return callback({ cancel: true });
+              return callback({ redirectURL: dummyResponse });
             }
           } catch (e) {}
           callback({ cancel: false });

@@ -43,3 +43,58 @@ body.dark ::-webkit-scrollbar-thumb {
 body.dark ::-webkit-scrollbar-thumb:hover {
   background: #484f58;
 }
+
+/* --------------------------------------------------------------------------
+   2. Data Management & Storage Contrast Fixes
+   -------------------------------------------------------------------------- */
+.disk-overview-container {
+  color: #e2e8f0 !important;
+}
+
+.disk-usage-chart {
+  background: rgba(255, 255, 255, 0.16) !important;
+  border-radius: 8px !important;
+  height: 10px !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.disk-usage-chart .zalo-usage {
+  background: #0088ff !important;
+  border-radius: 4px 0 0 4px !important;
+  box-shadow: 0 0 8px rgba(0, 136, 255, 0.5) !important;
+}
+
+.disk-usage-chart .another-app-usage {
+  background: #00d2ff !important;
+  box-shadow: 0 0 8px rgba(0, 210, 255, 0.4) !important;
+}
+
+.disk-usage-desc {
+  display: flex !important;
+  align-items: center !important;
+  margin-top: 8px !important;
+  font-size: 13px !important;
+}
+
+.disk-usage-desc [style*="var(--N300)"],
+.disk-usage-desc span {
+  color: #cbd5e1 !important;
+  font-weight: 500 !important;
+  opacity: 1 !important;
+}
+
+.disk-usage-desc-zalo {
+  background: #0088ff !important;
+  box-shadow: 0 0 6px rgba(0, 136, 255, 0.6) !important;
+}
+
+.disk-usage-desc-another {
+  background: #00d2ff !important;
+  box-shadow: 0 0 6px rgba(0, 210, 255, 0.5) !important;
+}
+
+.setting-section-content {
+  color: #e2e8f0 !important;
+}
+
