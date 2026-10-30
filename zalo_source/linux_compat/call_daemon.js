@@ -92,6 +92,7 @@ class ZaloCallDaemon {
     this.hangupCb = null;
     this.muteCb = null;
     this.cameraCb = null;
+    this.screenCb = null;
     this.videoFrameCb = null;
     this.deviceCb = null;
     this.micVolumeCb = null;
@@ -108,11 +109,33 @@ class ZaloCallDaemon {
     electron.ipcMain.removeAllListeners("call-action-end");
     electron.ipcMain.removeAllListeners("call-action-mute");
     electron.ipcMain.removeAllListeners("call-action-camera");
+    electron.ipcMain.removeAllListeners("call-action-share-screen");
     electron.ipcMain.removeAllListeners("call-action-video-frame");
     electron.ipcMain.removeAllListeners("call-action-device");
     electron.ipcMain.removeAllListeners("call-action-mic-volume");
     electron.ipcMain.removeAllListeners("call-action-expand-video");
     electron.ipcMain.removeAllListeners("call-action-need-key");
+    electron.ipcMain.removeHandler("call-get-screen-sources");
+
+    electron.ipcMain.handle("call-get-screen-sources", async () => {
+      try {
+        if (!electron.desktopCapturer) return [];
+        const sources = await electron.desktopCapturer.getSources({
+          types: ["screen", "window"],
+          thumbnailSize: { width: 320, height: 180 },
+          fetchWindowIcons: true
+        });
+        return sources.map(s => ({
+          id: s.id,
+          name: s.name,
+          thumbnail: s.thumbnail ? s.thumbnail.toDataURL() : null,
+          appIcon: s.appIcon ? s.appIcon.toDataURL() : null
+        }));
+      } catch (err) {
+        logDebug("IPC", "call-get-screen-sources error: " + err.message);
+        return [];
+      }
+    });
 
     electron.ipcMain.on("call-action-answer", () => {
       logDebug("IPC", "call-action-answer received");
@@ -153,11 +176,19 @@ class ZaloCallDaemon {
       }
     });
 
+    electron.ipcMain.on("call-action-share-screen", (e, on) => {
+      logDebug("IPC", `call-action-share-screen: ${on}`);
+      if (this.screenCb) {
+        this.screenCb(on);
+      }
+    });
+
     electron.ipcMain.on("call-action-video-frame", (e, frame) => {
       if (this.videoFrameCb && frame && frame.data) {
         this.videoFrameCb({
           key: !!frame.key,
           data: Buffer.from(frame.data),
+          screen: !!frame.screen,
           w: frame.w || 640,
           h: frame.h || 480
         });
@@ -180,8 +211,8 @@ class ZaloCallDaemon {
     electron.ipcMain.on("call-action-expand-video", () => {
       if (this.callWindow && !this.callWindow.isDestroyed()) {
         const [w, h] = this.callWindow.getSize();
-        if (w < 700) {
-          this.callWindow.setSize(780, 580, true);
+        if (w < 850) {
+          this.callWindow.setSize(900, 650, true);
           this.callWindow.center();
         }
       }
@@ -250,6 +281,9 @@ class ZaloCallDaemon {
       },
       onCamera: (cb) => {
         this.cameraCb = cb;
+      },
+      onScreen: (cb) => {
+        this.screenCb = cb;
       },
       onVideoFrame: (cb) => {
         this.videoFrameCb = cb;
@@ -448,6 +482,19 @@ class ZaloCallDaemon {
         ses.setPermissionCheckHandler(() => true);
         ses.setPermissionRequestHandler((wc, perm, cb) => cb(true));
         ses.setDevicePermissionHandler(() => true);
+        if (typeof ses.setDisplayMediaRequestHandler === "function") {
+          ses.setDisplayMediaRequestHandler(async (request, callback) => {
+            try {
+              if (electron.desktopCapturer) {
+                const sources = await electron.desktopCapturer.getSources({ types: ["screen", "window"] });
+                const screenSource = sources.find(s => s.id.startsWith("screen:")) || sources[0];
+                callback({ video: screenSource });
+                return;
+              }
+            } catch (e) {}
+            callback({});
+          });
+        }
       } catch (e) {}
     }
 

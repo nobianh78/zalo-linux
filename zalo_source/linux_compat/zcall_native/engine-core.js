@@ -280,6 +280,12 @@ class EngineCore {
       return;
     }
     this.emit({ type: 'sendSignal', command: 12064, data: { callId: c.callId, status: on ? 1 : 0, uidTo: c.peerId } });
+    if (on) {
+      if (this.media) this.media.vKeySent = false;
+      this._camMic(true);
+    } else if (!c.cameraOn) {
+      this._camMic(false);
+    }
   }
 
   // Group calls are not implemented (separate SFU signalling and media).
