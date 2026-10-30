@@ -77,6 +77,9 @@
       auto_detect_phone: true,
       default_qr_template: 'compact2'
     },
+    system: {
+      close_to_tray: false
+    },
     _systemIsDark: false
   };
 

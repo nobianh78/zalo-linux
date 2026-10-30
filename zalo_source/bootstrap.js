@@ -16,6 +16,22 @@ process.on('uncaughtException', (error) => {
   console.error('[CRITICAL UNCAUGHT EXCEPTION in bootstrap]', error);
 });
 
+// Expose Electron executable for sub-processes (like call daemon runner)
+process.env.ZALO_ELECTRON_BIN = process.execPath;
+try {
+  const fs = require('fs');
+  const path = require('path');
+  const runner = path.join(__dirname, 'linux_compat', 'zalo_call_runner.sh');
+  if (fs.existsSync(runner)) {
+    fs.chmodSync(runner, 0o755);
+  }
+} catch (e) {}
+
+// If invoked as call daemon runner, dispatch immediately without single-instance lock
+if (process.argv.some(e => e.startsWith('--launch-call-daemon'))) {
+  return require('./linux_compat/call_daemon');
+}
+
 // Set Linux Desktop integration (dock grouping, notifications, frameless & menu cleanup)
 try {
   const electron = require('electron');
@@ -118,6 +134,9 @@ try {
       function isMainWindow(w) {
         if (!w || w.isDestroyed()) return false;
         try {
+          if (w.isMainWindowCandidate === true) {
+            return true;
+          }
           const url = (w.webContents ? w.webContents.getURL() : '').toLowerCase();
           if (url.includes('sqlite') || url.includes('worker') || url.includes('notification') || url.includes('call_window')) {
             return false;
@@ -125,13 +144,6 @@ try {
           const title = (w.getTitle() || '').toLowerCase();
           if (title.includes('sqlite') || title.includes('worker') || title.includes('notification') || title.includes('call_window')) {
             return false;
-          }
-          const bounds = w.getBounds();
-          if (bounds.width < 500 || bounds.height < 400) {
-            return false;
-          }
-          if (w.isMainWindowCandidate === true) {
-            return true;
           }
           if (url.includes('index.html') || url.includes('login.html') || url.includes('compact-app.html')) {
             return true;
@@ -156,13 +168,10 @@ try {
           try {
             const url = (w.webContents ? w.webContents.getURL() : '').toLowerCase();
             const title = (w.getTitle() || '').toLowerCase();
-            const b = w.getBounds();
             if (url.includes('sqlite') || url.includes('worker') || url.includes('notification') || url.includes('call_window')) continue;
             if (title.includes('sqlite') || title.includes('worker') || title.includes('notification') || title.includes('call_window')) continue;
-            if (b.width >= 500 && b.height >= 400) {
-              mainAppWindow = w;
-              return w;
-            }
+            mainAppWindow = w;
+            return w;
           } catch (e) {}
         }
         return null;
@@ -180,8 +189,11 @@ try {
           }
           if (isMaximizedState) {
             win.maximize();
-          } else if (normalBounds && normalBounds.width >= 500 && normalBounds.height >= 400) {
-            win.setBounds(normalBounds);
+          } else {
+            const b = win.getBounds();
+            if (b.width < 500 || b.height < 400) {
+              win.setBounds(normalBounds || { width: 1000, height: 720 });
+            }
           }
           win.setOpacity(1);
           win.show();
@@ -196,9 +208,6 @@ try {
           try {
             win.webContents.send('show-from-tray');
           } catch (e) {}
-          try {
-            electron.app.emit('activate');
-          } catch (e) {}
         } catch (e) {
           console.error('[Bootstrap] Error in restoreMainWindow:', e.message);
         }
@@ -206,6 +215,10 @@ try {
 
       // Handle second instance on Linux: restore ONLY the main window
       electron.app.on('second-instance', (event, commandLine, workingDirectory) => {
+        restoreMainWindow();
+      });
+
+      electron.app.on('activate', () => {
         restoreMainWindow();
       });
 
@@ -282,11 +295,33 @@ try {
 
         win.on('close', () => {
           if (isMainWindow(win)) {
-            isClosingWindow = true;
-            if (win.isMaximized()) {
-              isMaximizedState = true;
+            let closeToTray = false;
+            try {
+              const { getConfig } = require('./linux_compat/tadaza/config_manager');
+              const cfg = getConfig();
+              if (cfg && cfg.system && cfg.system.close_to_tray === true) {
+                closeToTray = true;
+              }
+            } catch (err) {}
+
+            if (!closeToTray) {
+              if (global.zaloAppQuitFlow && typeof global.zaloAppQuitFlow.setAppIsQuitting === 'function') {
+                global.zaloAppQuitFlow.setAppIsQuitting();
+              }
+              setTimeout(() => {
+                try {
+                  if (electron.app) {
+                    electron.app.quit();
+                  }
+                } catch (e) {}
+              }, 50);
+            } else {
+              isClosingWindow = true;
+              if (win.isMaximized()) {
+                isMaximizedState = true;
+              }
+              setTimeout(() => { isClosingWindow = false; }, 500);
             }
-            setTimeout(() => { isClosingWindow = false; }, 500);
           }
         });
 
@@ -334,6 +369,11 @@ const handleEntryCompactApp = () => {
 };
 
 function bootstrap() {
+  const isCallDaemon = process.argv.some(e => e.startsWith('--launch-call-daemon'));
+  if (isCallDaemon) {
+    return require('./linux_compat/call_daemon');
+  }
+
   let profileLockData = {};
   try {
     const { getCurrentProfileId } = require('./linux_compat/tadaza/profiles_manager');

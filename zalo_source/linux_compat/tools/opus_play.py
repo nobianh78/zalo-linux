@@ -25,20 +25,34 @@ DEFAULT_DEVICE = "default"
 
 
 def load_opus():
-    # find_library needs ldconfig or a compiler; the loader finds libopus.so.0
-    # on its own in the standard paths of any distro / architecture.
-    lib = ctypes.util.find_library("opus") or "libopus.so.0"
-    opus = ctypes.CDLL(lib)
-    opus.opus_decoder_create.restype = ctypes.c_void_p
-    opus.opus_decoder_create.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.POINTER(ctypes.c_int)]
-    opus.opus_decode.argtypes = [
-        ctypes.c_void_p, ctypes.c_char_p, ctypes.c_int, ctypes.c_char_p, ctypes.c_int, ctypes.c_int,
+    # Prefer bundled libopus.so.0 next to this script, then system paths
+    candidates = [
+        str(Path(__file__).resolve().parent / "libopus.so.0"),
+        str(Path(__file__).resolve().parent / "libopus.so"),
+        ctypes.util.find_library("opus"),
+        "libopus.so.0",
+        "libopus.so",
+        "/usr/lib/x86_64-linux-gnu/libopus.so.0",
+        "/usr/lib/libopus.so.0"
     ]
-    opus.opus_encoder_create.restype = ctypes.c_void_p
-    opus.opus_encoder_create.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.POINTER(ctypes.c_int)]
-    opus.opus_encode.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_int, ctypes.c_char_p, ctypes.c_int]
-    opus.opus_encoder_ctl.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_int]
-    return opus
+    for lib in candidates:
+        if not lib:
+            continue
+        try:
+            opus = ctypes.CDLL(lib)
+            opus.opus_decoder_create.restype = ctypes.c_void_p
+            opus.opus_decoder_create.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.POINTER(ctypes.c_int)]
+            opus.opus_decode.argtypes = [
+                ctypes.c_void_p, ctypes.c_char_p, ctypes.c_int, ctypes.c_char_p, ctypes.c_int, ctypes.c_int,
+            ]
+            opus.opus_encoder_create.restype = ctypes.c_void_p
+            opus.opus_encoder_create.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.POINTER(ctypes.c_int)]
+            opus.opus_encode.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_int, ctypes.c_char_p, ctypes.c_int]
+            opus.opus_encoder_ctl.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_int]
+            return opus
+        except Exception:
+            continue
+    raise RuntimeError("Failed to load libopus library")
 
 
 def new_decoder(opus):

@@ -421,6 +421,20 @@
             </label>
           </div>
         </div>
+
+        <div class="tadaza-section">
+          <h3 class="tadaza-section-title">Hệ thống & Cửa sổ</h3>
+          <div class="tadaza-item">
+            <div class="tadaza-item-info">
+              <span class="tadaza-item-title">Thu nhỏ xuống khay khi bấm nút đóng (X)</span>
+              <span class="tadaza-item-desc">Mặc định tắt (bấm X để thoát hẳn Zalo). Bật để thu nhỏ xuống khay Tray.</span>
+            </div>
+            <label class="tadaza-switch">
+              <input type="checkbox" id="toggle-close-to-tray" ${(currentConfig.system && currentConfig.system.close_to_tray) ? 'checked' : ''}>
+              <span class="tadaza-slider"></span>
+            </label>
+          </div>
+        </div>
       `;
     }
 
@@ -829,6 +843,15 @@
       if (hideDelivered) {
         hideDelivered.addEventListener('change', () => {
           saveAndApply({ privacy: { ...currentConfig.privacy, hide_delivered: hideDelivered.checked } });
+        });
+      }
+
+      const closeToTray = drawer.querySelector('#toggle-close-to-tray');
+      if (closeToTray) {
+        closeToTray.addEventListener('change', () => {
+          if (!currentConfig.system) currentConfig.system = {};
+          currentConfig.system.close_to_tray = closeToTray.checked;
+          saveAndApply({ system: currentConfig.system });
         });
       }
     }

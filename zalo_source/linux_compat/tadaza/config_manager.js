@@ -50,6 +50,9 @@ const DEFAULT_CONFIG = {
     window_width: 370,
     window_height: 520,
     pinned_chats: []
+  },
+  system: {
+    close_to_tray: false
   }
 };
 

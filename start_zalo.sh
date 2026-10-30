@@ -31,6 +31,13 @@ if [ -z "$PROFILE" ] && [ -n "$ZALO_PROFILE" ]; then
   PROFILE="$ZALO_PROFILE"
 fi
 
+if [ -z "$PROFILE" ] && [ -f "$HOME/.config/zalo_profiles.json" ]; then
+  ACTIVE_PROF=$(grep -o '"activeProfile"[[:space:]]*:[[:space:]]*"[^"]*"' "$HOME/.config/zalo_profiles.json" 2>/dev/null | sed 's/.*"activeProfile"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/' || true)
+  if [ -n "$ACTIVE_PROF" ]; then
+    PROFILE="$ACTIVE_PROF"
+  fi
+fi
+
 EXTRA_ARGS=()
 if [ "$HAS_USER_DATA" -eq 0 ]; then
   if [ -n "$PROFILE" ] && [ "$PROFILE" != "default" ]; then
