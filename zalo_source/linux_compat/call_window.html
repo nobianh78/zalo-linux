@@ -993,15 +993,38 @@
       try {
         availableSources = await ipcRenderer.invoke('call-get-screen-sources');
         if (!availableSources || !availableSources.length) {
-          closeScreenPicker();
-          startScreenShare(null);
+          screenSourcesGrid.innerHTML = `
+            <div style="grid-column: 1 / -1; text-align: center; padding: 24px; color: #8b949e;">
+              <p style="margin-bottom: 12px; color: #8b949e;">Không tìm thấy danh sách cửa sổ riêng lẻ.</p>
+              <button class="btn-confirm" id="btnRetryDirectShare" style="padding: 8px 16px;">Chia sẻ toàn màn hình</button>
+            </div>
+          `;
+          const retryBtn = document.getElementById('btnRetryDirectShare');
+          if (retryBtn) {
+            retryBtn.addEventListener('click', () => {
+              closeScreenPicker();
+              startScreenShare(null);
+            });
+          }
           return;
         }
         renderSourcesGrid();
       } catch (err) {
-        console.warn('[ScreenPicker] invoke error, fallback to getDisplayMedia:', err);
-        closeScreenPicker();
-        startScreenShare(null);
+        console.warn('[ScreenPicker] invoke error:', err);
+        screenSourcesGrid.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 20px; color: #8b949e;">
+            <p style="margin-bottom: 8px; color: #f85149; font-weight: 500;">Chưa nhận được danh sách màn hình từ tiến trình nền</p>
+            <p style="margin-bottom: 14px; font-size: 12px; color: #8b949e;">Nếu Zalo chưa khởi động lại sau khi cập nhật, vui lòng tắt mở lại Zalo hoàn toàn hoặc thử chia sẻ trực tiếp:</p>
+            <button class="btn-confirm" id="btnRetryDirectShare" style="padding: 8px 16px;">Chia sẻ toàn màn hình</button>
+          </div>
+        `;
+        const retryBtn = document.getElementById('btnRetryDirectShare');
+        if (retryBtn) {
+          retryBtn.addEventListener('click', () => {
+            closeScreenPicker();
+            startScreenShare(null);
+          });
+        }
       }
     }
 
@@ -1159,6 +1182,7 @@
       } catch (err) {
         console.warn('[startScreenShare] error:', err);
         stopScreenShare();
+        alert('Không thể chia sẻ màn hình: ' + (err.message || 'Lỗi không xác định'));
       }
     }
 
