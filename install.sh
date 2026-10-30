@@ -5,7 +5,7 @@ set -e
 # Repository: https://github.com/nobianh78/zalo-linux
 
 REPO="nobianh78/zalo-linux"
-FALLBACK_DEB_URL="https://github.com/nobianh78/zalo-linux/releases/download/v26.10.11/zalo-linux_26.10.11_amd64.deb"
+FALLBACK_DEB_URL="https://github.com/nobianh78/zalo-linux/releases/download/v26.10.15/zalo-linux_26.10.15_amd64.deb"
 
 # Colors for terminal output
 RED='\033[0;31m'
@@ -18,12 +18,6 @@ echo -e "${BLUE}==========================================${NC}"
 echo -e "${GREEN}      Cai dat Zalo PC Native Linux        ${NC}"
 echo -e "${BLUE}==========================================${NC}"
 
-# Check root / sudo
-if [ "$EUID" -ne 0 ]; then
-    echo -e "${YELLOW}[!] Yêu cầu quyền quản trị viên (root/sudo). Đang nâng quyền...${NC}"
-    exec sudo bash "$0" "$@"
-fi
-
 # Check architecture
 ARCH=$(uname -m)
 if [ "$ARCH" != "x86_64" ]; then
@@ -34,7 +28,11 @@ fi
 # Ensure curl is installed
 if ! command -v curl >/dev/null 2>&1; then
     echo -e "${YELLOW}[*] Đang cài đặt curl...${NC}"
-    apt-get update -qq && apt-get install -y -qq curl
+    if [ "$EUID" -ne 0 ]; then
+        sudo apt-get update -qq && sudo apt-get install -y -qq curl
+    else
+        apt-get update -qq && apt-get install -y -qq curl
+    fi
 fi
 
 # Query latest deb release URL from GitHub API
@@ -45,7 +43,7 @@ LATEST_DEB_URL=$(curl -s "https://api.github.com/repos/${REPO}/releases/latest" 
     | head -n 1 || true)
 
 if [ -z "$LATEST_DEB_URL" ]; then
-    echo -e "${YELLOW}[!] Không lấy được URL từ GitHub API (có thể do giới hạn truy vấn). Sử dụng URL mặc định...${NC}"
+    echo -e "${YELLOW}[!] Không lấy được URL từ GitHub API. Sử dụng URL chính thức...${NC}"
     LATEST_DEB_URL="$FALLBACK_DEB_URL"
 fi
 
@@ -58,15 +56,10 @@ curl -fSL --progress-bar "$LATEST_DEB_URL" -o "$TEMP_DEB"
 
 # Install package
 echo -e "${BLUE}[3/3] Đang tiến hành cài đặt vào hệ thống...${NC}"
-if command -v apt >/dev/null 2>&1; then
-    apt-get update -qq
-    apt-get install -y "$TEMP_DEB"
-elif command -v dpkg >/dev/null 2>&1; then
-    dpkg -i "$TEMP_DEB" || apt-get install -f -y
+if [ "$EUID" -ne 0 ]; then
+    sudo apt install -y "$TEMP_DEB"
 else
-    echo -e "${RED}[Lỗi] Hệ điều hành không hỗ trợ định dạng gói .deb (không tìm thấy apt hoặc dpkg).${NC}"
-    rm -f "$TEMP_DEB"
-    exit 1
+    apt install -y "$TEMP_DEB"
 fi
 
 # Cleanup
