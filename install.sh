@@ -25,13 +25,20 @@ if [ "$ARCH" != "x86_64" ]; then
     exit 1
 fi
 
-# Ensure curl is installed
-if ! command -v curl >/dev/null 2>&1; then
-    echo -e "${YELLOW}[*] Đang cài đặt curl...${NC}"
+# Ensure curl and audio/call dependencies are installed
+MISSING_PKGS=()
+for pkg in curl python3 alsa-utils pulseaudio-utils; do
+    if ! dpkg -s "$pkg" >/dev/null 2>&1; then
+        MISSING_PKGS+=("$pkg")
+    fi
+done
+
+if [ ${#MISSING_PKGS[@]} -gt 0 ]; then
+    echo -e "${YELLOW}[*] Đang cài đặt các gói phụ thuộc cho cuộc gọi và hệ thống (${MISSING_PKGS[*]})...${NC}"
     if [ "$EUID" -ne 0 ]; then
-        sudo apt-get update -qq && sudo apt-get install -y -qq curl
+        sudo apt-get update -qq && sudo apt-get install -y -qq "${MISSING_PKGS[@]}"
     else
-        apt-get update -qq && apt-get install -y -qq curl
+        apt-get update -qq && apt-get install -y -qq "${MISSING_PKGS[@]}"
     fi
 fi
 
