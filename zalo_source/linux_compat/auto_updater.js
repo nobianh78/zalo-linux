@@ -19,8 +19,8 @@ const path = require('path');
 const { spawn } = require('child_process');
 
 const REPO = 'nobianh78/zalo-linux';
-const CHECK_INTERVAL_MS = 6 * 60 * 60 * 1000; // 6 hours
-const INITIAL_DELAY_MS = 8000; // 8 seconds after app start
+const CHECK_INTERVAL_MS = 15 * 60 * 1000; // Check every 15 minutes
+const INITIAL_DELAY_MS = 2000; // 2 seconds after app start
 
 function getCurrentVersion() {
   try {
@@ -223,7 +223,31 @@ async function checkForUpdates(silent = true) {
       return;
     }
 
-    const { response } = await dialog.showMessageBox({
+    // Broadcast update availability to all renderer windows (for in-app UI banner)
+    try {
+      const windows = electron.BrowserWindow.getAllWindows();
+      for (const w of windows) {
+        if (!w.isDestroyed() && w.webContents) {
+          w.webContents.send('tadaza:update-available', {
+            version: remoteVer,
+            currentVersion: currentVer,
+            releaseUrl: release.html_url,
+            assetUrl: asset.browser_download_url
+          });
+        }
+      }
+    } catch (e) {}
+
+    let mainWin = null;
+    try {
+      const windows = electron.BrowserWindow.getAllWindows();
+      mainWin = windows.find(w => !w.isDestroyed() && w.isVisible()) || null;
+      if (mainWin) {
+        mainWin.focus();
+      }
+    } catch (e) {}
+
+    const dialogOptions = {
       type: 'info',
       title: 'Cập nhật Zalo Linux',
       message: `Đã có phiên bản mới: v${remoteVer}`,
@@ -231,7 +255,9 @@ async function checkForUpdates(silent = true) {
       buttons: ['Cập nhật ngay', 'Để sau', 'Xem chi tiết'],
       defaultId: 0,
       cancelId: 1
-    });
+    };
+
+    const { response } = await (mainWin ? dialog.showMessageBox(mainWin, dialogOptions) : dialog.showMessageBox(dialogOptions));
 
     if (response === 0) {
       performUpdate(asset.browser_download_url, remoteVer);
@@ -269,5 +295,6 @@ function initAutoUpdater() {
 module.exports = {
   initAutoUpdater,
   checkForUpdates,
+  performUpdate,
   getCurrentVersion
 };

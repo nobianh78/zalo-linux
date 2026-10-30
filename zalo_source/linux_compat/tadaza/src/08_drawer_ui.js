@@ -423,7 +423,7 @@
         </div>
 
         <div class="tadaza-section">
-          <h3 class="tadaza-section-title">Hệ thống & Cửa sổ</h3>
+          <h3 class="tadaza-section-title">Hệ thống & Cập nhật</h3>
           <div class="tadaza-item">
             <div class="tadaza-item-info">
               <span class="tadaza-item-title">Thu nhỏ xuống khay khi bấm nút đóng (X)</span>
@@ -433,6 +433,16 @@
               <input type="checkbox" id="toggle-close-to-tray" ${(currentConfig.system && currentConfig.system.close_to_tray) ? 'checked' : ''}>
               <span class="tadaza-slider"></span>
             </label>
+          </div>
+
+          <div class="tadaza-item">
+            <div class="tadaza-item-info">
+              <span class="tadaza-item-title">Kiểm tra cập nhật</span>
+              <span class="tadaza-item-desc" id="tadaza-update-status">Kiểm tra phiên bản mới nhất từ GitHub Releases</span>
+            </div>
+            <button class="tadaza-action-btn" id="btn-check-update" style="white-space:nowrap; padding:6px 12px; font-size:12px;">
+              Kiểm tra ngay
+            </button>
           </div>
         </div>
       `;
@@ -852,6 +862,23 @@
           if (!currentConfig.system) currentConfig.system = {};
           currentConfig.system.close_to_tray = closeToTray.checked;
           saveAndApply({ system: currentConfig.system });
+        });
+      }
+
+      const btnCheckUpdate = drawer.querySelector('#btn-check-update');
+      const updateStatus = drawer.querySelector('#tadaza-update-status');
+      if (btnCheckUpdate) {
+        btnCheckUpdate.addEventListener('click', async () => {
+          if (updateStatus) updateStatus.textContent = 'Đang kiểm tra từ GitHub...';
+          btnCheckUpdate.disabled = true;
+          try {
+            await window.electronAPI.invoke('tadaza:check-for-updates', false);
+            if (updateStatus) updateStatus.textContent = 'Đã kiểm tra xong!';
+          } catch (e) {
+            if (updateStatus) updateStatus.textContent = 'Lỗi: ' + e.message;
+          } finally {
+            btnCheckUpdate.disabled = false;
+          }
         });
       }
     }

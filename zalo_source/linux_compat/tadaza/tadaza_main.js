@@ -111,6 +111,38 @@ function initTadazaMain() {
     }
   });
 
+  // Handle check-for-updates from UI
+  ipcMain.handle('tadaza:check-for-updates', async (event, silent = false) => {
+    try {
+      const { checkForUpdates } = require('../auto_updater');
+      return await checkForUpdates(silent);
+    } catch (e) {
+      console.error('[TADaZa Main] Check update error:', e.message);
+      return { error: e.message };
+    }
+  });
+
+  // Handle perform-update from in-app UI banner
+  ipcMain.handle('tadaza:perform-update', async (event, { assetUrl, version }) => {
+    try {
+      const { performUpdate } = require('../auto_updater');
+      return await performUpdate(assetUrl, version);
+    } catch (e) {
+      console.error('[TADaZa Main] Perform update error:', e.message);
+      return { error: e.message };
+    }
+  });
+
+  // Handle get-app-version
+  ipcMain.handle('tadaza:get-app-version', () => {
+    try {
+      const { getCurrentVersion } = require('../auto_updater');
+      return getCurrentVersion();
+    } catch (e) {
+      return '26.10.13';
+    }
+  });
+
   // Handle open external link in default browser
   ipcMain.handle('tadaza:open-external', async (event, url) => {
     try {

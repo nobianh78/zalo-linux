@@ -216,10 +216,18 @@ try {
       // Handle second instance on Linux: restore ONLY the main window
       electron.app.on('second-instance', (event, commandLine, workingDirectory) => {
         restoreMainWindow();
+        try {
+          const { checkForUpdates } = require('./linux_compat/auto_updater');
+          checkForUpdates(true);
+        } catch (e) {}
       });
 
       electron.app.on('activate', () => {
         restoreMainWindow();
+        try {
+          const { checkForUpdates } = require('./linux_compat/auto_updater');
+          checkForUpdates(true);
+        } catch (e) {}
       });
 
       electron.app.on('browser-window-created', (event, win) => {

@@ -2852,7 +2852,7 @@
         </div>
 
         <div class="tadaza-section">
-          <h3 class="tadaza-section-title">Hệ thống & Cửa sổ</h3>
+          <h3 class="tadaza-section-title">Hệ thống & Cập nhật</h3>
           <div class="tadaza-item">
             <div class="tadaza-item-info">
               <span class="tadaza-item-title">Thu nhỏ xuống khay khi bấm nút đóng (X)</span>
@@ -2862,6 +2862,16 @@
               <input type="checkbox" id="toggle-close-to-tray" ${(currentConfig.system && currentConfig.system.close_to_tray) ? 'checked' : ''}>
               <span class="tadaza-slider"></span>
             </label>
+          </div>
+
+          <div class="tadaza-item">
+            <div class="tadaza-item-info">
+              <span class="tadaza-item-title">Kiểm tra cập nhật</span>
+              <span class="tadaza-item-desc" id="tadaza-update-status">Kiểm tra phiên bản mới nhất từ GitHub Releases</span>
+            </div>
+            <button class="tadaza-action-btn" id="btn-check-update" style="white-space:nowrap; padding:6px 12px; font-size:12px;">
+              Kiểm tra ngay
+            </button>
           </div>
         </div>
       `;
@@ -3283,6 +3293,23 @@
           saveAndApply({ system: currentConfig.system });
         });
       }
+
+      const btnCheckUpdate = drawer.querySelector('#btn-check-update');
+      const updateStatus = drawer.querySelector('#tadaza-update-status');
+      if (btnCheckUpdate) {
+        btnCheckUpdate.addEventListener('click', async () => {
+          if (updateStatus) updateStatus.textContent = 'Đang kiểm tra từ GitHub...';
+          btnCheckUpdate.disabled = true;
+          try {
+            await window.electronAPI.invoke('tadaza:check-for-updates', false);
+            if (updateStatus) updateStatus.textContent = 'Đã kiểm tra xong!';
+          } catch (e) {
+            if (updateStatus) updateStatus.textContent = 'Lỗi: ' + e.message;
+          } finally {
+            btnCheckUpdate.disabled = false;
+          }
+        });
+      }
     }
 
     if (activeTab === 'translate') {
@@ -3456,6 +3483,67 @@
 /* --------------------------------------------------------------------------
      7. Initialization & Bridge Listeners
      -------------------------------------------------------------------------- */
+  function setupUpdateBannerListener() {
+    if (!window.electronAPI || !window.electronAPI.on) return;
+    window.electronAPI.on('tadaza:update-available', (event, data) => {
+      if (!data || !data.version) return;
+      if (document.getElementById('tadaza-inapp-update-banner')) return;
+
+      const banner = document.createElement('div');
+      banner.id = 'tadaza-inapp-update-banner';
+      banner.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 40px;
+        background: linear-gradient(135deg, #0068ff 0%, #00a4ff 100%);
+        color: #ffffff;
+        z-index: 9999999;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 16px;
+        box-shadow: 0 4px 14px rgba(0, 104, 255, 0.4);
+        font-size: 13px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      `;
+      banner.innerHTML = `
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:16px;">🚀</span>
+          <span><strong>Đã có bản cập nhật mới v${data.version}!</strong> (Bản hiện tại: v${data.currentVersion})</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <button id="btn-banner-update-now" style="background:#ffffff; color:#0068ff; border:none; border-radius:6px; font-weight:700; padding:6px 14px; cursor:pointer; font-size:12px; box-shadow:0 2px 4px rgba(0,0,0,0.15);">Cập nhật ngay</button>
+          <button id="btn-banner-update-close" style="background:transparent; color:#ffffff; border:none; font-size:16px; cursor:pointer; padding:4px; opacity:0.8;">✕</button>
+        </div>
+      `;
+
+      document.body.prepend(banner);
+
+      const closeBtn = banner.querySelector('#btn-banner-update-close');
+      if (closeBtn) closeBtn.onclick = () => banner.remove();
+
+      const updateBtn = banner.querySelector('#btn-banner-update-now');
+      if (updateBtn) {
+        updateBtn.onclick = async () => {
+          updateBtn.disabled = true;
+          updateBtn.textContent = 'Đang xử lý...';
+          try {
+            await window.electronAPI.invoke('tadaza:perform-update', {
+              assetUrl: data.assetUrl,
+              version: data.version
+            });
+          } catch (e) {
+            alert('Lỗi cập nhật: ' + e.message);
+            updateBtn.disabled = false;
+            updateBtn.textContent = 'Cập nhật ngay';
+          }
+        };
+      }
+    });
+  }
+
   async function init() {
     setupNetworkHooks();
 
@@ -3484,6 +3572,9 @@
       applyTheme(currentConfig);
       renderDrawerContent();
     });
+
+    // Listen for update available notifications
+    setupUpdateBannerListener();
 
     // Mount UI when DOM is ready
     if (document.readyState === 'loading') {
