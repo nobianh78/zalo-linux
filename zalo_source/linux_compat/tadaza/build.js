@@ -25,12 +25,13 @@ function buildTadaza() {
   // 2. Build JS
   if (fs.existsSync(srcDir)) {
     const jsFiles = fs.readdirSync(srcDir).filter(f => f.endsWith('.js')).sort();
-    let combinedJs = '/* Auto-generated bundle from linux_compat/tadaza/src - Do not edit directly */\n\n';
+    let combinedJs = '/* Auto-generated bundle from linux_compat/tadaza/src - Do not edit directly */\n\n(function () {\n  \'use strict\';\n\n';
     for (const file of jsFiles) {
       const content = fs.readFileSync(path.join(srcDir, file), 'utf8');
       combinedJs += `/* ==========================================================================\n   MODULE: ${file}\n   ========================================================================== */\n\n`;
       combinedJs += content.trim() + '\n\n';
     }
+    combinedJs += '})();\n';
 
     // Validate JS syntax before writing
     try {

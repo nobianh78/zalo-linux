@@ -1,8 +1,5 @@
-(function () {
-  'use strict';
-
-  if (window.__TADAZA_INITIALIZED__) return;
-  window.__TADAZA_INITIALIZED__ = true;
+if (window.__TADAZA_INITIALIZED__) return;
+window.__TADAZA_INITIALIZED__ = true;
 
   console.log('[TADaZa] Initializing TADaZa Extension in Renderer...');
 
