@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Zalo Linux icon: original artwork (chat bubble + penguin), not derived from the Zalo logo. -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2dd4bf"/>
+      <stop offset="1" stop-color="#0f766e"/>
+    </linearGradient>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#334155"/>
+      <stop offset="1" stop-color="#0f172a"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Rounded-square tile -->
+  <rect x="16" y="16" width="480" height="480" rx="112" fill="url(#bg)"/>
+
+  <!-- Speech bubble with tail at bottom-left -->
+  <path d="M256 92c-96 0-168 60-168 140 0 44 22 82 58 108l-14 58c-2 8 7 14 14 9l62-40c15 3 31 5 48 5 96 0 168-60 168-140S352 92 256 92z"
+        fill="#ffffff"/>
+
+  <!-- Penguin -->
+  <g transform="translate(256 236)">
+    <!-- feet -->
+    <ellipse cx="-30" cy="92" rx="26" ry="11" fill="#f59e0b"/>
+    <ellipse cx="30" cy="92" rx="26" ry="11" fill="#f59e0b"/>
+    <!-- body -->
+    <path d="M0 -104c-46 0-72 40-72 92 0 30-14 52-14 78 0 18 30 30 86 30s86-12 86-30c0-26-14-48-14-78 0-52-26-92-72-92z"
+          fill="url(#body)"/>
+    <!-- belly -->
+    <path d="M0 -40c-32 0-48 32-48 66 0 30 18 52 48 52s48-22 48-52c0-34-16-66-48-66z" fill="#f8fafc"/>
+    <!-- eyes -->
+    <ellipse cx="-20" cy="-58" rx="14" ry="17" fill="#ffffff"/>
+    <ellipse cx="20" cy="-58" rx="14" ry="17" fill="#ffffff"/>
+    <circle cx="-17" cy="-55" r="7" fill="#0f172a"/>
+    <circle cx="17" cy="-55" r="7" fill="#0f172a"/>
+    <circle cx="-15" cy="-58" r="2.5" fill="#ffffff"/>
+    <circle cx="19" cy="-58" r="2.5" fill="#ffffff"/>
+    <!-- beak -->
+    <path d="M-16 -36c8-8 24-8 32 0-6 10-26 10-32 0z" fill="#f59e0b"/>
+    <!-- cheeks -->
+    <circle cx="-38" cy="-30" r="7" fill="#fb7185" opacity="0.55"/>
+    <circle cx="38" cy="-30" r="7" fill="#fb7185" opacity="0.55"/>
+  </g>
+</svg>

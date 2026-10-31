@@ -325,15 +325,18 @@ function updateTray(electron, count) {
 
 /**
  * Zalo's bundle loads the tray icon from favicon.ico, which Electron cannot decode on Linux
- * (empty 0x0 image -> invisible tray icon). Serve the PNG next to it instead.
+ * (empty 0x0 image -> invisible tray icon). Serve this project's own PNG icon instead
+ * (so the tray does not show the Zalo logo); fall back to the PNG next to the .ico.
  */
+const TRAY_ICON = path.join(__dirname, 'assets', 'tray-32.png');
 function patchIcoLoading(electron) {
   const ni = electron.nativeImage;
   const orig = ni.createFromPath;
   ni.createFromPath = function (p) {
     if (typeof p === 'string' && /\.ico$/i.test(p)) {
-      const png = path.join(path.dirname(p), 'favicon-32x32.png');
-      if (fs.existsSync(png)) return orig.call(this, png);
+      for (const png of [TRAY_ICON, path.join(path.dirname(p), 'favicon-32x32.png')]) {
+        if (fs.existsSync(png)) return orig.call(this, png);
+      }
     }
     return orig.call(this, p);
   };
