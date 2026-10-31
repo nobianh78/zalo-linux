@@ -18,11 +18,23 @@ try {
 const { EngineCore } = require("./zcall_native/engine-core");
 const { ZrtcMediaBackend } = require("./zcall_native/backends/zrtc-media");
 
-const LOG_FILE = "/tmp/zalo_call_daemon.log";
+// Call signalling contains names, avatars and phone numbers: keep the log private to the
+// user (0600 in ~/.cache, not world-readable /tmp) and bounded in size.
+const LOG_DIR = path.join(require("os").homedir(), ".cache", "zalo-linux");
+const LOG_FILE = path.join(LOG_DIR, "call_daemon.log");
+const LOG_MAX_BYTES = 2 * 1024 * 1024;
+let logReady = false;
 function logDebug(dir, data) {
   try {
+    if (!logReady) {
+      fs.mkdirSync(LOG_DIR, { recursive: true, mode: 0o700 });
+      logReady = true;
+    }
+    try {
+      if (fs.statSync(LOG_FILE).size > LOG_MAX_BYTES) fs.renameSync(LOG_FILE, LOG_FILE + ".1");
+    } catch (e) {}
     const line = `[${new Date().toISOString()}] [${dir}] ${typeof data === "string" ? data : JSON.stringify(data)}\n`;
-    fs.appendFileSync(LOG_FILE, line);
+    fs.appendFileSync(LOG_FILE, line, { mode: 0o600 });
   } catch (e) {}
 }
 
