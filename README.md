@@ -112,6 +112,8 @@ Kiểm tra trong **TADaZa → Riêng tư → Linux: Bộ gõ & Hiển thị**: d
 | `ZALO_DISPLAY` | `x11` / `wayland` | Ghi đè chế độ hiển thị trong cài đặt |
 | `ZALO_SCALE` | ví dụ `1.25`, `1.5` | Ép tỉ lệ hiển thị |
 | `ZALO_PROFILE` | tên hồ sơ | Mở hồ sơ (tài khoản) cụ thể |
+| `ZALO_RESET_GPU_CACHE` | `1` | Xoá bộ nhớ đệm GPU khi mở. Dùng khi cửa sổ hiện toàn ô vuông/chữ rác. App đã tự xoá mỗi khi driver đồ hoạ hoặc phiên bản app thay đổi. |
+| `ZALO_DISABLE_GPU` | `1` | Tắt tăng tốc phần cứng (khi driver đồ hoạ lỗi hẳn) |
 
 Ví dụ: `ZALO_DISPLAY=wayland zalo-linux`
 
