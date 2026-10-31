@@ -500,8 +500,17 @@ function bootstrap() {
 
   const hasLock = require('electron').app.requestSingleInstanceLock(profileLockData);
   if (!hasLock) {
-    return require('./main-dist/second-instance');
+    const fallback = () => require('./main-dist/second-instance');
+    try {
+      const { app } = require('electron');
+      const { relaunchOptions } = require('./linux_compat/desktop_integration');
+      if (require('./linux_compat/single_instance').waitForQuittingInstance(app, relaunchOptions, fallback)) return;
+    } catch (e) {
+      console.warn('[SingleInstance] retry failed:', e.message);
+    }
+    return fallback();
   }
+  try { require('./linux_compat/single_instance').clearRetryMarker(); } catch (e) {}
 
   // Initialize Linux Native Auto-Updater
   try {
