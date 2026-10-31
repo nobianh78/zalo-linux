@@ -18,6 +18,8 @@ Dán lệnh sau vào Terminal. Chạy được trên **mọi bản phân phối 
 curl -fsSL https://raw.githubusercontent.com/nobianh78/zalo-linux/main/install.sh | bash
 ```
 
+Trên máy có giao diện đồ hoạ, lệnh này mở **cửa sổ cài đặt** (cần `zenity`, có sẵn trên Ubuntu, Mint, Fedora GNOME): xác nhận, thanh tiến trình, hộp nhập mật khẩu của hệ thống, nút mở Zalo khi xong. Không có `zenity` hoặc thêm `--no-gui` thì cài ngay trong Terminal.
+
 Script tự chọn cách cài phù hợp và kiểm tra SHA256 của file tải về:
 
 | Bản phân phối | Cách cài | Cần mật khẩu? |
