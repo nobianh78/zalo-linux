@@ -8,21 +8,35 @@ Chạy ứng dụng Zalo PC trực tiếp trên Linux x86_64 bằng Electron, th
 
 ## Cài đặt
 
-Ubuntu, Debian, Linux Mint và các bản dẫn xuất:
+Dán lệnh sau vào Terminal. Chạy được trên **mọi bản phân phối x86_64** (Ubuntu, Debian, Mint, Fedora, openSUSE, Arch, Manjaro…):
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/nobianh78/zalo-linux/main/install.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/nobianh78/zalo-linux/main/install.sh | bash
 ```
 
-Script tải bản `.deb` mới nhất từ GitHub Releases, cài các gói phụ thuộc qua `apt` và đăng ký biểu tượng trong menu. Nếu muốn kiểm tra trước khi chạy với quyền root, hãy tải [install.sh](install.sh) về đọc rồi mới chạy.
+Script tự chọn cách cài phù hợp và kiểm tra SHA256 của file tải về:
 
-Bản `.AppImage` cũng có trong mục Releases cho các bản phân phối khác.
+| Bản phân phối | Cách cài | Cần mật khẩu? |
+|---|---|---|
+| Ubuntu, Debian, Mint, Pop!_OS… (apt) | Gói `.deb` | Có |
+| Fedora, openSUSE… (dnf / zypper) | Gói `.rpm` (nếu bản phát hành chưa có thì dùng AppImage) | Có |
+| Arch, Manjaro, Void và các bản khác | AppImage trong `~/.local`, kèm biểu tượng menu | Không bắt buộc* |
 
-Gỡ cài đặt:
+\* Script sẽ hỏi mật khẩu để cài thêm FUSE 2 và thư viện âm thanh cho cuộc gọi; bỏ qua thì Zalo vẫn chạy (mở chậm hơn vài giây).
+
+Muốn kiểm tra script trước khi chạy: tải [install.sh](install.sh) về đọc, rồi `bash install.sh`.
+
+**Tuỳ chọn**
 
 ```bash
-sudo apt remove zalo-linux
+# Chỉ dùng AppImage, không cần quyền root
+curl -fsSL https://raw.githubusercontent.com/nobianh78/zalo-linux/main/install.sh | bash -s -- --appimage
+
+# Gỡ cài đặt (dữ liệu chat ở ~/.config/ZaloData được giữ lại)
+curl -fsSL https://raw.githubusercontent.com/nobianh78/zalo-linux/main/install.sh | bash -s -- --uninstall
 ```
+
+Sau khi cài, Zalo tự cập nhật trong ứng dụng theo đúng định dạng đã cài (`.deb`, `.rpm` hoặc AppImage).
 
 ---
 
@@ -104,8 +118,9 @@ Yêu cầu Node.js 18/20/22 và npm.
 ```bash
 npm install
 ./start_zalo.sh            # chạy từ mã nguồn
-npm run dist               # đóng gói .deb và .AppImage vào dist/
+npm run dist               # đóng gói .deb, .rpm và .AppImage vào dist/
 npm run dist:deb           # chỉ .deb
+npm run dist:rpm           # chỉ .rpm (cần gói rpm: sudo apt install rpm)
 npm run dist:appimage      # chỉ .AppImage
 ```
 

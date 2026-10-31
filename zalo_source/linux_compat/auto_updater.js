@@ -16,7 +16,37 @@ const Notification = electron ? electron.Notification : null;
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
-const { spawn } = require('child_process');
+const { spawn, spawnSync } = require('child_process');
+
+/**
+ * How this copy of Zalo was installed: 'appimage' | 'deb' | 'rpm'.
+ * Decides which release asset to download and how to apply it.
+ */
+function getInstallKind() {
+  if (process.env.APPIMAGE) return 'appimage';
+  const owns = (cmd, args) => {
+    try { return spawnSync(cmd, args, { stdio: 'ignore' }).status === 0; } catch (e) { return false; }
+  };
+  if (fs.existsSync('/usr/bin/dpkg-query') && owns('dpkg-query', ['-W', 'zalo-linux'])) return 'deb';
+  if (fs.existsSync('/usr/bin/rpm') && owns('rpm', ['-q', 'zalo-linux'])) return 'rpm';
+  return fs.existsSync('/usr/bin/rpm') && !fs.existsSync('/usr/bin/dpkg') ? 'rpm' : 'deb';
+}
+
+const ASSET_MATCHERS = {
+  appimage: (name) => name.endsWith('.AppImage'),
+  deb: (name) => name.endsWith('_amd64.deb'),
+  rpm: (name) => name.endsWith('.x86_64.rpm')
+};
+
+/** Package-manager command (run through pkexec) that installs a local package file. */
+function packageInstallCommand(kind, file) {
+  if (kind === 'rpm') {
+    if (fs.existsSync('/usr/bin/dnf')) return ['dnf', 'install', '-y', file];
+    if (fs.existsSync('/usr/bin/zypper')) return ['zypper', '--non-interactive', 'install', '--allow-unsigned-rpm', file];
+    return ['rpm', '-U', '--replacepkgs', file];
+  }
+  return ['apt', 'install', '-y', file];
+}
 
 const REPO = 'nobianh78/zalo-linux';
 const CHECK_INTERVAL_MS = 15 * 60 * 1000; // Check every 15 minutes
@@ -117,8 +147,9 @@ function downloadFile(url, destPath, onProgress) {
 }
 
 async function performUpdate(assetUrl, remoteVer) {
-  const isAppImage = !!process.env.APPIMAGE;
-  const ext = isAppImage ? '.AppImage' : '.deb';
+  const kind = getInstallKind();
+  const isAppImage = kind === 'appimage';
+  const ext = { appimage: '.AppImage', deb: '.deb', rpm: '.rpm' }[kind];
   const tempPath = path.join('/tmp', `zalo-update-${remoteVer}${ext}`);
 
   try {
@@ -134,10 +165,13 @@ async function performUpdate(assetUrl, remoteVer) {
     console.log('[AutoUpdater] Download completed!');
 
     if (isAppImage) {
-      // Self-update AppImage: replace current AppImage file
-      fs.chmodSync(tempPath, 0o755);
+      // Self-update AppImage: write next to the running file, then atomically rename over it
+      // (overwriting a running executable in place fails with ETXTBSY).
       const currentAppImage = process.env.APPIMAGE;
-      fs.copyFileSync(tempPath, currentAppImage);
+      const staged = `${currentAppImage}.update`;
+      fs.copyFileSync(tempPath, staged);
+      fs.chmodSync(staged, 0o755);
+      fs.renameSync(staged, currentAppImage);
       fs.unlinkSync(tempPath);
 
       dialog.showMessageBoxSync({
@@ -151,7 +185,7 @@ async function performUpdate(assetUrl, remoteVer) {
       app.relaunch({ execPath: currentAppImage });
       app.exit(0);
     } else {
-      // DEB package: execute pkexec apt install
+      // .deb / .rpm package: install through the system package manager
       if (Notification.isSupported()) {
         new Notification({
           title: 'Zalo Linux',
@@ -159,7 +193,7 @@ async function performUpdate(assetUrl, remoteVer) {
         }).show();
       }
 
-      const child = spawn('pkexec', ['apt', 'install', '-y', tempPath], {
+      const child = spawn('pkexec', packageInstallCommand(kind, tempPath), {
         stdio: 'inherit'
       });
 
@@ -178,7 +212,7 @@ async function performUpdate(assetUrl, remoteVer) {
         } else {
           dialog.showErrorBox(
             'Lỗi cập nhật',
-            `Quá trình cài đặt gói .deb thất bại (mã thoát: ${code}). Vui lòng thử lại sau hoặc cập nhật thủ công.`
+            `Quá trình cài đặt gói ${ext} thất bại (mã thoát: ${code}). Vui lòng thử lại sau hoặc cập nhật thủ công.`
           );
         }
       });
@@ -214,12 +248,11 @@ async function checkForUpdates(silent = true) {
     console.log(`[AutoUpdater] New version available: v${remoteVer}`);
 
     // Find suitable download asset
-    const isAppImage = !!process.env.APPIMAGE;
-    const targetExt = isAppImage ? '.AppImage' : '.deb';
-    const asset = (release.assets || []).find(a => a.name.endsWith(targetExt));
+    const kind = getInstallKind();
+    const asset = (release.assets || []).find(a => ASSET_MATCHERS[kind](a.name));
 
     if (!asset || !asset.browser_download_url) {
-      console.warn(`[AutoUpdater] No matching ${targetExt} asset found in release v${remoteVer}`);
+      console.warn(`[AutoUpdater] No ${kind} asset found in release v${remoteVer}`);
       return;
     }
 
