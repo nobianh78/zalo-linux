@@ -1,0 +1,19 @@
+{
+ "path": "main-dist/compact-app-preload.js",
+ "base_sha256": "c7302cfcc89e2937773bea54f8af7016635b54cbc2ef5421101190fe675fc7db",
+ "result_sha256": "7008591bdb87f33b1547768c5e9845a36c8a921c16d21ddc010d705b4e653367",
+ "edits": [
+  {
+   "find": "(e,t){e.exports=require(\"..\\\\native\\\\nativelibs\")},EZmK:function(e,t,n){",
+   "replace": "(e,t){e.exports=require(\"../native/nativelibs\")},EZmK:function(e,t,n){"
+  },
+  {
+   "find": " Windows\");const t=ft();return t.startsWith(e)?t:B.join(e,c.c,c.d,B.se",
+   "replace": " Windows\");const t=ft();return (!e||typeof e!==\"string\"||t.startsWith(e))?t:B.join(e,c.c,c.d,B.se"
+  },
+  {
+   "find": "urn t?`${t[1]}\\\\`:null},a=e=>Object(r.gethomeDirSync)().startsWith(e),o=e=>e.endsWith(\":\\\\\")?",
+   "replace": "urn t?`${t[1]}\\\\`:null},a=e=>(!e||typeof e!==\"string\"||e===\"/\"||Object(r.gethomeDirSync)().startsWith(e)),o=e=>e.endsWith(\":\\\\\")?"
+  }
+ ]
+}

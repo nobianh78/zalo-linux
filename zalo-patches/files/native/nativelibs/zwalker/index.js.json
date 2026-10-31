@@ -1,0 +1,11 @@
+{
+ "path": "native/nativelibs/zwalker/index.js",
+ "base_sha256": "44a0391d42f3bcae848d4f1dc8458c6889087c4638b143da98b1178e60528d1c",
+ "result_sha256": "6448a129c9b1eed482ddf710a4f3d48711b25b28dbc17bb66e1e7724516ea4ee",
+ "edits": [
+  {
+   "find": "\nif (!nativeBinding) {\r\n  if (loadError) {\r\n    throw loadError\r\n  }\r\n  throw new Error(`Failed to load native binding`)\r\n}\r\n\r\nconst { scanDirec",
+   "replace": "\nif (!nativeBinding) {\r\n  nativeBinding = require('../../../linux_compat/mocks/zwalker.js');\r\n}\r\n\r\nconst { scanDirec"
+  }
+ ]
+}

@@ -42,6 +42,8 @@ curl -fsSL https://raw.githubusercontent.com/nobianh78/zalo-linux/main/install.s
 
 Sau khi cài, Zalo tự cập nhật trong ứng dụng theo đúng định dạng đã cài (`.deb`, `.rpm` hoặc AppImage).
 
+**Lần mở đầu tiên** cần mạng: gói cài đặt của dự án **không chứa mã của Zalo**. Ứng dụng tải bộ cài Zalo PC chính thức (khoảng 213 MB) từ máy chủ của Zalo (`res-download-pc.zadn.vn`), kiểm tra SHA-256, giải nén rồi áp các bản vá Linux trong [`zalo-patches/`](zalo-patches/). Kết quả nằm ở `~/.local/share/zalo-linux/runtime/` (khoảng 300 MB); các lần mở sau chạy ngay, không tải lại.
+
 ---
 
 ## Tính năng
@@ -121,6 +123,7 @@ Yêu cầu Node.js 18/20/22 và npm.
 
 ```bash
 npm install
+npm run zalo:prepare       # tải bộ cài Zalo chính thức, ghép zalo_source/ (làm một lần)
 ./start_zalo.sh            # chạy từ mã nguồn
 npm run dist               # đóng gói .deb, .rpm và .AppImage vào dist/
 npm run dist:deb           # chỉ .deb
@@ -137,7 +140,18 @@ Cấu trúc chính:
 | `zalo_source/linux_compat/mocks/` | Bản Linux của các module native (`zwalker`, `zfile`, `zimage`, `mp4thumb`, …) |
 | `zalo_source/linux_compat/call_daemon.js` | Engine gọi thoại/video |
 | `zalo_source/linux_compat/tadaza/` | Tiện ích TADaZa (`src/` và `css/` được gộp thành bundle khi khởi động) |
-| `zalo_source/main-dist/`, `zalo_source/pc-dist/` | Client Zalo PC gốc của VNG |
+| `zalo_source/main-dist/`, `zalo_source/pc-dist/`, … | Client Zalo PC của VNG. **Không có trong repo**: `npm run zalo:prepare` tạo ra từ bộ cài chính thức |
+| `zalo-patches/` | Bản Zalo gốc được dùng (`manifest.json`: phiên bản, URL, SHA-256) và các bản vá dạng tìm/thay cho từng file |
+| `runtime/` | Điểm khởi động của gói cài: lần đầu tải và ghép Zalo trên máy người dùng |
+| `tools/zalo/gen_patches.py` | Sinh lại `zalo-patches/` sau khi sửa một file của Zalo trong `zalo_source/` |
+
+Sửa một file của Zalo (ví dụ `zalo_source/main-dist/main.js`) thì chạy lại bộ sinh patch rồi commit thư mục `zalo-patches/files/`:
+
+```bash
+python3 -I tools/zalo/gen_patches.py ~/.cache/zalo-linux/official-26.10.10 zalo_source zalo-patches
+```
+
+Gói phát hành kèm `7zz` (7-Zip, LGPL-2.1) để giải nén bộ cài; `npm run dist*` tự chép nó vào `build/vendor/`.
 
 ---
 

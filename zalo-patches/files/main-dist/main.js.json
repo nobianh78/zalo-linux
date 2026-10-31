@@ -1,0 +1,107 @@
+{
+ "path": "main-dist/main.js",
+ "base_sha256": "886eac231ded07df9bb47ddc3cff06b772ec7f1684a7e4c36d0f8be94106ade6",
+ "result_sha256": "905e7ae0478fad19c9141d0eeb57cedcd8d921468cf51ee5578ca36fb6808659",
+ "edits": [
+  {
+   "find": "__ZaBUNDLENAME__=\"main\",",
+   "replace": "process.on('unhandledRejection', (reason, promise) => {\n  console.error('[CRITICAL UNHANDLED REJECTION in main.js]', { reason, promise });\n});\nprocess.on('uncaughtException', (error) => {\n  console.error('[CRITICAL UNCAUGHT EXCEPTION in main.js]', error);\n});\n__ZaBUNDLENAME__=\"main\","
+  },
+  {
+   "find": "e=function(){let e=null;return\"win32\"===process.platform?e=u()?o.join(__dirname,\"..\"",
+   "replace": "e=function(){let e=null;if(\"win32\"===process.platform){e=u()?o.join(__dirname,\"..\""
+  },
+  {
+   "find": "capture\",\"ZaloCall.exe\"):(e=u()?o.join(__dirname,\"",
+   "replace": "capture\",\"ZaloCall.exe\")}else if(\"darwin\"===process.platform){e=u()?o.join(__dirname,\""
+  },
+  {
+   "find": "),\"..\",\"ZaloHelper.app\"),e=o.join(e,\"Contents\",\"MacOS\",\"ZaloCall\")),e}();h(e,p).then((t=>{if(",
+   "replace": "),\"..\",\"ZaloHelper.app\");e=o.join(e,\"Contents\",\"MacOS\",\"ZaloCall\")}else{e=o.join(__dirname,\"..\",\"linux_compat\",\"zalo_call_runner.sh\")}return e}();h(e,p).then((t=>{if("
+  },
+  {
+   "find": " on end\",\"b1E0Gr\"]),H(),S&&S.webContents&&S.webContents.send(\"call-update\",\"callState\",{state:\"free\"})}))})),I.on(\"error\",(e=>",
+   "replace": " on end\",\"b1E0Gr\"]),H(),(S&&!S.isDestroyed()&&S.webContents?S.webContents.send(\"call-update\",\"callState\",{state:\"free\"}):void 0)}))})),I.on(\"error\",(e=>"
+  },
+  {
+   "find": "ate\",{state:\"free\"})})),O=t=>{g?V(e,t):G(e,t)}})),C.on(\"error\",(e=>{e&",
+   "replace": "ate\",{state:\"free\"})})),O=t=>V(e,t)})),C.on(\"error\",(e=>{e&"
+  },
+  {
+   "find": "on(\"exit\",(e=>{H(),L=!1,S&&S.webContents&&S.webContents.send(\"call-update\",\"callState\",{state:\"free\"}),d.zsymb(4,\"z2jtlQ\",[\"cl",
+   "replace": "on(\"exit\",(e=>{H(),L=!1,(S&&!S.isDestroyed()&&S.webContents?S.webContents.send(\"call-update\",\"callState\",{state:\"free\"}):void 0),d.zsymb(4,\"z2jtlQ\",[\"cl"
+  },
+  {
+   "find": ";k=new a(this.mainOpts),j.zsymb(3,\"eb0jqB\",[\"ope",
+   "replace": ";k=new a(this.mainOpts),process.argv.includes(\"--dev\")&&k.webContents.openDevTools({mode:\"detach\"}),j.zsymb(3,\"eb0jqB\",[\"ope"
+  },
+  {
+   "find": "n(t,{title:\"Zalo Photo\",frame:h()!==p,x:o.x,y:o.y,width:o.w,h",
+   "replace": "n(t,{title:\"Zalo Photo\",frame:!1,x:o.x,y:o.y,width:o.w,h"
+  },
+  {
+   "find": "turn{title:\"Zalo Photo\",frame:h()!==p,x:e.x,y:e.y,width:e.w,h",
+   "replace": "turn{title:\"Zalo Photo\",frame:!1,x:e.x,y:e.y,width:e.w,h"
+  },
+  {
+   "find": "null===(t=e.webContents)||void 0===t||t.openDevTools())}}},\"8Mgu\":function(e",
+   "replace": "null===(t=e.webContents)||void 0===t||process.argv.includes(\"--dev\")&&t.openDevTools())}}},\"8Mgu\":function(e"
+  },
+  {
+   "find": "OUT_MS=3e4;const u=new d},DfW2:function(e,t,n){\"",
+   "replace": "OUT_MS=3e4;const u=new d;global.zaloAppQuitFlow=u},DfW2:function(e,t,n){\""
+  },
+  {
+   "find": "(e,t){e.exports=require(\"..\\\\native\\\\nativelibs\")},EYqZ:function(e,t,n){",
+   "replace": "(e,t){e.exports=require(\"../native/nativelibs\")},EYqZ:function(e,t,n){"
+  },
+  {
+   "find": "omHost:async function(){if(null===_e){const e=me.default.migrateFullyDone;_e=e?\"utility-process-sqlite\":\"preload-sqlite\"}return _e}};var ge=n(\"W+DE\");cons",
+   "replace": "omHost:async function(){return\"preload-sqlite\"}};var ge=n(\"W+DE\");cons"
+  },
+  {
+   "find": "?void 0:t.browserWindow;n&&n.webContents.openDevTools()},this._enableDevConte",
+   "replace": "?void 0:t.browserWindow;process.argv.includes(\"--dev\")&&n&&n.webContents.openDevTools()},this._enableDevConte"
+  },
+  {
+   "find": "e=>({title:\"Zalo Photo\",frame:Object(d.getClientType)()!==d.WIN_CLIENT_TYPE,x:e.x,y:e.y,width:e.w,h",
+   "replace": "e=>({title:\"Zalo Photo\",frame:!1,x:e.x,y:e.y,width:e.w,h"
+  },
+  {
+   "find": " Windows\");const t=Je();return t.startsWith(e)?t:E.join(e,c.MIGRATED_P",
+   "replace": " Windows\");const t=Je();return (!e||typeof e!==\"string\"||t.startsWith(e))?t:E.join(e,c.MIGRATED_P"
+  },
+  {
+   "find": "urn t?t[1].toUpperCase()+\":\":null},s=e=>{const t=e.match(",
+   "replace": "urn t?t[1].toUpperCase()+\":\":\"/\"},s=e=>{const t=e.match("
+  },
+  {
+   "find": "urn t?`${t[1]}\\\\`:null},c=e=>Object(i.gethomeDirSync)().startsWith(e),l=e=>(Object(r.b)(!0,\"i",
+   "replace": "urn t?`${t[1]}\\\\`:null},c=e=>(!e||typeof e!==\"string\"||e===\"/\"||Object(i.gethomeDirSync)().startsWith(e)),l=e=>(Object(r.b)(!0,\"i"
+  },
+  {
+   "find": ")}return t}function x(){const e=v.resolve(R).get",
+   "replace": ")}return t}function x(){if(process.platform!==\"win32\")return null;const e=v.resolve(R).get"
+  },
+  {
+   "find": "lChild(),G.quit()),yn(),G.appIsQuitting||(e.preventDefault(),\"darw",
+   "replace": "lChild(),G.quit()),yn(),(G.appIsQuitting||(()=>{try{return!require(\"../linux_compat/tadaza/config_manager\").getConfig().system.close_to_tray}catch(e){return!1}})()?(m.closeAllChild(),G.quit()):(e.preventDefault(),\"darw"
+  },
+  {
+   "find": "meout((()=>{yn()}),10)))})).on(\"resize\",(e=>{b.z",
+   "replace": "meout((()=>{yn()}),10))))})).on(\"resize\",(e=>{b.z"
+  },
+  {
+   "find": "t.start(),function(){if(bt.migrateFullyDone){const e=n(\"60ZI\").defa",
+   "replace": "t.start(),function(){if(!1&&bt.migrateFullyDone){const e=n(\"60ZI\").defa"
+  },
+  {
+   "find": " crashed\",\"Iaev1j\"])})),m&&y.webContents.openDevTools(),function(e){let t=u(\"",
+   "replace": " crashed\",\"Iaev1j\"])})),process.argv.includes(\"--dev\")&&m&&y.webContents.openDevTools(),function(e){let t=u(\""
+  },
+  {
+   "find": "this.__zwindow=new l(e),c(this.__zwindow.webCont",
+   "replace": "this.__zwindow=new l(e),process.argv.includes(\"--dev\")&&this.__zwindow.webContents.openDevTools({mode:\"detach\"}),c(this.__zwindow.webCont"
+  }
+ ]
+}

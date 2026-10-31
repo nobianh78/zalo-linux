@@ -1,0 +1,63 @@
+{
+ "path": "native/nativelibs/index.js",
+ "base_sha256": "b00514cbcb86382742dffd08d3bdedce689d4f1235ec2474d2b0dc0318f4c0e1",
+ "result_sha256": "9b5d3f2c252fa10e05dbdbf6545ca566bde6632c0962f8646f5dbf09a7bc314f",
+ "edits": [
+  {
+   "find": "let arch;\r\nvar instance = module.e",
+   "replace": "const path = require('path');\r\nconst isLinux = process.platform === 'linux';\r\nconst mocksPath = path.resolve(__dirname, '../../linux_compat/mocks');\r\n\r\nvar instance = module.e"
+  },
+  {
+   "find": "\n    fileUtils: () => {\r\n        return require(",
+   "replace": "\n    fileUtils: () => {\r\n        if (isLinux) return require(path.join(mocksPath, 'file-utils.js'));\r\n        return require("
+  },
+  {
+   "find": "   },\r\n    winUtils : ()=>{    \t\r\n    \treturn require('./win-utils/index.js')",
+   "replace": "   },\r\n    winUtils : () => {\r\n        if (isLinux) return require(path.join(mocksPath, 'win-utils.js'));\r\n        return require('./win-utils/index.js')"
+  },
+  {
+   "find": "\r\n    },\r\n    zcall : ()=>{\r\n    \treturn require('./zcall/index.js');\r\n    },\r\n    sqlite3 : ()=>{\r\n    \treturn require('./sqlite3/index.js');\r",
+   "replace": "\r\n    },\r\n    zcall : () => {\r\n        return require('./zcall/index.js');\r\n    },\r\n    sqlite3 : () => {\r\n        return require('./sqlite3/index.js');\r"
+  },
+  {
+   "find": "    },\r\n    dbUtils : ()=>{\r\n        return require(",
+   "replace": "    },\r\n    dbUtils : () => {\r\n        if (isLinux) return require(path.join(mocksPath, 'db-cross-v4.js'));\r\n        return require("
+  },
+  {
+   "find": " },\r\n    v8Profiles : ()=>{\r\n        return require(",
+   "replace": " },\r\n    v8Profiles : () => {\r\n        if (isLinux) return require(path.join(mocksPath, 'v8-profiles.js'));\r\n        return require("
+  },
+  {
+   "find": " zimage: (options) => {\r\n        return require(",
+   "replace": " zimage: (options) => {\r\n        if (isLinux) return require(path.join(mocksPath, 'zimage.js'))(options);\r\n        return require("
+  },
+  {
+   "find": "mage/index.js')(options)\r\n    },\r\n    zaloLogger",
+   "replace": "mage/index.js')(options);\r\n    },\r\n    zaloLogger"
+  },
+  {
+   "find": "  },\r\n    zjxl: () => {\r\n        return require(",
+   "replace": "  },\r\n    zjxl: () => {\r\n        if (isLinux) return require(path.join(mocksPath, 'zjxl.js'));\r\n        return require("
+  },
+  {
+   "find": ",\r\n    zwalker: () => {\r\n        return require(",
+   "replace": ",\r\n    zwalker: () => {\r\n        if (isLinux) return require(path.join(mocksPath, 'zwalker.js'));\r\n        return require("
+  },
+  {
+   "find": "  },\r\n    zocr: () => {\r\n        return require(",
+   "replace": "  },\r\n    zocr: () => {\r\n        if (isLinux) return require(path.join(mocksPath, 'zocr.js'));\r\n        return require("
+  },
+  {
+   "find": " },\r\n    zfile: () => {\r\n        return require(",
+   "replace": " },\r\n    zfile: () => {\r\n        if (isLinux) return require(path.join(mocksPath, 'zfile.js'));\r\n        return require("
+  },
+  {
+   "find": " fileUtilities: () => {\r\n        try {\r\n        ",
+   "replace": " fileUtilities: () => {\r\n        if (isLinux) return require(path.join(mocksPath, 'file-utilities.js'));\r\n        try {\r\n        "
+  },
+  {
+   "find": "\r\n    mp4thumb: () => {\r\n        return require(",
+   "replace": "\r\n    mp4thumb: () => {\r\n        if (isLinux) return require(path.join(mocksPath, 'mp4thumb.js'));\r\n        return require("
+  }
+ ]
+}

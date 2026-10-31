@@ -1,0 +1,11 @@
+{
+ "path": "pc-dist/lazy/main-startup.88ecc330054698a13502.js",
+ "base_sha256": "d1017a4bb79a73450acb3657d5a8a4eb8820568da2a7ee8f607f9d05ce124327",
+ "result_sha256": "f5c80b56f34d8ee59ca4aa76966ef9d1325bf7855bf6f07ce1aeec3e8b33aca5",
+ "edits": [
+  {
+   "find": "essChecker=h}isEnable(){const e=this.config.get(\"cross_setting.offFeature\"),t=this.config.get(\"cross_setting.enable\");return!e&&t}isEnableBySrc(e){if(this.metricts.onCheckSyncSuggestion(e),!this.isEnable())return!1;switch(e){case rf.j.FIRST_TIME_LOGIN:return this.config.get(\"cross_setting.enableFirstTimeUse\");case rf.j.MANUAL:return this.config.get(\"cross_setting.enableManual\");case rf.j.OVERFLOW:return this.config.get(\"cross_setting.enableOverQueue\");case rf.j.E2EE_MISSING_MESSAGE:return this.config.get(\"notify_missing_e2ee_message.enable\")}return!0}isEnableResume(){return!!this.isEnable()&&this.config.get(\"cross_setting.enableResume\")}canSync(e){return this.",
+   "replace": "essChecker=h}isEnable(){return true}isEnableBySrc(e){return true}isEnableResume(){return true}canSync(e){return this."
+  }
+ ]
+}

@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src file:">
+<title>Zalo Linux</title>
+<style>
+  :root { --bg: #ffffff; --fg: #0f172a; --muted: #64748b; --track: #e2e8f0; --accent: #0f766e; --err: #b91c1c; color-scheme: light; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0f172a; --fg: #e2e8f0; --muted: #94a3b8; --track: #1e293b; --accent: #2dd4bf; --err: #f87171; color-scheme: dark; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 24px 28px; font: 14px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--fg); user-select: none; }
+  header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  header img { width: 44px; height: 44px; }
+  h1 { font-size: 17px; margin: 0; }
+  p { margin: 0 0 12px; color: var(--muted); }
+  .bar { height: 8px; border-radius: 4px; background: var(--track); overflow: hidden; margin: 18px 0 8px; }
+  .bar > div { height: 100%; width: 0; background: var(--accent); transition: width .2s; }
+  #status { min-height: 21px; font-variant-numeric: tabular-nums; }
+  #status.err { color: var(--err); }
+  button { margin-top: 14px; padding: 8px 18px; border: 0; border-radius: 8px; background: var(--accent); color: #fff; font: inherit; font-weight: 600; cursor: pointer; }
+  @media (prefers-color-scheme: dark) { button { color: #042f2e; } }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+  <header>
+    <img src="../assets/icons/64x64.png" alt="">
+    <h1>Chuẩn bị Zalo Linux</h1>
+  </header>
+  <p id="intro">Lần đầu chạy, Zalo Linux tải bộ cài Zalo PC <b>chính thức</b> (khoảng 213&nbsp;MB) từ máy chủ của Zalo, kiểm tra mã SHA-256, rồi chuyển sang chạy trên Linux. Việc này chỉ làm một lần.</p>
+  <div class="bar" id="bar" hidden><div id="fill"></div></div>
+  <div id="status"></div>
+  <button id="go">Tải và cài đặt</button>
+<script>
+  const $ = (id) => document.getElementById(id);
+  const mb = (n) => (n / 1048576).toFixed(0);
+  const set = (text, err) => { $('status').textContent = text; $('status').className = err ? 'err' : ''; };
+  $('go').onclick = () => {
+    $('go').hidden = true;
+    $('bar').hidden = false;
+    set('Đang kết nối máy chủ Zalo…');
+    (window.__failed ? window.setup.retry : window.setup.start)();
+  };
+  window.setup.onStatus((m) => {
+    if (m.phase === 'download') {
+      const pct = m.total ? Math.min(100, (m.done / m.total) * 100) : 0;
+      $('fill').style.width = pct.toFixed(1) + '%';
+      set(`Đang tải bộ cài Zalo ${mb(m.done)} / ${mb(m.total)} MB`);
+    } else if (m.phase === 'extract') {
+      $('fill').style.width = '100%';
+      set('Đang giải nén…');
+    } else if (m.phase === 'assemble') {
+      set('Đang chuyển sang chạy trên Linux…');
+    } else if (m.phase === 'done') {
+      set('Xong! Đang mở Zalo…');
+    } else if (m.phase === 'error') {
+      window.__failed = true;
+      set('Lỗi: ' + m.message, true);
+      $('go').textContent = 'Thử lại';
+      $('go').hidden = false;
+    }
+  });
+</script>
+</body>
+</html>

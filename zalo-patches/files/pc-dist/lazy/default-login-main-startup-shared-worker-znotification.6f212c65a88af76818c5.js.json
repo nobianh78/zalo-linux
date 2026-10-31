@@ -1,0 +1,35 @@
+{
+ "path": "pc-dist/lazy/default-login-main-startup-shared-worker-znotification.6f212c65a88af76818c5.js",
+ "base_sha256": "11384b6da7f580d8807f88498e2777a47caa90cdb362df47827e734e739613cd",
+ "result_sha256": "7f3b392e57f50a84c449db06b7f122b9f8f31254f6c95963f00c0777cbd40680",
+ "edits": [
+  {
+   "find": "0===e||e.stop()}send(e){return this.interpreter.send(e)}onChange(e){this.interpreter.onChange(e)}onTransition(e){this.interpreter.onTransition(e)}onStop(e){this.interpreter.onStop(e)}onDone(e){this.interpreter.onDone(e)}off(e){var t,n;null=",
+   "replace": "0===e||e.stop()}send(e){if(!this.interpreter&&typeof this.createMachine===\"function\"){try{this.create();this.start()}catch(err){}}return this.interpreter?this.interpreter.send(e):undefined}onChange(e){this.interpreter&&this.interpreter.onChange(e)}onTransition(e){this.interpreter&&this.interpreter.onTransition(e)}onStop(e){this.interpreter&&this.interpreter.onStop(e)}onDone(e){this.interpreter&&this.interpreter.onDone(e)}off(e){var t,n;null="
+  },
+  {
+   "find": " Windows\");const t=Ze();return t.startsWith(e)?t:p.join(e,l.c,l.d,p.se",
+   "replace": " Windows\");const t=Ze();return (!e||typeof e!==\"string\"||t.startsWith(e))?t:p.join(e,l.c,l.d,p.se"
+  },
+  {
+   "find": "i=n(\"lUm7\");const o=e=>{const t=e.match(/^([A-Z]",
+   "replace": "i=n(\"lUm7\");const o=e=>{if(!e||typeof e!==\"string\")return\"/\";const t=e.match(/^([A-Z]"
+  },
+  {
+   "find": "urn t?t[1].toUpperCase()+\":\":null},r=e=>{const t=e.match(/^([A-Z]",
+   "replace": "urn t?t[1].toUpperCase()+\":\":\"/\"},r=e=>{if(!e||typeof e!==\"string\")return\"/\";const t=e.match(/^([A-Z]"
+  },
+  {
+   "find": "+:)/i);return t?`${t[1]}\\\\`:null},l=e=>Object(s.gethomeDirSync)().startsWith(e),c=e=>(Object(a.b)(!0,\"i",
+   "replace": "+:)/i);return t?`${t[1]}\\\\`:\"/\"},l=e=>(!e||typeof e!==\"string\"||e===\"/\"||Object(s.gethomeDirSync)().startsWith(e)),c=e=>(Object(a.b)(!0,\"i"
+  },
+  {
+   "find": "return i}));const a=e=>{const t=e.match(/^([A-Z]",
+   "replace": "return i}));const a=e=>{if(!e||typeof e!==\"string\")return\"/\";const t=e.match(/^([A-Z]"
+  },
+  {
+   "find": "urn t?t[1].toUpperCase()+\":\":null},s=e=>{const t=e.match(/^([A-Z]+):/i);return t?t[1]:null};const i=e=>e.endsWith(",
+   "replace": "urn t?t[1].toUpperCase()+\":\":\"/\"},s=e=>{if(!e||typeof e!==\"string\")return\"/\";const t=e.match(/^([A-Z]+):/i);return t?t[1]:\"/\"};const i=e=>e.endsWith("
+  }
+ ]
+}

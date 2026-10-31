@@ -1,0 +1,15 @@
+{
+ "path": "native/nativelibs/v8-profiles/index.js",
+ "base_sha256": "5c2ef08e13e70262c637ed55eb6ed065ea93dd25bac407b76607270aeef5cd73",
+ "result_sha256": "3ad071d6a3d6da7a42f39522ffb5cc9e36f18603bc9419ad13ed8a5a0e0f9bd5",
+ "edits": [
+  {
+   "find": "es/node-inspector)\r\n*/\r\nvar binding = process.platform === 'win32' ? (process.arch === 'ia32'",
+   "replace": "es/node-inspector)\r\n*/\r\nvar binding = process.platform === 'win32' \r\n  ? (process.arch === 'ia32'"
+  },
+  {
+   "find": "ron1.8_win32_x64.node')) : require('./profiler_electron1.8_mac.node')\r\n\r\nfunction CpuProfile(",
+   "replace": "ron1.8_win32_x64.node')) \r\n  : (process.platform === 'darwin' ? require('./profiler_electron1.8_mac.node') : { cpu: { profiles: {}, startProfiling: () => {}, stopProfiling: () => ({ startTime: Date.now(), endTime: Date.now() }), setSamplingInterval: () => {} } });\r\n\r\nfunction CpuProfile("
+  }
+ ]
+}

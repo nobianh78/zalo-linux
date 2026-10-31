@@ -1,0 +1,23 @@
+{
+ "path": "main-dist/preload-sqlite.js",
+ "base_sha256": "a7ca834099c88979c28f1b06ce81d84f069d69409df538264e75c572e2891485",
+ "result_sha256": "5d0149c3f2d3137025e774e60726c8c2980fcc3695946415164a012162b36792",
+ "edits": [
+  {
+   "find": "__ZaBUNDLENAME__=\"preloa",
+   "replace": "process.on('unhandledRejection', (reason, promise) => {\n  console.error('[CRITICAL UNHANDLED REJECTION in preload-sqlite.js]', { reason, promise });\n});\nprocess.on('uncaughtException', (error) => {\n  console.error('[CRITICAL UNCAUGHT EXCEPTION in preload-sqlite.js]', error);\n});\n__ZaBUNDLENAME__=\"preloa"
+  },
+  {
+   "find": "(e,t){e.exports=require(\"..\\\\native\\\\nativelibs\")},EZmK:function(e,t,n){",
+   "replace": "(e,t){e.exports=require(\"../native/nativelibs\")},EZmK:function(e,t,n){"
+  },
+  {
+   "find": " Windows\");const t=ft();return t.startsWith(e)?t:x.join(e,c.c,c.d,x.se",
+   "replace": " Windows\");const t=ft();return (!e||typeof e!==\"string\"||t.startsWith(e))?t:x.join(e,c.c,c.d,x.se"
+  },
+  {
+   "find": "urn t?`${t[1]}\\\\`:null},i=e=>Object(r.gethomeDirSync)().startsWith(e),o=e=>e.endsWith(\":\\\\\")?",
+   "replace": "urn t?`${t[1]}\\\\`:null},i=e=>(!e||typeof e!==\"string\"||e===\"/\"||Object(r.gethomeDirSync)().startsWith(e)),o=e=>e.endsWith(\":\\\\\")?"
+  }
+ ]
+}

@@ -1,0 +1,63 @@
+{
+ "path": "main-dist/compact-app.js",
+ "base_sha256": "f3db7d8bca1bc26bb1d7b959c9017bf362905c12a07d0c089bb03dbf0b99c558",
+ "result_sha256": "cd6c157d502d5ac6248783c37ec98d0ad8f96e96075d9822aee25663153ed132",
+ "edits": [
+  {
+   "find": "e=function(){let e=null;return\"win32\"===process.platform?e=d()?o.join(__dirname,\"..\"",
+   "replace": "e=function(){let e=null;if(\"win32\"===process.platform){e=d()?o.join(__dirname,\"..\""
+  },
+  {
+   "find": "capture\",\"ZaloCall.exe\"):(e=d()?o.join(__dirname,\"",
+   "replace": "capture\",\"ZaloCall.exe\")}else if(\"darwin\"===process.platform){e=d()?o.join(__dirname,\""
+  },
+  {
+   "find": "),\"..\",\"ZaloHelper.app\"),e=o.join(e,\"Contents\",\"MacOS\",\"ZaloCall\")),e}();h(e,p).then((t=>{if(",
+   "replace": "),\"..\",\"ZaloHelper.app\");e=o.join(e,\"Contents\",\"MacOS\",\"ZaloCall\")}else{e=o.join(__dirname,\"..\",\"linux_compat\",\"zalo_call_runner.sh\")}return e}();h(e,p).then((t=>{if("
+  },
+  {
+   "find": "n(t,{title:\"Zalo Photo\",frame:h()!==p,x:o.x,y:o.y,width:o.w,h",
+   "replace": "n(t,{title:\"Zalo Photo\",frame:!1,x:o.x,y:o.y,width:o.w,h"
+  },
+  {
+   "find": "turn{title:\"Zalo Photo\",frame:h()!==p,x:e.x,y:e.y,width:e.w,h",
+   "replace": "turn{title:\"Zalo Photo\",frame:!1,x:e.x,y:e.y,width:e.w,h"
+  },
+  {
+   "find": "null===(t=e.webContents)||void 0===t||t.openDevTools())}}},\"8Mgu\":function(e",
+   "replace": "null===(t=e.webContents)||void 0===t||process.argv.includes(\"--dev\")&&t.openDevTools())}}},\"8Mgu\":function(e"
+  },
+  {
+   "find": "(e,t){e.exports=require(\"..\\\\native\\\\nativelibs\")},EYqZ:function(e,t,n){",
+   "replace": "(e,t){e.exports=require(\"../native/nativelibs\")},EYqZ:function(e,t,n){"
+  },
+  {
+   "find": "omHost:async function(){if(null===_e){const e=me.default.migrateFullyDone;_e=e?\"utility-process-sqlite\":\"preload-sqlite\"}return _e}};var ye=n(\"W+DE\");cons",
+   "replace": "omHost:async function(){return\"preload-sqlite\"}};var ye=n(\"W+DE\");cons"
+  },
+  {
+   "find": "?void 0:t.browserWindow;n&&n.webContents.openDevTools()},this._enableDevConte",
+   "replace": "?void 0:t.browserWindow;process.argv.includes(\"--dev\")&&n&&n.webContents.openDevTools()},this._enableDevConte"
+  },
+  {
+   "find": "e=>({title:\"Zalo Photo\",frame:Object(u.getClientType)()!==u.WIN_CLIENT_TYPE,x:e.x,y:e.y,width:e.w,h",
+   "replace": "e=>({title:\"Zalo Photo\",frame:!1,x:e.x,y:e.y,width:e.w,h"
+  },
+  {
+   "find": " Windows\");const t=Qe();return t.startsWith(e)?t:E.join(e,c.MIGRATED_P",
+   "replace": " Windows\");const t=Qe();return (!e||typeof e!==\"string\"||t.startsWith(e))?t:E.join(e,c.MIGRATED_P"
+  },
+  {
+   "find": "urn t?t[1].toUpperCase()+\":\":null},s=e=>{const t=e.match(",
+   "replace": "urn t?t[1].toUpperCase()+\":\":\"/\"},s=e=>{const t=e.match("
+  },
+  {
+   "find": "urn t?`${t[1]}\\\\`:null},c=e=>Object(i.gethomeDirSync)().startsWith(e),l=e=>(Object(r.b)(!0,\"i",
+   "replace": "urn t?`${t[1]}\\\\`:null},c=e=>(!e||typeof e!==\"string\"||e===\"/\"||Object(i.gethomeDirSync)().startsWith(e)),l=e=>(Object(r.b)(!0,\"i"
+  },
+  {
+   "find": "t.start(),function(){if(Tt.migrateFullyDone){const e=n(\"60ZI\").defa",
+   "replace": "t.start(),function(){if(!1&&Tt.migrateFullyDone){const e=n(\"60ZI\").defa"
+  }
+ ]
+}

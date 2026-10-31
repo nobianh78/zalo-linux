@@ -1,0 +1,11 @@
+{
+ "path": "native/nativelibs/db-cross-v4/dist/binding.js",
+ "base_sha256": "78d03bc8aaffc3504d15a6269fbdc34ba3e6be60e760496e0403dd220aef15db",
+ "result_sha256": "987ad23c0f101a5fe1b67898f99251cd61d42e332415f30a94811ed450ac234b",
+ "edits": [
+  {
+   "find": "ss-v4-native.node`);\r\n}\r\nelse {\r\n    if (process",
+   "replace": "ss-v4-native.node`);\r\n}\r\nelse if (process.platform === 'linux') {\r\n    addon = require('../../../../linux_compat/mocks/db-cross-v4.js');\r\n}\r\nelse {\r\n    if (process"
+  }
+ ]
+}
