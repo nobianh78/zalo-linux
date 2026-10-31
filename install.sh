@@ -16,7 +16,7 @@ set -euo pipefail
 
 REPO="nobianh78/zalo-linux"
 APP_ID="zalo-linux"
-ICON_URL="https://raw.githubusercontent.com/${REPO}/main/zalo_source/pc-dist/android-icon-192x192.png"
+ICON_URL="https://raw.githubusercontent.com/${REPO}/main/assets/icons/256x256.png"
 
 RED='\033[0;31m'; GREEN='\033[0;32m'; BLUE='\033[0;34m'; YELLOW='\033[1;33m'; NC='\033[0m'
 info() { echo -e "${BLUE}==>${NC} $*"; }
@@ -75,7 +75,8 @@ detect_pm() {
 APPIMAGE_DIR="$TARGET_HOME/.local/opt/$APP_ID"
 APPIMAGE_PATH="$APPIMAGE_DIR/Zalo.AppImage"
 DESKTOP_FILE="$TARGET_HOME/.local/share/applications/$APP_ID.desktop"
-ICON_FILE="$TARGET_HOME/.local/share/icons/hicolor/192x192/apps/$APP_ID.png"
+ICON_FILE="$TARGET_HOME/.local/share/icons/hicolor/256x256/apps/$APP_ID.png"
+OLD_ICON_FILE="$TARGET_HOME/.local/share/icons/hicolor/192x192/apps/$APP_ID.png"  # used before v26.10.22
 BIN_LINK="$TARGET_HOME/.local/bin/$APP_ID"
 
 # ---------------------------------------------------------------------------
@@ -86,7 +87,7 @@ if [ "$MODE" = "uninstall" ]; then
   # User-level AppImage first: never needs a password.
   if [ -e "$APPIMAGE_PATH" ] || [ -e "$DESKTOP_FILE" ]; then
     info "Gỡ bản AppImage..."
-    rm -rf "$APPIMAGE_DIR"; rm -f "$DESKTOP_FILE" "$ICON_FILE" "$BIN_LINK"
+    rm -rf "$APPIMAGE_DIR"; rm -f "$DESKTOP_FILE" "$ICON_FILE" "$OLD_ICON_FILE" "$BIN_LINK"
     have update-desktop-database && run_as_user update-desktop-database "$TARGET_HOME/.local/share/applications" >/dev/null 2>&1 || true
     removed=1
   fi
@@ -229,6 +230,7 @@ install_appimage() {
   install -m 0755 "$TMP/Zalo.AppImage" "$APPIMAGE_PATH.new"
   mv -f "$APPIMAGE_PATH.new" "$APPIMAGE_PATH"
   curl -fsSL "$ICON_URL" -o "$ICON_FILE" 2>/dev/null || true
+  rm -f "$OLD_ICON_FILE"
 
   # Without FUSE 2 the AppImage still runs by extracting itself first (slower start).
   local exec_line="\"$APPIMAGE_PATH\" %U"
@@ -239,7 +241,7 @@ install_appimage() {
 
   cat > "$DESKTOP_FILE" <<EOF
 [Desktop Entry]
-Name=Zalo
+Name=Zalo Linux
 Comment=Zalo PC cho Linux (không chính thức)
 Exec=$exec_line
 Icon=$ICON_FILE

@@ -1,7 +1,7 @@
 {
   "name": "zalo-linux",
   "version": "26.10.21",
-  "description": "Zalo PC Native Linux",
+  "description": "Zalo PC cho Linux (không chính thức, không liên kết với VNG)",
   "homepage": "https://github.com/nobianh78/zalo-linux",
   "author": {
     "name": "nobianh78",
@@ -19,8 +19,8 @@
     "dist:rpm": "electron-builder --linux rpm"
   },
   "build": {
-    "appId": "com.vng.zalo.linux",
-    "productName": "Zalo",
+    "appId": "io.github.nobianh78.zalolinux",
+    "productName": "Zalo Linux",
     "directories": {
       "output": "dist"
     },
@@ -39,9 +39,19 @@
       ],
       "maintainer": "nobianh78 <nobianh78@users.noreply.github.com>",
       "category": "Network",
-      "icon": "zalo_source/pc-dist/android-icon-192x192.png"
+      "icon": "assets/icons",
+      "artifactName": "Zalo-Linux-${version}.${ext}",
+      "desktop": {
+        "entry": {
+          "Name": "Zalo Linux",
+          "GenericName": "Nhắn tin",
+          "Comment": "Zalo không chính thức cho Linux",
+          "StartupWMClass": "Zalo"
+        }
+      }
     },
     "deb": {
+      "artifactName": "zalo-linux_${version}_amd64.${ext}",
       "depends": [
         "libgtk-3-0",
         "libnotify4",
@@ -61,6 +71,7 @@
       ]
     },
     "rpm": {
+      "artifactName": "zalo-linux-${version}.x86_64.${ext}",
       "depends": [
         "gtk3",
         "libnotify",

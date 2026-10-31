@@ -1,8 +1,12 @@
-# Zalo PC cho Linux (không chính thức)
+<p align="center"><img src="assets/icons/128x128.png" width="96" alt="Zalo Linux"></p>
+
+# Zalo Linux: Zalo PC cho Linux (không chính thức)
 
 Chạy ứng dụng Zalo PC trực tiếp trên Linux x86_64 bằng Electron, thay các module native chỉ có trên Windows/macOS bằng bản viết cho Linux. Không dùng Wine hay máy ảo.
 
-> **Đây là dự án cộng đồng, không chính thức.** Dự án không liên kết, không được tài trợ hay chứng thực bởi VNG Corporation. "Zalo", logo và giao diện ứng dụng Zalo thuộc về VNG. Repo chỉ bổ sung lớp tương thích Linux; dùng với tài khoản của bạn và tự chịu rủi ro.
+> **Đây là dự án cộng đồng, không chính thức.** Dự án không liên kết, không được tài trợ hay chứng thực bởi VNG Corporation. "Zalo", logo và giao diện ứng dụng Zalo thuộc về VNG. Tên "Zalo Linux" chỉ mô tả việc chạy Zalo trên Linux; biểu tượng của dự án (bong bóng chat và chim cánh cụt) là hình vẽ riêng, không lấy từ logo Zalo. Dùng với tài khoản của bạn và tự chịu rủi ro.
+>
+> Nếu bạn là đại diện VNG và có yêu cầu về dự án này, hãy mở issue hoặc liên hệ người duy trì; yêu cầu sẽ được xử lý ngay.
 
 ---
 
@@ -107,7 +111,7 @@ Kiểm tra trong **TADaZa → Riêng tư → Linux: Bộ gõ & Hiển thị**: d
 | `ZALO_SCALE` | ví dụ `1.25`, `1.5` | Ép tỉ lệ hiển thị |
 | `ZALO_PROFILE` | tên hồ sơ | Mở hồ sơ (tài khoản) cụ thể |
 
-Ví dụ: `ZALO_DISPLAY=wayland /opt/Zalo/zalo-linux`
+Ví dụ: `ZALO_DISPLAY=wayland zalo-linux`
 
 ---
 
