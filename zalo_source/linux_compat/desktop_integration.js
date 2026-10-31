@@ -478,4 +478,4 @@ function relaunchApp() {
   app.quit();
 }
 
-module.exports = { applyEarly, getDiagnostics, relaunchApp, refreshBadge, isWaylandSession };
+module.exports = { applyEarly, getDiagnostics, relaunchApp, relaunchOptions, refreshBadge, isWaylandSession };

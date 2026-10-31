@@ -520,41 +520,55 @@ function initTadazaMain() {
     });
   }
 
-  // Intercept and block network requests at Electron session level for typing, seen, delivered
+  // Privacy: block typing / seen / delivered at the network layer.
+  // Zalo's windows run in the "persist:zalo" partition, not defaultSession, so the
+  // filter must be installed there. This also covers requests the renderer hook in
+  // 01_privacy_network.js cannot see: shared-worker.html, znotification.html and
+  // Web Workers, which load the same API code. Zalo registers no onBeforeRequest
+  // listener of its own, so ours does not displace anything.
+  // A blocked request is cancelled; Chromium refuses redirects to data: URLs for
+  // XHR/fetch, so a fake response is not possible here. The main page still gets
+  // a clean fake success from the renderer hook before the request leaves it.
+  const PRIVACY_RULES = [
+    ['hide_typing', /\/api\/(message|group)\/typing(?:\?|\/|#|$)/i],
+    ['hide_seen', /\/api\/(?:e2ee\/pc\/t\/)?(message|group)\/(?:seen|seenv2|react_seen)(?:\?|\/|#|$)/i],
+    ['hide_delivered', /\/api\/(?:e2ee\/pc\/t\/)?(message|group)\/(?:delivered|deliveredv2|react_delivered)(?:\?|\/|#|$)/i]
+  ];
+  const privacyBlockReason = (url) => {
+    const cfg = configManager.get().privacy || {};
+    for (const [key, re] of PRIVACY_RULES) {
+      if (cfg[key] && re.test(url)) return key;
+    }
+    return null;
+  };
+
   const setupWebRequest = () => {
-    try {
-      if (electron.session && electron.session.defaultSession && electron.session.defaultSession.webRequest) {
-        const filter = {
-          urls: [
-            '*://*/*typing*',
-            '*://*/*seen*',
-            '*://*/*delivered*'
-          ]
-        };
-        electron.session.defaultSession.webRequest.onBeforeRequest(filter, (details, callback) => {
-          try {
-            const cfg = configManager.get().privacy || {};
-            const url = details.url || '';
-            const dummyResponse = 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify({ error_code: 0, data: { ok: true }, message: 'Success' }));
-            if (cfg.hide_typing && /\/api\/(message|group)\/typing(?:\?|\/|#|$)/i.test(url)) {
-              console.log('[TADaZa Main WebRequest] Blocked typing:', url);
-              return callback({ redirectURL: dummyResponse });
-            }
-            if (cfg.hide_seen && /\/api\/(?:e2ee\/pc\/t\/)?(message|group)\/(?:seen|seenv2|react_seen)(?:\?|\/|#|$)/i.test(url)) {
-              console.log('[TADaZa Main WebRequest] Blocked seen:', url);
-              return callback({ redirectURL: dummyResponse });
-            }
-            if (cfg.hide_delivered && /\/api\/(?:e2ee\/pc\/t\/)?(message|group)\/(?:delivered|deliveredv2|react_delivered)(?:\?|\/|#|$)/i.test(url)) {
-              console.log('[TADaZa Main WebRequest] Blocked delivered:', url);
-              return callback({ redirectURL: dummyResponse });
-            }
-          } catch (e) {}
-          callback({ cancel: false });
+    const filter = {
+      urls: ['typing', 'seen', 'delivered'].flatMap(word => [
+        `*://*.zalo.me/*${word}*`,
+        `*://*.zaloapp.com/*${word}*`
+      ])
+    };
+    const sessions = [];
+    try { sessions.push(['persist:zalo', electron.session.fromPartition('persist:zalo')]); } catch (e) { }
+    try { sessions.push(['default', electron.session.defaultSession]); } catch (e) { }
+
+    for (const [name, ses] of sessions) {
+      if (!ses || !ses.webRequest) continue;
+      try {
+        ses.webRequest.onBeforeRequest(filter, (details, callback) => {
+          let reason = null;
+          try { reason = privacyBlockReason(details.url || ''); } catch (e) { }
+          if (reason) {
+            console.log(`[TADaZa Main] Blocked (${reason}):`, (details.url || '').replace(/\?.*/, ''));
+            return callback({ cancel: true });
+          }
+          callback({});
         });
-        console.log('[TADaZa Main] WebRequest filter registered for privacy features');
+        console.log(`[TADaZa Main] Privacy filter registered on session "${name}"`);
+      } catch (e) {
+        console.warn(`[TADaZa Main] Privacy filter failed on session "${name}":`, e.message);
       }
-    } catch (e) {
-      console.warn('[TADaZa Main] WebRequest filter registration failed:', e.message);
     }
   };
 
