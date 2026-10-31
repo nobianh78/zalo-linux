@@ -58,13 +58,26 @@ const DEFAULT_CONFIG = {
     pinned_chats: []
   },
   system: {
-    close_to_tray: false
+    close_to_tray: false,
+    display_mode: 'x11',  // 'x11' (XWayland, Vietnamese IME works everywhere) | 'wayland' (native, opt-in)
+    scale_factor: 0,      // 0 = automatic, otherwise e.g. 1.25 / 1.5 / 2
+    unread_badge: true    // unread count on dock (LauncherEntry) and tray icon
   }
 };
 
+// Merge every top-level section (theme, privacy, ..., system) so new sections are never dropped.
+function mergeSections(base, patch) {
+  const out = {};
+  const keys = new Set([...Object.keys(DEFAULT_CONFIG), ...Object.keys(base || {})]);
+  for (const key of keys) {
+    out[key] = { ...(DEFAULT_CONFIG[key] || {}), ...((base || {})[key] || {}), ...((patch || {})[key] || {}) };
+  }
+  return out;
+}
+
 class ConfigManager {
   constructor() {
-    this.config = { ...DEFAULT_CONFIG };
+    this.config = mergeSections(DEFAULT_CONFIG, null);
     this.ensureDir();
     this.load();
   }
@@ -84,34 +97,20 @@ class ConfigManager {
       if (fs.existsSync(CONFIG_FILE)) {
         const raw = fs.readFileSync(CONFIG_FILE, 'utf-8');
         const parsed = JSON.parse(raw);
-        this.config = {
-          theme: { ...DEFAULT_CONFIG.theme, ...(parsed.theme || {}) },
-          privacy: { ...DEFAULT_CONFIG.privacy, ...(parsed.privacy || {}) },
-          translate: { ...DEFAULT_CONFIG.translate, ...(parsed.translate || {}) },
-          markdown: { ...DEFAULT_CONFIG.markdown, ...(parsed.markdown || {}) },
-          quick_parser: { ...DEFAULT_CONFIG.quick_parser, ...(parsed.quick_parser || {}) },
-          floating_chat: { ...DEFAULT_CONFIG.floating_chat, ...(parsed.floating_chat || {}) }
-        };
+        this.config = mergeSections(DEFAULT_CONFIG, parsed);
       } else {
         this.save();
       }
     } catch (e) {
       console.warn('[TADaZa Config] Failed to read config, using defaults:', e.message);
-      this.config = { ...DEFAULT_CONFIG };
+      this.config = mergeSections(DEFAULT_CONFIG, null);
     }
     return this.config;
   }
 
   save(newConfig = null) {
     if (newConfig) {
-      this.config = {
-        theme: { ...this.config.theme, ...(newConfig.theme || {}) },
-        privacy: { ...this.config.privacy, ...(newConfig.privacy || {}) },
-        translate: { ...this.config.translate, ...(newConfig.translate || {}) },
-        markdown: { ...this.config.markdown, ...(newConfig.markdown || {}) },
-        quick_parser: { ...this.config.quick_parser, ...(newConfig.quick_parser || {}) },
-        floating_chat: { ...this.config.floating_chat, ...(newConfig.floating_chat || {}) }
-      };
+      this.config = mergeSections(this.config, newConfig);
     }
     try {
       this.ensureDir();
@@ -135,8 +134,13 @@ function getConfigManager() {
   return instance;
 }
 
+function getConfig() {
+  return getConfigManager().get();
+}
+
 module.exports = {
   getConfigManager,
+  getConfig,
   DEFAULT_CONFIG,
   CONFIG_FILE
 };

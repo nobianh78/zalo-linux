@@ -1002,6 +1002,14 @@
     });
 
     async function openScreenPicker() {
+      try {
+        const mode = await ipcRenderer.invoke('call-screen-share-mode');
+        if (mode === 'portal') {
+          // Wayland: let xdg-desktop-portal show the system picker (screen or window).
+          startScreenShare(null);
+          return;
+        }
+      } catch (e) {}
       screenPickerModal.style.display = 'flex';
       selectedSourceId = null;
       btnStartShare.disabled = true;
