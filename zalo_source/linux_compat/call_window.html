@@ -1001,10 +1001,12 @@
       }
     });
 
+    let screenShareMode = 'picker';
+
     async function openScreenPicker() {
       try {
-        const mode = await ipcRenderer.invoke('call-screen-share-mode');
-        if (mode === 'portal') {
+        screenShareMode = await ipcRenderer.invoke('call-screen-share-mode');
+        if (screenShareMode === 'portal') {
           // Wayland: let xdg-desktop-portal show the system picker (screen or window).
           startScreenShare(null);
           return;
@@ -1131,6 +1133,17 @@
           } catch (e1) {
             console.warn('[startScreenShare] chromeMediaSource error, trying getDisplayMedia:', e1);
           }
+        }
+
+        if (!stream && screenShareMode === 'portal') {
+          // Wayland: a desktop getUserMedia goes straight to the PipeWire capturer, which asks
+          // xdg-desktop-portal (the system dialog picks the screen; the id is ignored).
+          // Do not use getDisplayMedia here: its handler would need desktopCapturer.getSources,
+          // which crashes Electron 22 with PipeWire and takes the whole call down.
+          stream = await navigator.mediaDevices.getUserMedia({
+            audio: false,
+            video: { mandatory: { chromeMediaSource: 'desktop', chromeMediaSourceId: 'screen:0:0', maxFrameRate: 20 } }
+          });
         }
 
         if (!stream) {

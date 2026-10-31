@@ -137,7 +137,8 @@ class ZaloCallDaemon {
 
     electron.ipcMain.handle("call-get-screen-sources", async () => {
       try {
-        if (!electron.desktopCapturer) return [];
+        // desktopCapturer.getSources segfaults Electron 22 when the PipeWire capturer is on.
+        if (isWaylandSession || !electron.desktopCapturer) return [];
         const sources = await electron.desktopCapturer.getSources({
           types: ["screen", "window"],
           thumbnailSize: { width: 320, height: 180 },
@@ -504,10 +505,11 @@ class ZaloCallDaemon {
         if (typeof ses.setDisplayMediaRequestHandler === "function") {
           ses.setDisplayMediaRequestHandler(async (request, callback) => {
             try {
-              if (electron.desktopCapturer) {
-                // One type only: asking for both makes the Wayland portal open two dialogs.
-                const isWayland = (process.env.XDG_SESSION_TYPE || "").toLowerCase() === "wayland" || !!process.env.WAYLAND_DISPLAY;
-                const sources = await electron.desktopCapturer.getSources({ types: isWayland ? ["screen"] : ["screen", "window"] });
+              // On Wayland desktopCapturer.getSources segfaults Electron 22 (PipeWire capturer),
+              // which would end the call; the call window captures via getUserMedia there instead.
+              const isWayland = (process.env.XDG_SESSION_TYPE || "").toLowerCase() === "wayland" || !!process.env.WAYLAND_DISPLAY;
+              if (electron.desktopCapturer && !isWayland) {
+                const sources = await electron.desktopCapturer.getSources({ types: ["screen", "window"] });
                 const screenSource = sources.find(s => s.id.startsWith("screen:")) || sources[0];
                 callback({ video: screenSource });
                 return;
