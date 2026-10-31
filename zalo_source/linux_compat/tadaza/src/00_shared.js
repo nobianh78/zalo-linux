@@ -78,7 +78,10 @@ window.__TADAZA_INITIALIZED__ = true;
       default_qr_template: 'compact2'
     },
     system: {
-      close_to_tray: false
+      close_to_tray: false,
+      display_mode: 'x11',
+      scale_factor: 0,
+      unread_badge: true
     },
     _systemIsDark: false
   };

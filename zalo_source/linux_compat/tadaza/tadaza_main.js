@@ -56,7 +56,25 @@ function initTadazaMain() {
       console.error('[TADaZa Main] Error broadcasting config:', e.message);
     }
 
+    if (newConfig && newConfig.system) {
+      try { require('../desktop_integration').refreshBadge(); } catch (e) {}
+    }
+
     return payload;
+  });
+
+  // Linux desktop integration: diagnostics (IME / display backend / badge) and restart
+  ipcMain.handle('tadaza:linux-diagnostics', () => {
+    try {
+      return require('../desktop_integration').getDiagnostics();
+    } catch (e) {
+      return { error: e.message };
+    }
+  });
+
+  ipcMain.handle('tadaza:relaunch', () => {
+    require('../desktop_integration').relaunchApp();
+    return true;
   });
 
   // Handle translate

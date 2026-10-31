@@ -87,7 +87,10 @@ window.__TADAZA_INITIALIZED__ = true;
       default_qr_template: 'compact2'
     },
     system: {
-      close_to_tray: false
+      close_to_tray: false,
+      display_mode: 'x11',
+      scale_factor: 0,
+      unread_badge: true
     },
     _systemIsDark: false
   };
@@ -3919,6 +3922,7 @@ function updateDynamicThemes(themeCfg) {
     const t = currentConfig.theme;
     const p = currentConfig.privacy;
     const tr = currentConfig.translate;
+    const sys = currentConfig.system || {};
     const f = currentConfig.features;
 
     if (activeTab === 'theme') {
@@ -4189,6 +4193,58 @@ function updateDynamicThemes(themeCfg) {
             <button class="tadaza-action-btn" id="btn-check-update" style="white-space:nowrap; padding:6px 12px; font-size:12px;">
               Kiểm tra ngay
             </button>
+          </div>
+        </div>
+
+        <div class="tadaza-section">
+          <h3 class="tadaza-section-title">Linux: Bộ gõ &amp; Hiển thị</h3>
+          <div class="tadaza-item" style="display:block;">
+            <div class="tadaza-item-info">
+              <span class="tadaza-item-title">Tình trạng hệ thống</span>
+              <span class="tadaza-item-desc" id="tadaza-linux-diag" style="white-space:pre-line;">Đang kiểm tra...</span>
+            </div>
+          </div>
+
+          <div class="tadaza-item">
+            <div class="tadaza-item-info">
+              <span class="tadaza-item-title">Chế độ hiển thị</span>
+              <span class="tadaza-item-desc">X11 (XWayland): gõ tiếng Việt ổn định trên mọi môi trường. Wayland gốc: nét hơn khi scale lẻ, nhưng trên GNOME bộ gõ sẽ không hoạt động (giới hạn của Electron 22).</span>
+            </div>
+            <select class="tadaza-select" id="select-display-mode">
+              <option value="x11" ${sys.display_mode !== 'wayland' ? 'selected' : ''}>X11 (khuyên dùng)</option>
+              <option value="wayland" ${sys.display_mode === 'wayland' ? 'selected' : ''}>Wayland gốc (thử nghiệm)</option>
+            </select>
+          </div>
+
+          <div class="tadaza-item">
+            <div class="tadaza-item-info">
+              <span class="tadaza-item-title">Tỉ lệ hiển thị (HiDPI)</span>
+              <span class="tadaza-item-desc">Dùng khi chữ bị mờ hoặc quá nhỏ ở chế độ X11 với màn hình scale lẻ.</span>
+            </div>
+            <select class="tadaza-select" id="select-scale-factor">
+              ${[0, 1, 1.25, 1.5, 1.75, 2].map(v => `<option value="${v}" ${Number(sys.scale_factor || 0) === v ? 'selected' : ''}>${v === 0 ? 'Tự động' : Math.round(v * 100) + '%'}</option>`).join('')}
+            </select>
+          </div>
+
+          <div class="tadaza-item" id="tadaza-relaunch-row" style="display:none;">
+            <div class="tadaza-item-info">
+              <span class="tadaza-item-title">Cần khởi động lại</span>
+              <span class="tadaza-item-desc">Thay đổi chế độ hiển thị / tỉ lệ có hiệu lực sau khi mở lại Zalo.</span>
+            </div>
+            <button class="tadaza-action-btn" id="btn-relaunch-zalo" style="white-space:nowrap; padding:6px 12px; font-size:12px;">
+              Khởi động lại
+            </button>
+          </div>
+
+          <div class="tadaza-item">
+            <div class="tadaza-item-info">
+              <span class="tadaza-item-title">Số tin chưa đọc trên Dock &amp; khay</span>
+              <span class="tadaza-item-desc">Hiện số đỏ trên biểu tượng Zalo ở Ubuntu Dock / Dash to Dock / KDE Plasma và ở khay hệ thống.</span>
+            </div>
+            <label class="tadaza-switch">
+              <input type="checkbox" id="toggle-unread-badge" ${sys.unread_badge !== false ? 'checked' : ''}>
+              <span class="tadaza-slider"></span>
+            </label>
           </div>
         </div>
       `;
@@ -4684,6 +4740,64 @@ function updateDynamicThemes(themeCfg) {
           } finally {
             btnCheckUpdate.disabled = false;
           }
+        });
+      }
+
+      // Linux: input method / display backend / badge
+      const diagEl = drawer.querySelector('#tadaza-linux-diag');
+      if (diagEl && window.electronAPI && window.electronAPI.invoke) {
+        window.electronAPI.invoke('tadaza:linux-diagnostics').then(d => {
+          if (!d || d.error) {
+            diagEl.textContent = 'Không đọc được thông tin hệ thống' + (d && d.error ? ': ' + d.error : '');
+            return;
+          }
+          const imName = d.inputMethod === 'fcitx' ? 'Fcitx5' : d.inputMethod === 'ibus' ? 'IBus' : null;
+          const imLine = imName
+            ? `${d.gtkImModuleFound === false ? '⚠️' : '✅'} Bộ gõ: ${imName} (GTK_IM_MODULE=${d.gtkImModule || 'mặc định'}${d.gtkImModuleSource === 'auto' ? ', tự cấu hình' : ''})`
+            : '⚠️ Không thấy ibus/fcitx5 đang chạy — hãy cài ibus-bamboo, ibus-unikey hoặc fcitx5-unikey';
+          const lines = [
+            `🖥️ Phiên: ${d.session === 'wayland' ? 'Wayland' : 'X11'}${d.desktop ? ' · ' + d.desktop : ''} → Zalo đang chạy ${d.displayMode === 'wayland' ? 'Wayland gốc' : 'X11/XWayland'}`,
+            imLine,
+            `${d.pipewireCapture ? '✅ Chia sẻ màn hình qua PipeWire (xdg-desktop-portal)' : '✅ Chia sẻ màn hình qua X11'}`,
+            `🔴 Badge: ${d.desktopFileId || '?'}${d.scaleFactor ? ' · Tỉ lệ ép ' + Math.round(d.scaleFactor * 100) + '%' : ''}`
+          ].concat((d.warnings || []).map(w => '⚠️ ' + w));
+          diagEl.textContent = lines.join('\n');
+        }).catch(e => {
+          diagEl.textContent = 'Không đọc được thông tin hệ thống: ' + e.message;
+        });
+      }
+
+      const relaunchRow = drawer.querySelector('#tadaza-relaunch-row');
+      const showRelaunch = () => { if (relaunchRow) relaunchRow.style.display = ''; };
+
+      const displayMode = drawer.querySelector('#select-display-mode');
+      if (displayMode) {
+        displayMode.addEventListener('change', () => {
+          saveAndApply({ system: { ...(currentConfig.system || {}), display_mode: displayMode.value } });
+          showRelaunch();
+        });
+      }
+
+      const scaleFactor = drawer.querySelector('#select-scale-factor');
+      if (scaleFactor) {
+        scaleFactor.addEventListener('change', () => {
+          saveAndApply({ system: { ...(currentConfig.system || {}), scale_factor: Number(scaleFactor.value) || 0 } });
+          showRelaunch();
+        });
+      }
+
+      const unreadBadge = drawer.querySelector('#toggle-unread-badge');
+      if (unreadBadge) {
+        unreadBadge.addEventListener('change', () => {
+          saveAndApply({ system: { ...(currentConfig.system || {}), unread_badge: unreadBadge.checked } });
+        });
+      }
+
+      const btnRelaunch = drawer.querySelector('#btn-relaunch-zalo');
+      if (btnRelaunch) {
+        btnRelaunch.addEventListener('click', () => {
+          btnRelaunch.disabled = true;
+          window.electronAPI.invoke('tadaza:relaunch').catch(() => { btnRelaunch.disabled = false; });
         });
       }
     }

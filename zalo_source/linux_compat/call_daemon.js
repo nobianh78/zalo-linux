@@ -116,6 +116,12 @@ class ZaloCallDaemon {
     electron.ipcMain.removeAllListeners("call-action-expand-video");
     electron.ipcMain.removeAllListeners("call-action-need-key");
     electron.ipcMain.removeHandler("call-get-screen-sources");
+    electron.ipcMain.removeHandler("call-screen-share-mode");
+
+    // On Wayland, capture goes through xdg-desktop-portal: the system dialog is the picker,
+    // and thumbnails cannot be listed up front.
+    const isWaylandSession = (process.env.XDG_SESSION_TYPE || "").toLowerCase() === "wayland" || !!process.env.WAYLAND_DISPLAY;
+    electron.ipcMain.handle("call-screen-share-mode", () => (isWaylandSession ? "portal" : "picker"));
 
     electron.ipcMain.handle("call-get-screen-sources", async () => {
       try {
@@ -487,7 +493,9 @@ class ZaloCallDaemon {
           ses.setDisplayMediaRequestHandler(async (request, callback) => {
             try {
               if (electron.desktopCapturer) {
-                const sources = await electron.desktopCapturer.getSources({ types: ["screen", "window"] });
+                // One type only: asking for both makes the Wayland portal open two dialogs.
+                const isWayland = (process.env.XDG_SESSION_TYPE || "").toLowerCase() === "wayland" || !!process.env.WAYLAND_DISPLAY;
+                const sources = await electron.desktopCapturer.getSources({ types: isWayland ? ["screen"] : ["screen", "window"] });
                 const screenSource = sources.find(s => s.id.startsWith("screen:")) || sources[0];
                 callback({ video: screenSource });
                 return;

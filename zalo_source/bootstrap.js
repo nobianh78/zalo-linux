@@ -27,6 +27,19 @@ try {
   }
 } catch (e) {}
 
+// Linux desktop integration: input method env, X11/Wayland backend, HiDPI, PipeWire, unread badge.
+// Must run before anything touches the app (GTK and Chromium read these during startup).
+try {
+  const desktop = require('./linux_compat/desktop_integration').applyEarly({
+    isCallDaemon: process.argv.some(e => e.startsWith('--launch-call-daemon'))
+  });
+  if (desktop.relaunching) {
+    return; // restarting into native Wayland mode
+  }
+} catch (e) {
+  console.warn('[Bootstrap] Desktop integration failed:', e.message);
+}
+
 // If invoked as call daemon runner, dispatch immediately without single-instance lock
 if (process.argv.some(e => e.startsWith('--launch-call-daemon'))) {
   return require('./linux_compat/call_daemon');
@@ -193,9 +206,7 @@ try {
         console.warn('[Multi-Profile] Error setting socket hooks:', sockErr.message);
       }
 
-      if (process.platform === 'linux' && typeof electron.app.setDesktopName === 'function') {
-        electron.app.setDesktopName('zalo.desktop');
-      }
+      // Desktop file name is detected in linux_compat/desktop_integration.js (zalo-linux.desktop for .deb).
       let mainAppWindow = null;
       let isMaximizedState = false;
       let normalBounds = { width: 1000, height: 720 };
