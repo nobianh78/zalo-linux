@@ -1358,6 +1358,16 @@ body.tadaza-ascii-scene .CodeMirror-gutters {
   border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 
+/* Bubbles with reactions: Zalo hangs the reaction container (a descendant, not always a
+   direct child of .card) below the bubble edge,
+   so the glass bubble's overflow:hidden would clip it inside. Specificity matches the
+   bubble rules above (.chat-message:not(.me) .card) and wins by coming later. */
+body.tadaza-ascii-scene .chat-message:not(.me) .card.card-has-react,
+body.tadaza-ascii-scene .chat-message.me .card.card-has-react,
+body.tadaza-ascii-scene .chat-message .card:has(.message-reaction-container, .message-reaction-container-v2) {
+  overflow: visible !important;
+}
+
 /* Reaction pill badge on messages */
 body.tadaza-ascii-scene .card-send-time,
 body.tadaza-ascii-scene .card-with-reaction-v2,
@@ -3902,5 +3912,42 @@ body.dark .tadaza-profiles-footer {
   background: #13171f;
   border-top-color: rgba(255, 255, 255, 0.06);
   color: #94a3b8;
+}
+
+/* ==========================================================================
+   MODULE: 09_reactions.css
+   ========================================================================== */
+
+/* ==========================================================================
+   Extra reactions: the picker holds 18 icons, so wrap it into two rows of 10
+   and anchor it to the bubble's side instead of centring it on the button
+   (centred, a 670px row ran off the left edge of the chat pane).
+   ========================================================================== */
+
+body.tadaza-extra-reactions .emoji-list-wrapper {
+  top: auto !important;
+  bottom: 0 !important;
+  width: auto !important;
+  padding-bottom: 26px !important; /* hover bridge between the button and the list */
+  z-index: 1000 !important;
+}
+
+body.tadaza-extra-reactions .emoji-list-wrapper:not(.me) {
+  left: -8px !important;
+  right: auto !important;
+  transform: none !important;
+}
+
+body.tadaza-extra-reactions .emoji-list-wrapper.me {
+  left: auto !important;
+  right: -8px !important;
+  transform: none !important;
+}
+
+body.tadaza-extra-reactions .emoji-list-wrapper .reaction-emoji-list {
+  flex-wrap: wrap !important;
+  width: 360px !important; /* 10 icons x 36px */
+  height: auto !important;
+  padding: 4px 10px !important;
 }
 

@@ -1,0 +1,32 @@
+/* ==========================================================================
+   Extra reactions: the picker holds 18 icons, so wrap it into two rows of 10
+   and anchor it to the bubble's side instead of centring it on the button
+   (centred, a 670px row ran off the left edge of the chat pane).
+   ========================================================================== */
+
+body.tadaza-extra-reactions .emoji-list-wrapper {
+  top: auto !important;
+  bottom: 0 !important;
+  width: auto !important;
+  padding-bottom: 26px !important; /* hover bridge between the button and the list */
+  z-index: 1000 !important;
+}
+
+body.tadaza-extra-reactions .emoji-list-wrapper:not(.me) {
+  left: -8px !important;
+  right: auto !important;
+  transform: none !important;
+}
+
+body.tadaza-extra-reactions .emoji-list-wrapper.me {
+  left: auto !important;
+  right: -8px !important;
+  transform: none !important;
+}
+
+body.tadaza-extra-reactions .emoji-list-wrapper .reaction-emoji-list {
+  flex-wrap: wrap !important;
+  width: 360px !important; /* 10 icons x 36px */
+  height: auto !important;
+  padding: 4px 10px !important;
+}

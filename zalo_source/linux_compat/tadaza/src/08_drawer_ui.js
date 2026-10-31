@@ -524,6 +524,16 @@
               <span class="tadaza-slider"></span>
             </label>
           </div>
+          <div class="tadaza-item">
+            <div class="tadaza-item-info">
+              <span class="tadaza-item-title">Thêm cảm xúc</span>
+              <span class="tadaza-item-desc">18 cảm xúc thay vì 6 (👌 🙏 🌹 💔 👏 …), điện thoại vẫn thấy được</span>
+            </div>
+            <label class="tadaza-switch">
+              <input type="checkbox" id="toggle-extra-reactions" ${sys.extra_reactions !== false ? 'checked' : ''}>
+              <span class="tadaza-slider"></span>
+            </label>
+          </div>
           <div class="tadaza-item" id="tadaza-relaunch-row" hidden>
             <div class="tadaza-item-info">
               <span class="tadaza-item-title">Cần khởi động lại</span>
@@ -1087,6 +1097,14 @@
       if (unreadBadge) {
         unreadBadge.addEventListener('change', () => {
           saveAndApply({ system: { ...(currentConfig.system || {}), unread_badge: unreadBadge.checked } });
+        });
+      }
+
+      const extraReactions = drawer.querySelector('#toggle-extra-reactions');
+      if (extraReactions) {
+        extraReactions.addEventListener('change', () => {
+          saveAndApply({ system: { ...(currentConfig.system || {}), extra_reactions: extraReactions.checked } });
+          applyExtraReactions();
         });
       }
 

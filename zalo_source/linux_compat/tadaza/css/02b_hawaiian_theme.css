@@ -1131,6 +1131,16 @@ body.tadaza-ascii-scene .CodeMirror-gutters {
   border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 
+/* Bubbles with reactions: Zalo hangs the reaction container (a descendant, not always a
+   direct child of .card) below the bubble edge,
+   so the glass bubble's overflow:hidden would clip it inside. Specificity matches the
+   bubble rules above (.chat-message:not(.me) .card) and wins by coming later. */
+body.tadaza-ascii-scene .chat-message:not(.me) .card.card-has-react,
+body.tadaza-ascii-scene .chat-message.me .card.card-has-react,
+body.tadaza-ascii-scene .chat-message .card:has(.message-reaction-container, .message-reaction-container-v2) {
+  overflow: visible !important;
+}
+
 /* Reaction pill badge on messages */
 body.tadaza-ascii-scene .card-send-time,
 body.tadaza-ascii-scene .card-with-reaction-v2,
