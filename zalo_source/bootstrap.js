@@ -512,6 +512,13 @@ function bootstrap() {
   }
   try { require('./linux_compat/single_instance').clearRetryMarker(); } catch (e) {}
 
+  // Stale GPU shader caches (after a driver/app update) make the window draw as garbage.
+  try {
+    require('./linux_compat/gpu_cache_guard').guard(require('electron').app);
+  } catch (e) {
+    console.warn('[GPU] cache guard failed:', e.message);
+  }
+
   // Initialize Linux Native Auto-Updater
   try {
     const { initAutoUpdater } = require('./linux_compat/auto_updater');
