@@ -446,6 +446,56 @@
     .btn-confirm:not(:disabled):hover {
       background: #2ea44f;
     }
+
+    /* ---------- Mini mode: minimized call parked in the screen corner ---------- */
+    #miniExpandCol { display: none; }
+    body.mini #callContainer {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 0 12px;
+      cursor: default;
+    }
+    body.mini.in-video-mode #callContainer {
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: stretch;
+      padding: 8px 10px;
+      background: linear-gradient(180deg, rgba(13, 17, 23, 0) 45%, rgba(13, 17, 23, 0.85) 100%);
+    }
+    body.mini .avatar-wrap,
+    body.mini .status,
+    body.mini .btn-label,
+    body.mini #localVideo,
+    body.mini #shareBanner,
+    body.mini #settingsModal,
+    body.mini #screenPickerModal,
+    body.mini .btn-action-col:has(#camBtn),
+    body.mini .btn-action-col:has(#shareBtn),
+    body.mini .btn-action-col:has(#btnOpenSettings) { display: none !important; }
+    body.mini .header {
+      margin: 0;
+      min-width: 0;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    body.mini.in-video-mode .header { flex-direction: row; align-items: baseline; gap: 8px; }
+    body.mini .name {
+      font-size: 14px;
+      margin: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    body.mini .timer { font-size: 13px; margin: 0; }
+    body.mini .actions { gap: 8px; margin: 0; flex-shrink: 0; }
+    body.mini.in-video-mode .actions { justify-content: center; }
+    body.mini .btn, body.mini .btn-end, body.mini .btn-answer { width: 38px; height: 38px; box-shadow: none; }
+    body.mini .btn svg { width: 18px; height: 18px; }
+    body.mini #miniExpandCol { display: flex; }
   </style>
 </head>
 <body>
@@ -531,6 +581,14 @@
           </svg>
         </button>
         <span class="btn-label">Cài đặt</span>
+      </div>
+
+      <div class="btn-action-col" id="miniExpandCol">
+        <button class="btn" id="miniExpandBtn" title="Mở rộng cửa sổ cuộc gọi">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+          </svg>
+        </button>
       </div>
 
       <div class="btn-action-col">
@@ -1455,6 +1513,27 @@
     }
 
     // Call window updates from daemon
+    // Mini mode (window parked in the screen corner instead of minimized)
+    let miniSentVideo = null;
+    function sendMiniSize() {
+      if (!document.body.classList.contains('mini')) { miniSentVideo = null; return; }
+      const video = document.body.classList.contains('in-video-mode');
+      if (video === miniSentVideo) return;
+      miniSentVideo = video;
+      ipcRenderer.send('call-mini-size', video ? { width: 320, height: 200 } : { width: 320, height: 76 });
+    }
+    ipcRenderer.on('call-mini-mode', (e, on) => {
+      document.body.classList.toggle('mini', !!on);
+      miniSentVideo = null;
+      sendMiniSize();
+    });
+    // Video can start or stop while parked: resize between the voice and video layouts.
+    new MutationObserver(sendMiniSize).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    document.getElementById('miniExpandBtn').addEventListener('click', () => ipcRenderer.send('call-mini-expand'));
+    document.addEventListener('dblclick', (e) => {
+      if (document.body.classList.contains('mini') && !e.target.closest('button')) ipcRenderer.send('call-mini-expand');
+    });
+
     ipcRenderer.on('call-status', (e, text) => {
       statusEl.innerText = text;
     });

@@ -126,6 +126,8 @@ class ZaloCallDaemon {
     electron.ipcMain.removeAllListeners("call-action-device");
     electron.ipcMain.removeAllListeners("call-action-mic-volume");
     electron.ipcMain.removeAllListeners("call-action-expand-video");
+    electron.ipcMain.removeAllListeners("call-mini-expand");
+    electron.ipcMain.removeAllListeners("call-mini-size");
     electron.ipcMain.removeAllListeners("call-action-need-key");
     electron.ipcMain.removeHandler("call-get-screen-sources");
     electron.ipcMain.removeHandler("call-screen-share-mode");
@@ -228,8 +230,11 @@ class ZaloCallDaemon {
       }
     });
 
+    electron.ipcMain.on("call-mini-expand", () => this.exitMiniMode());
+    electron.ipcMain.on("call-mini-size", (_e, size) => this.placeMiniWindow(size));
+
     electron.ipcMain.on("call-action-expand-video", () => {
-      if (this.callWindow && !this.callWindow.isDestroyed()) {
+      if (this.callWindow && !this.callWindow.isDestroyed() && !this.miniState) {
         const [w, h] = this.callWindow.getSize();
         if (w < 850) {
           this.callWindow.setSize(900, 650, true);
@@ -550,12 +555,72 @@ class ZaloCallDaemon {
       }
     });
 
+    // Minimizing would lose the call window (no reliable way back to it from the dock),
+    // so "minimize" turns it into a small always-on-top window in the screen corner.
+    this.miniState = null;
+    this.callWindow.on("minimize", () => {
+      setImmediate(() => this.enterMiniMode());
+    });
+
     this.callWindow.on("closed", () => {
       this.callWindow = null;
+      this.miniState = null;
       if (this.hangupCb) {
         this.hangupCb();
       }
     });
+  }
+
+  enterMiniMode() {
+    const win = this.callWindow;
+    if (!win || win.isDestroyed()) return;
+    if (win.isMinimized()) win.restore();
+    if (!this.miniState) {
+      this.miniState = { bounds: win.getBounds(), onTop: win.isAlwaysOnTop() };
+      win.setMinimumSize(200, 90);
+      win.setAlwaysOnTop(true, "floating");
+      try { win.setVisibleOnAllWorkspaces(true); } catch (e) { }
+    }
+    // The renderer answers with the size it needs (video or voice layout) via call-mini-size.
+    win.webContents.send("call-mini-mode", true);
+    this.placeMiniWindow({ width: 320, height: 120 });
+    win.showInactive();
+  }
+
+  placeMiniWindow(size) {
+    const win = this.callWindow;
+    if (!win || win.isDestroyed() || !this.miniState) return;
+    const width = Math.max(200, Math.min(480, Math.round((size && size.width) || 320)));
+    const height = Math.max(90, Math.min(360, Math.round((size && size.height) || 120)));
+    // Frame size from the current window: getSize() right after setContentSize() can be stale.
+    const [curW, curH] = win.getSize();
+    const [curCW, curCH] = win.getContentSize();
+    win.setContentSize(width, height);
+    const outerW = width + (curW - curCW);
+    const outerH = height + (curH - curCH);
+    const area = electron.screen.getDisplayMatching(this.miniState.bounds).workArea;
+    const margin = 16;
+    win.setPosition(area.x + area.width - outerW - margin, area.y + area.height - outerH - margin);
+  }
+
+  exitMiniMode() {
+    const win = this.callWindow;
+    if (!win || win.isDestroyed() || !this.miniState) return;
+    const { bounds, onTop } = this.miniState;
+    this.miniState = null;
+    win.webContents.send("call-mini-mode", false);
+    try { win.setVisibleOnAllWorkspaces(false); } catch (e) { }
+    win.setAlwaysOnTop(onTop);
+    win.setMinimumSize(360, 520);
+    win.setBounds(bounds);
+    // Some window managers place the frame, not the content, at the requested y; undo the drift
+    // so repeated minimize/expand does not walk the window down the screen.
+    setTimeout(() => {
+      if (win.isDestroyed() || this.miniState) return;
+      const now = win.getBounds();
+      if (now.x !== bounds.x || now.y !== bounds.y) win.setPosition(2 * bounds.x - now.x, 2 * bounds.y - now.y);
+    }, 120);
+    win.focus();
   }
 
   updateCallWindowConnected() {
