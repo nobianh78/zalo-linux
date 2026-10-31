@@ -4,6 +4,8 @@
 
 Chạy ứng dụng Zalo PC trực tiếp trên Linux x86_64 bằng Electron, thay các module native chỉ có trên Windows/macOS bằng bản viết cho Linux. Không dùng Wine hay máy ảo.
 
+Repo và các gói cài đặt **không chứa mã của Zalo**: lần đầu mở, ứng dụng tải bộ cài Zalo PC chính thức từ máy chủ của Zalo rồi chuyển nó sang chạy trên Linux ngay trên máy bạn.
+
 > **Đây là dự án cộng đồng, không chính thức.** Dự án không liên kết, không được tài trợ hay chứng thực bởi VNG Corporation. "Zalo", logo và giao diện ứng dụng Zalo thuộc về VNG. Tên "Zalo Linux" chỉ mô tả việc chạy Zalo trên Linux; biểu tượng của dự án (bong bóng chat và chim cánh cụt) là hình vẽ riêng, không lấy từ logo Zalo. Dùng với tài khoản của bạn và tự chịu rủi ro.
 >
 > Nếu bạn là đại diện VNG và có yêu cầu về dự án này, hãy mở issue hoặc liên hệ người duy trì; yêu cầu sẽ được xử lý ngay.
@@ -36,7 +38,7 @@ Muốn kiểm tra script trước khi chạy: tải [install.sh](install.sh) v�
 # Chỉ dùng AppImage, không cần quyền root
 curl -fsSL https://raw.githubusercontent.com/nobianh78/zalo-linux/main/install.sh | bash -s -- --appimage
 
-# Gỡ cài đặt (dữ liệu chat ở ~/.config/ZaloData được giữ lại)
+# Gỡ cài đặt (xoá cả bản Zalo đã tải ở ~/.local/share/zalo-linux; dữ liệu chat ở ~/.config/ZaloData được giữ lại)
 curl -fsSL https://raw.githubusercontent.com/nobianh78/zalo-linux/main/install.sh | bash -s -- --uninstall
 ```
 
@@ -72,12 +74,20 @@ Sau khi cài, Zalo tự cập nhật trong ứng dụng theo đúng định dạ
 - SQLite/SQLCipher (N-API) cho lịch sử tin nhắn.
 
 ### Tiện ích TADaZa
-Bảng điều khiển ở thanh bên phải của cửa sổ chat:
-- **Giao diện:** sáng / tối / theo hệ thống, đổi phông chữ và cỡ chữ (12–22px), hình nền chat có chỉnh độ mờ.
-- **Riêng tư:** làm mờ tin nhắn, ảnh, tên (rê chuột để xem).
-- **Dịch nhanh:** nút dịch ngay cạnh tin nhắn.
-- **Linux: Bộ gõ & Hiển thị:** xem tình trạng bộ gõ/phiên đăng nhập, đổi chế độ X11/Wayland, tỉ lệ hiển thị, bật/tắt số tin chưa đọc.
-- **Nhiều tài khoản:** mỗi hồ sơ có thư mục dữ liệu riêng.
+Bấm biểu tượng TADaZa ở thanh bên trái để mở bảng cài đặt. Mọi tiện ích đều bật/tắt được:
+
+| Mục | Có gì |
+|---|---|
+| **Giao diện** | Sáng / tối / theo hệ thống, phông chữ, cỡ chữ (12–22px), hình nền chat. 5 chủ đề động: Hawaiian Lagoon, Hồ Sen Cá Koi, Dải Ngân Hà, Bắc Cực, Mùa Xuân (mặc định không bật). |
+| **Riêng tư** | Chống nhìn trộm: làm mờ tin nhắn, ảnh, tên (rê chuột để xem). Ẩn "đang soạn tin", "đã xem", "đã nhận" (xem lưu ý bên dưới). |
+| **Dịch nhanh** | Nút dịch ngay cạnh tin nhắn, chọn ngôn ngữ đích. |
+| **Markdown** | Hiển thị Markdown và khối code có tô màu cú pháp trong tin nhắn. |
+| **VietQR & Vận đơn** | Nhận ra số tài khoản (tạo mã VietQR), mã vận đơn, số điện thoại trong tin nhắn. |
+| **Chat nổi** | Ghim cuộc trò chuyện thành bong bóng nổi trên màn hình. |
+| **Tài khoản** | Nhiều tài khoản, mỗi tài khoản một thư mục dữ liệu; mở song song hai tài khoản. |
+| **Hệ thống** | Tình trạng bộ gõ và phiên đăng nhập, chế độ X11/Wayland, tỉ lệ hiển thị, số tin chưa đọc, thu nhỏ xuống khay, **18 cảm xúc** thay vì 6, kiểm tra cập nhật. |
+
+TADaZa cũng sửa một lỗi của Zalo trên bản này: cảm xúc (reaction) thả từ điện thoại không hiện trên máy tính.
 
 Cấu hình lưu tại `~/.config/ZaloData/tadaza_config.json`.
 
@@ -97,12 +107,14 @@ sudo apt install ibus-bamboo        # hoặc ibus-unikey
 sudo apt install fcitx5 fcitx5-unikey fcitx5-frontend-gtk3
 ```
 
-Kiểm tra trong **TADaZa → Riêng tư → Linux: Bộ gõ & Hiển thị**: dòng "Bộ gõ" cần có dấu ✅. Nếu bạn đã tự đặt `GTK_IM_MODULE`, Zalo giữ nguyên giá trị đó.
+Kiểm tra trong **TADaZa → Hệ thống**: dòng "Bộ gõ" cần có dấu ✅. Nếu bạn đã tự đặt `GTK_IM_MODULE`, Zalo giữ nguyên giá trị đó.
 
 ## Giới hạn đã biết
 
 - **Wayland gốc trên GNOME không gõ được tiếng Việt.** Zalo chạy trên Electron 22 (Chromium 108); bản Chromium này chỉ hỗ trợ giao thức nhập liệu `text-input-v1`, trong khi GNOME chỉ cung cấp `text-input-v3`. Vì vậy mặc định là X11/XWayland. Trên KDE Plasma, Wayland gốc kết hợp Fcitx5 vẫn gõ được.
 - **Electron 22 đã hết hạn hỗ trợ bảo mật.** Client Zalo hiện báo lỗi khi chạy trên Electron mới hơn; nâng cấp được là mục tiêu ưu tiên.
+- **Chia sẻ màn hình trên phiên GNOME Wayland đang lỗi.** Electron 22 bị văng khi gọi bộ chụp màn hình PipeWire trên các bản PipeWire mới (đã tái hiện trên Ubuntu 26.04). Đang tìm cách sửa; tạm thời đăng nhập phiên **Ubuntu on Xorg** nếu cần chia sẻ màn hình.
+- **Lần mở đầu tiên cần mạng** để tải bộ cài Zalo chính thức (khoảng 213 MB).
 - Chỉ hỗ trợ x86_64.
 
 ## Biến môi trường
@@ -161,7 +173,8 @@ Các dự án dưới đây cũng đưa Zalo PC lên Linux. Tên các module nat
 
 - [realdtn2/zalo-linux-2026](https://github.com/realdtn2/zalo-linux-2026): port Linux từ client macOS
 - [RuriMeiko/zalo-linux-native](https://github.com/RuriMeiko/zalo-linux-native): port các module native, gọi điện qua thư viện Android
-- [VN-Linux-Family/zalo-for-linux](https://github.com/VN-Linux-Family/zalo-for-linux): AppImage tích hợp ZaDark
+- [VN-Linux-Family/zalo-for-linux](https://github.com/VN-Linux-Family/zalo-for-linux): chuyển bản Zalo macOS sang Linux, AppImage tích hợp ZaDark
+- [todo-laterx/zalux](https://github.com/todo-laterx/zalux): bộ vá trên nền VN-Linux-Family, giao diện macOS, nhạc chuông tuỳ chọn
 - [ruskicoder/zalo-linux](https://github.com/ruskicoder/zalo-linux)
 - [lcaohoanq/zalo-linux-unofficial](https://github.com/lcaohoanq/zalo-linux-unofficial)
 
@@ -177,5 +190,5 @@ Phần tích hợp Linux được viết dựa trên các tài liệu và đặc
 
 ## Ghi công
 
-- **VNG Corporation**: ứng dụng Zalo PC gốc (`main-dist/`, `pc-dist/`), giao thức và tài nguyên giao diện. Các file như `native/nativelibs/zimage/index.js` giữ nguyên ghi chú tác giả gốc của đội Zalo.
-- [Electron](https://www.electronjs.org/), [electron-builder](https://www.electron.build/), [sharp](https://github.com/lovell/sharp) / libvips, [FFmpeg](https://ffmpeg.org/) (qua [@ffmpeg-installer/ffmpeg](https://github.com/kribblo/node-ffmpeg-installer)), [Opus](https://opus-codec.org/), [node-sqlite3](https://github.com/TryGhost/node-sqlite3): mỗi thư viện giữ giấy phép riêng của mình.
+- **VNG Corporation**: ứng dụng Zalo PC, giao thức và tài nguyên giao diện. Repo không phân phối lại mã này; người dùng tải bộ cài chính thức từ máy chủ của Zalo.
+- [Electron](https://www.electronjs.org/), [electron-builder](https://www.electron.build/), [sharp](https://github.com/lovell/sharp) / libvips, [FFmpeg](https://ffmpeg.org/) (qua [@ffmpeg-installer/ffmpeg](https://github.com/kribblo/node-ffmpeg-installer)), [Opus](https://opus-codec.org/), [node-sqlite3](https://github.com/TryGhost/node-sqlite3), [7-Zip](https://www.7-zip.org/) (LGPL-2.1, đi kèm gói cài để giải nén bộ cài Zalo): mỗi thư viện giữ giấy phép riêng của mình.

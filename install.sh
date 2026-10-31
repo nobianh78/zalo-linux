@@ -101,6 +101,13 @@ if [ "$MODE" = "uninstall" ]; then
       if { have dnf && $SUDO dnf remove -y "$APP_ID"; } || { have zypper && $SUDO zypper --non-interactive remove "$APP_ID"; }; then removed=1; else warn "Không gỡ được gói .rpm."; fi
     fi
   fi
+  # Zalo itself, downloaded from Zalo's servers on first launch (~300 MB). Chat data is elsewhere.
+  RUNTIME_DIR="${XDG_DATA_HOME:-$TARGET_HOME/.local/share}/zalo-linux"
+  if [ -d "$RUNTIME_DIR" ] && [ "$ONLY_APPIMAGE" -eq 0 -o "$removed" -eq 1 ]; then
+    info "Xoá bản Zalo đã tải ($RUNTIME_DIR)..."
+    rm -rf "$RUNTIME_DIR"
+    removed=1
+  fi
   if [ "$removed" -eq 1 ]; then
     ok "Đã gỡ Zalo. Dữ liệu chat vẫn còn ở ~/.config/ZaloData (xoá tay nếu muốn)."
   else
