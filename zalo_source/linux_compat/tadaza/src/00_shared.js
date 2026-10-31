@@ -81,7 +81,8 @@ window.__TADAZA_INITIALIZED__ = true;
       close_to_tray: false,
       display_mode: 'x11',
       scale_factor: 0,
-      unread_badge: true
+      unread_badge: true,
+      extra_reactions: true
     },
     _systemIsDark: false
   };

@@ -16,6 +16,8 @@ const Notification = electron ? electron.Notification : null;
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
+const crypto = require('crypto');
 const { spawn, spawnSync } = require('child_process');
 
 /**
@@ -146,11 +148,29 @@ function downloadFile(url, destPath, onProgress) {
   });
 }
 
-async function performUpdate(assetUrl, remoteVer) {
-  const kind = getInstallKind();
+// The only update the app may install: set by checkForUpdates() from the GitHub API,
+// never taken from the renderer (which displays untrusted chat content).
+let pendingUpdate = null;
+
+function sha256File(file) {
+  return new Promise((resolve, reject) => {
+    const h = crypto.createHash('sha256');
+    fs.createReadStream(file).on('data', (d) => h.update(d)).on('end', () => resolve(h.digest('hex'))).on('error', reject);
+  });
+}
+
+async function performUpdate(assetUrl) {
+  if (!pendingUpdate || assetUrl !== pendingUpdate.url) {
+    console.warn('[AutoUpdater] Rejected update request for unknown asset:', assetUrl);
+    return { error: 'Bản cập nhật không hợp lệ. Hãy bấm "Kiểm tra cập nhật" rồi thử lại.' };
+  }
+  const { kind, version: remoteVer, digest } = pendingUpdate;
   const isAppImage = kind === 'appimage';
   const ext = { appimage: '.AppImage', deb: '.deb', rpm: '.rpm' }[kind];
-  const tempPath = path.join('/tmp', `zalo-update-${remoteVer}${ext}`);
+  // Private 0700 directory: no other local user can pre-create or swap the file
+  // before it is installed with root rights.
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zalo-update-'));
+  const tempPath = path.join(tempDir, `zalo-linux-update${ext}`);
 
   try {
     if (Notification.isSupported()) {
@@ -164,6 +184,15 @@ async function performUpdate(assetUrl, remoteVer) {
     await downloadFile(assetUrl, tempPath);
     console.log('[AutoUpdater] Download completed!');
 
+    if (digest) {
+      const actual = await sha256File(tempPath);
+      if (actual !== digest) {
+        fs.rmSync(tempDir, { recursive: true, force: true });
+        throw new Error('File cập nhật bị lỗi khi tải (sai SHA256). Vui lòng thử lại sau.');
+      }
+      console.log('[AutoUpdater] SHA256 verified');
+    }
+
     if (isAppImage) {
       // Self-update AppImage: write next to the running file, then atomically rename over it
       // (overwriting a running executable in place fails with ETXTBSY).
@@ -172,7 +201,7 @@ async function performUpdate(assetUrl, remoteVer) {
       fs.copyFileSync(tempPath, staged);
       fs.chmodSync(staged, 0o755);
       fs.renameSync(staged, currentAppImage);
-      fs.unlinkSync(tempPath);
+      fs.rmSync(tempDir, { recursive: true, force: true });
 
       dialog.showMessageBoxSync({
         type: 'info',
@@ -198,7 +227,7 @@ async function performUpdate(assetUrl, remoteVer) {
       });
 
       child.on('close', (code) => {
-        fs.unlink(tempPath, () => {});
+        fs.rm(tempDir, { recursive: true, force: true }, () => {});
         if (code === 0) {
           dialog.showMessageBoxSync({
             type: 'info',
@@ -218,6 +247,7 @@ async function performUpdate(assetUrl, remoteVer) {
       });
     }
   } catch (err) {
+    try { fs.rmSync(tempDir, { recursive: true, force: true }); } catch (e) {}
     console.error('[AutoUpdater] Error applying update:', err);
     dialog.showErrorBox('Lỗi tải bản cập nhật', err.message);
   }
@@ -255,6 +285,9 @@ async function checkForUpdates(silent = true) {
       console.warn(`[AutoUpdater] No ${kind} asset found in release v${remoteVer}`);
       return;
     }
+
+    const digest = typeof asset.digest === 'string' && asset.digest.startsWith('sha256:') ? asset.digest.slice(7) : null;
+    pendingUpdate = { url: asset.browser_download_url, version: remoteVer, kind, digest };
 
     // Broadcast update availability to all renderer windows (for in-app UI banner)
     try {

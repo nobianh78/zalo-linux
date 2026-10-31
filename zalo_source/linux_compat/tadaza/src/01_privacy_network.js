@@ -67,30 +67,13 @@
           return null;
         };
 
+        // dispatchEvent() already runs the on* handler properties, so fire each event exactly once.
+        // (Calling onload() by hand as well made handlers run twice; the second run crashed
+        // Zalo's HTTP client with "Cannot read properties of null (reading 'getAllResponseHeaders')".)
         setTimeout(() => {
-          try {
-            const readyEvt = new Event('readystatechange');
-            if (typeof this.onreadystatechange === 'function') {
-              this.onreadystatechange(readyEvt);
-            }
-            this.dispatchEvent(readyEvt);
-          } catch (e) { }
-
-          try {
-            const loadEvt = new ProgressEvent('load');
-            if (typeof this.onload === 'function') {
-              this.onload(loadEvt);
-            }
-            this.dispatchEvent(loadEvt);
-          } catch (e) { }
-
-          try {
-            const loadEndEvt = new ProgressEvent('loadend');
-            if (typeof this.onloadend === 'function') {
-              this.onloadend(loadEndEvt);
-            }
-            this.dispatchEvent(loadEndEvt);
-          } catch (e) { }
+          for (const evt of [new Event('readystatechange'), new ProgressEvent('load'), new ProgressEvent('loadend')]) {
+            try { this.dispatchEvent(evt); } catch (e) { }
+          }
         }, 10);
 
         return;

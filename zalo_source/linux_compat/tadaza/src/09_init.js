@@ -64,6 +64,7 @@
 
   async function init() {
     setupNetworkHooks();
+    setupReactionV2Fix();
 
     try {
       const cfg = await bridge.getConfig();

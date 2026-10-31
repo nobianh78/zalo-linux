@@ -61,7 +61,8 @@ const DEFAULT_CONFIG = {
     close_to_tray: false,
     display_mode: 'x11',  // 'x11' (XWayland, Vietnamese IME works everywhere) | 'wayland' (native, opt-in)
     scale_factor: 0,      // 0 = automatic, otherwise e.g. 1.25 / 1.5 / 2
-    unread_badge: true    // unread count on dock (LauncherEntry) and tray icon
+    unread_badge: true,   // unread count on dock (LauncherEntry) and tray icon
+    extra_reactions: true // 18 reactions in the picker instead of Zalo's 6
   }
 };
 
