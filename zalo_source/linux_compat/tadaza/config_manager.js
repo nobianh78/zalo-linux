@@ -17,7 +17,7 @@ const DEFAULT_CONFIG = {
     hawaiian_theme: false,
     hawaiian_opacity: 0.85,
     hawaiian_fps: 15,
-    active_preset: 'hawaiian',
+    active_preset: 'none', // fresh installs start with stock Zalo; users pick a scene in TADaZa
     theme_opacity: 0.85,
     theme_fps: 20
   },
