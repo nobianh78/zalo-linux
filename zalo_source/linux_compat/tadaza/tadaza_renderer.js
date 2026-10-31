@@ -48,8 +48,8 @@ window.__TADAZA_INITIALIZED__ = true;
 
   let currentConfig = {
     theme: {
-      mode: 'system',
-      deep_dark: true,
+      mode: 'light',
+      deep_dark: false,
       font_family: 'Default',
       font_size: 14,
       wallpaper: '',
@@ -57,7 +57,8 @@ window.__TADAZA_INITIALIZED__ = true;
       wallpaper_blur: 0,
       hawaiian_theme: false,
       hawaiian_opacity: 0.85,
-      hawaiian_fps: 15
+      hawaiian_fps: 15,
+      active_preset: 'none'
     },
     privacy: {
       anti_peeping: false,
