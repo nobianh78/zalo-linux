@@ -393,9 +393,15 @@ if [ "$GUI" -eq 1 ]; then
        --text="<big><b>Đã cài Zalo Linux $(esc "${VERSION:-}")</b></big>
 
 Lần sau mở từ menu ứng dụng (tìm \"Zalo\"). Ứng dụng tự cập nhật khi có bản mới.$extra"; then
-    if have gtk-launch && gtk-launch "$APP_ID" >/dev/null 2>&1; then :
-    elif have "$APP_ID"; then setsid "$APP_ID" >/dev/null 2>&1 < /dev/null &
-    elif [ -x "$BIN_LINK" ]; then setsid "$BIN_LINK" >/dev/null 2>&1 < /dev/null &
+    # Start it the way the app menu would: a fresh systemd user unit gets the desktop
+    # session's environment, not this terminal's (a terminal inside a snap IDE, for
+    # example, leaks variables that make Chromium draw garbage).
+    launcher=()
+    have systemd-run && systemctl --user show-environment >/dev/null 2>&1 \
+      && launcher=(systemd-run --user --collect --quiet --unit="$APP_ID-first-run-$$" --)
+    if have gtk-launch; then "${launcher[@]}" gtk-launch "$APP_ID" >/dev/null 2>&1 || true
+    elif have "$APP_ID"; then "${launcher[@]}" setsid "$(command -v "$APP_ID")" >/dev/null 2>&1 < /dev/null &
+    elif [ -x "$BIN_LINK" ]; then "${launcher[@]}" setsid "$BIN_LINK" >/dev/null 2>&1 < /dev/null &
     fi
   fi
 fi
