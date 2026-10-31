@@ -561,6 +561,15 @@ class ZaloCallDaemon {
     this.callWindow.on("minimize", () => {
       setImmediate(() => this.enterMiniMode());
     });
+    // The title bar's maximize button (or double-clicking it) on the parked window means "expand".
+    this.callWindow.on("maximize", () => {
+      if (!this.miniState) return;
+      logDebug("UI", "mini: maximize -> expand");
+      setImmediate(() => {
+        if (this.callWindow && !this.callWindow.isDestroyed()) this.callWindow.unmaximize();
+        this.exitMiniMode();
+      });
+    });
 
     this.callWindow.on("closed", () => {
       this.callWindow = null;
@@ -576,6 +585,7 @@ class ZaloCallDaemon {
     if (!win || win.isDestroyed()) return;
     if (win.isMinimized()) win.restore();
     if (!this.miniState) {
+      logDebug("UI", "mini: parked in the corner");
       this.miniState = { bounds: win.getBounds(), onTop: win.isAlwaysOnTop() };
       win.setMinimumSize(200, 90);
       win.setAlwaysOnTop(true, "floating");
@@ -607,6 +617,7 @@ class ZaloCallDaemon {
     const win = this.callWindow;
     if (!win || win.isDestroyed() || !this.miniState) return;
     const { bounds, onTop } = this.miniState;
+    logDebug("UI", "mini: expand");
     this.miniState = null;
     win.webContents.send("call-mini-mode", false);
     try { win.setVisibleOnAllWorkspaces(false); } catch (e) { }
