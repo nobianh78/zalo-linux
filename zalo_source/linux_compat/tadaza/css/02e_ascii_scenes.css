@@ -1,0 +1,93 @@
+/* ==========================================================================
+   TADaZa ASCII scenes (Hồ Koi, Ngân Hà, Bắc Cực, Mùa Xuân)
+   The frosted-glass Zalo UI comes from 02b_hawaiian_theme.css via
+   body.tadaza-ascii-scene; each scene only swaps the --sc-* palette.
+   ========================================================================== */
+
+#tadaza-ascii-container {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+  background: var(--sc-bg, #04222c);
+  display: none;
+  opacity: 0.85;
+  transition: opacity 0.4s ease;
+}
+
+#tadaza-ascii-canvas {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 1944px;
+  height: 1760px;
+  transform-origin: center;
+  pointer-events: none;
+}
+
+/* Hồ Sen Cá Koi: jade water, warm koi accents */
+body.tadaza-ascii-scene.tadaza-scene-koi {
+  --sc-accent: #2fd39a;
+  --sc-accent-rgb: 47, 211, 154;
+  --sc-accent2-rgb: 160, 236, 200;
+  --sc-accent-deep-rgb: 22, 150, 110;
+  --sc-accent-deeper-rgb: 14, 112, 84;
+  --sc-glass-rgb: 8, 36, 30;
+  --sc-glass-light-rgb: 14, 52, 44;
+  --sc-glass-deep-rgb: 4, 20, 16;
+  --sc-text: #e3f6ee;
+  --sc-text-2: #bfe6d6;
+  --sc-text-3: #77a796;
+  --sc-bg: #0b3a2f;
+}
+
+/* Dải Ngân Hà: violet glass, lilac accent */
+body.tadaza-ascii-scene.tadaza-scene-galaxy {
+  --sc-accent: #b78cff;
+  --sc-accent-rgb: 183, 140, 255;
+  --sc-accent2-rgb: 214, 190, 255;
+  --sc-accent-deep-rgb: 130, 90, 210;
+  --sc-accent-deeper-rgb: 96, 62, 170;
+  --sc-glass-rgb: 24, 16, 48;
+  --sc-glass-light-rgb: 36, 26, 70;
+  --sc-glass-deep-rgb: 12, 8, 28;
+  --sc-text: #efe9ff;
+  --sc-text-2: #d2c6f2;
+  --sc-text-3: #8f84b3;
+  --sc-bg: #1a1238;
+}
+
+/* Bắc Cực: icy blue glass */
+body.tadaza-ascii-scene.tadaza-scene-arctic {
+  --sc-accent: #5cc8ff;
+  --sc-accent-rgb: 92, 200, 255;
+  --sc-accent2-rgb: 190, 232, 250;
+  --sc-accent-deep-rgb: 40, 140, 200;
+  --sc-accent-deeper-rgb: 26, 104, 160;
+  --sc-glass-rgb: 14, 40, 60;
+  --sc-glass-light-rgb: 22, 56, 80;
+  --sc-glass-deep-rgb: 6, 22, 36;
+  --sc-text: #eaf6fc;
+  --sc-text-2: #c8e4f2;
+  --sc-text-3: #7fa2b8;
+  --sc-bg: #0d2a3e;
+}
+
+/* Mùa Xuân: plum glass, peach-blossom pink accent */
+body.tadaza-ascii-scene.tadaza-scene-spring {
+  --sc-accent: #ff7aa8;
+  --sc-accent-rgb: 255, 122, 168;
+  --sc-accent2-rgb: 255, 196, 214;
+  --sc-accent-deep-rgb: 214, 80, 128;
+  --sc-accent-deeper-rgb: 170, 56, 100;
+  --sc-glass-rgb: 52, 22, 36;
+  --sc-glass-light-rgb: 70, 32, 50;
+  --sc-glass-deep-rgb: 30, 12, 22;
+  --sc-text: #fff0f4;
+  --sc-text-2: #f4cfdb;
+  --sc-text-3: #b88a9c;
+  --sc-bg: #3a1626;
+}

@@ -380,7 +380,8 @@ function updateHawaiianTheme(themeCfg) {
   const isEnabled = !!(themeCfg && themeCfg.hawaiian_theme);
 
   if (!isEnabled) {
-    document.body.classList.remove('tadaza-theme-hawaiian');
+    document.body.classList.remove('tadaza-theme-hawaiian', 'tadaza-scene-hawaiian');
+    if (!document.body.className.match(/tadaza-scene-(?!hawaiian)/)) document.body.classList.remove('tadaza-ascii-scene');
     if (hawaiianContainer) {
       hawaiianContainer.style.display = 'none';
     }
@@ -393,7 +394,7 @@ function updateHawaiianTheme(themeCfg) {
   }
 
   // Enable Theme
-  document.body.classList.add('tadaza-theme-hawaiian');
+  document.body.classList.add('tadaza-theme-hawaiian', 'tadaza-ascii-scene', 'tadaza-scene-hawaiian');
   initHawaiianStatics();
 
   if (!hawaiianContainer) {
