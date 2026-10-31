@@ -68,6 +68,8 @@ Sau khi cài, Zalo tự cập nhật trong ứng dụng theo đúng định dạ
 - Âm thanh qua PipeWire / PulseAudio / ALSA, codec Opus.
 - Hình ảnh mã hoá/giải mã H.264 bằng WebCodecs, có cửa sổ thu nhỏ (Picture-in-Picture).
 - Chọn micro (có thanh đo âm lượng), loa (có nút thử chuông), camera (có xem trước).
+- Bấm thu nhỏ cửa sổ cuộc gọi: cửa sổ thu thành ô nhỏ ở góc dưới bên phải, luôn nằm trên các ứng dụng khác. Bấm ⛶, nháy đúp vào ô hoặc bấm phóng to để mở lại.
+- Chia sẻ màn hình trên GNOME Wayland: hộp chọn màn hình của hệ thống hiện ra, bạn chọn màn hình muốn chia sẻ.
 
 ### Đa phương tiện và lưu trữ
 - Tạo ảnh thu nhỏ bằng [sharp](https://github.com/lovell/sharp), ảnh xem trước video bằng FFmpeg, giải mã ảnh JPEG XL.
@@ -113,7 +115,7 @@ Kiểm tra trong **TADaZa → Hệ thống**: dòng "Bộ gõ" cần có dấu �
 
 - **Wayland gốc trên GNOME không gõ được tiếng Việt.** Zalo chạy trên Electron 22 (Chromium 108); bản Chromium này chỉ hỗ trợ giao thức nhập liệu `text-input-v1`, trong khi GNOME chỉ cung cấp `text-input-v3`. Vì vậy mặc định là X11/XWayland. Trên KDE Plasma, Wayland gốc kết hợp Fcitx5 vẫn gõ được.
 - **Electron 22 đã hết hạn hỗ trợ bảo mật.** Client Zalo hiện báo lỗi khi chạy trên Electron mới hơn; nâng cấp được là mục tiêu ưu tiên.
-- **Chia sẻ màn hình trên phiên GNOME Wayland đang lỗi.** Electron 22 bị văng khi gọi bộ chụp màn hình PipeWire trên các bản PipeWire mới (đã tái hiện trên Ubuntu 26.04). Đang tìm cách sửa; tạm thời đăng nhập phiên **Ubuntu on Xorg** nếu cần chia sẻ màn hình.
+- **Trên Wayland, bảng chọn màn hình/cửa sổ của ứng dụng bị tắt** vì bộ liệt kê nguồn của Electron 22 bị văng với PipeWire mới. Thay vào đó, hộp chọn của hệ thống (xdg-desktop-portal) hiện ra.
 - **Lần mở đầu tiên cần mạng** để tải bộ cài Zalo chính thức (khoảng 213 MB).
 - Chỉ hỗ trợ x86_64.
 
