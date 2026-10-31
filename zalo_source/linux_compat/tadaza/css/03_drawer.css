@@ -1,8 +1,49 @@
 /* --------------------------------------------------------------------------
-   4. TADaZa UI Components (Left Sidebar Navigation Item & Drawer)
+   4. TADaZa UI: left-nav button + settings drawer
+   Layout: [sidebar tabs | header + grouped settings list]
    -------------------------------------------------------------------------- */
 
-/* Left Sidebar Navigation Item */
+/* ---- Design tokens ------------------------------------------------------ */
+#tadaza-drawer {
+  --tz-accent: #0068ff;
+  --tz-accent-hover: #0057d6;
+  --tz-accent-soft: rgba(0, 104, 255, 0.10);
+  --tz-bg: #ffffff;
+  --tz-sidebar: #f5f7fa;
+  --tz-card: #ffffff;
+  --tz-card-border: #e4e8ee;
+  --tz-divider: #edf0f4;
+  --tz-hover: rgba(15, 23, 42, 0.05);
+  --tz-text: #1b2230;
+  --tz-muted: #667085;
+  --tz-subtle: #98a2b3;
+  --tz-switch-off: #d0d5dd;
+  --tz-input-bg: #f2f4f7;
+  --tz-success: #12b76a;
+  --tz-warning: #f79009;
+  --tz-radius: 12px;
+  --tz-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+}
+
+body.dark #tadaza-drawer {
+  --tz-accent: #4c8dff;
+  --tz-accent-hover: #6aa1ff;
+  --tz-accent-soft: rgba(76, 141, 255, 0.16);
+  --tz-bg: #16191e;
+  --tz-sidebar: #111317;
+  --tz-card: #1e2228;
+  --tz-card-border: #2a2f37;
+  --tz-divider: #272c33;
+  --tz-hover: rgba(255, 255, 255, 0.05);
+  --tz-text: #e7eaf0;
+  --tz-muted: #9aa3b2;
+  --tz-subtle: #6b7380;
+  --tz-switch-off: #3a404a;
+  --tz-input-bg: #262b32;
+  --tz-shadow: none;
+}
+
+/* ---- Left sidebar navigation button (inside Zalo's nav bar) -------------- */
 .tadaza-nav-item {
   width: 100%;
   height: 56px;
@@ -13,7 +54,7 @@
   position: relative;
   user-select: none;
   color: var(--text-on-color, #c9d1d9);
-  transition: all 0.18s ease;
+  transition: background 0.15s ease, color 0.15s ease;
   box-sizing: border-box;
 }
 
@@ -23,42 +64,33 @@
 }
 
 .tadaza-nav-item.active {
-  color: #0068ff;
-  background: rgba(0, 104, 255, 0.18);
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.18);
 }
 
 .tadaza-nav-item.active::before {
   content: "";
   position: absolute;
   left: 0;
-  top: 10px;
-  bottom: 10px;
-  width: 3.5px;
-  background: #0068ff;
+  top: 12px;
+  bottom: 12px;
+  width: 3px;
+  background: #ffffff;
   border-radius: 0 3px 3px 0;
-}
-
-body.dark .tadaza-nav-item.active {
-  color: #58a6ff;
-  background: rgba(31, 111, 235, 0.25);
-}
-
-body.dark .tadaza-nav-item.active::before {
-  background: #58a6ff;
 }
 
 .tadaza-nav-icon {
   width: 24px;
   height: 24px;
   stroke: currentColor;
-  transition: transform 0.18s ease;
+  transition: transform 0.15s ease;
 }
 
 .tadaza-nav-item:hover .tadaza-nav-icon {
-  transform: scale(1.12);
+  transform: scale(1.08);
 }
 
-/* Overlay Backdrop - Closed by default */
+/* ---- Overlay -------------------------------------------------------------- */
 #tadaza-overlay {
   display: none;
   position: fixed;
@@ -66,210 +98,309 @@ body.dark .tadaza-nav-item.active::before {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(2px);
+  background: rgba(15, 23, 42, 0.32);
   z-index: 999998;
+  animation: tadazaFade 0.18s ease;
 }
 
 #tadaza-overlay.open {
   display: block;
 }
 
-/* Main Drawer Panel - Closed by default, zero interference */
+/* ---- Drawer shell --------------------------------------------------------- */
 #tadaza-drawer {
   display: none;
   position: fixed;
   top: 0;
   left: 68px;
-  width: 380px;
+  width: 600px;
   max-width: calc(100vw - 68px);
   height: 100vh;
   z-index: 999999;
-  background: #ffffff;
-  color: #1f2328;
-  box-shadow: 8px 0 32px rgba(0, 0, 0, 0.25);
-  flex-direction: column;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  border-right: 1px solid rgba(0, 0, 0, 0.08);
+  background: var(--tz-bg);
+  color: var(--tz-text);
+  box-shadow: 12px 0 40px rgba(15, 23, 42, 0.18);
+  flex-direction: row;
+  font-family: 'Inter', 'Be Vietnam Pro', -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size: 13px;
+  line-height: 1.45;
+  border-right: 1px solid var(--tz-card-border);
   animation: tadazaSlideIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  -webkit-font-smoothing: antialiased;
 }
 
 body.dark #tadaza-drawer {
-  background: #161b22;
-  color: #e6edf3;
-  box-shadow: 8px 0 32px rgba(0, 0, 0, 0.6);
-  border-right: 1px solid #30363d;
+  box-shadow: 12px 0 40px rgba(0, 0, 0, 0.55);
 }
 
 #tadaza-drawer.open {
   display: flex;
 }
 
+#tadaza-drawer *,
+#tadaza-drawer *::before,
+#tadaza-drawer *::after {
+  box-sizing: border-box;
+}
+
 @keyframes tadazaSlideIn {
-  from {
-    opacity: 0;
-    transform: translateX(-16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  from { opacity: 0; transform: translateX(-12px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
-/* Drawer Header */
-.tadaza-header {
-  padding: 16px 20px;
+@keyframes tadazaFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ---- Sidebar (tabs) ------------------------------------------------------- */
+.tadaza-sidebar {
+  width: 176px;
+  flex-shrink: 0;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  flex-direction: column;
+  background: var(--tz-sidebar);
+  border-right: 1px solid var(--tz-divider);
+  padding: 18px 10px 12px;
 }
 
-body.dark .tadaza-header {
-  border-bottom: 1px solid #30363d;
-}
-
-.tadaza-title-wrap {
+.tadaza-brand {
   display: flex;
   align-items: center;
   gap: 10px;
+  padding: 0 8px 18px;
 }
 
-.tadaza-badge {
-  background: linear-gradient(135deg, #0068ff, #0045ad);
+.tadaza-brand-logo {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: linear-gradient(135deg, #0068ff, #00a3ff);
   color: #ffffff;
-  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(0, 104, 255, 0.3);
+}
+
+.tadaza-brand-logo svg {
+  width: 18px;
+  height: 18px;
+}
+
+.tadaza-brand-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.tadaza-brand-name {
+  font-size: 15px;
   font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 6px;
-  text-transform: uppercase;
+  letter-spacing: -0.01em;
+}
+
+.tadaza-brand-sub {
+  font-size: 11px;
+  color: var(--tz-muted);
+}
+
+.tadaza-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.tadaza-tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--tz-muted);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.tadaza-tab-btn svg {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+  stroke: currentColor;
+}
+
+.tadaza-tab-btn:hover {
+  background: var(--tz-hover);
+  color: var(--tz-text);
+}
+
+.tadaza-tab-btn.active {
+  background: var(--tz-accent-soft);
+  color: var(--tz-accent);
+  font-weight: 600;
+}
+
+.tadaza-sidebar-footer {
+  padding: 10px 8px 0;
+  font-size: 11px;
+  color: var(--tz-subtle);
+}
+
+/* ---- Main column ---------------------------------------------------------- */
+.tadaza-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.tadaza-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 20px 6px 24px;
 }
 
 .tadaza-title {
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 700;
+  letter-spacing: -0.015em;
   margin: 0;
 }
 
 .tadaza-close-btn {
-  background: transparent;
-  border: none;
-  font-size: 20px;
-  cursor: pointer;
-  color: inherit;
   width: 32px;
   height: 32px;
-  border-radius: 6px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--tz-muted);
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.15s;
+  transition: background 0.12s ease, color 0.12s ease;
 }
 
 .tadaza-close-btn:hover {
-  background: rgba(128, 128, 128, 0.15);
+  background: var(--tz-hover);
+  color: var(--tz-text);
 }
 
-/* Tab Navigation */
-.tadaza-tabs {
-  display: flex;
-  background: rgba(128, 128, 128, 0.06);
-  padding: 6px;
-  gap: 4px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-}
-
-body.dark .tadaza-tabs {
-  background: #0d1117;
-  border-bottom: 1px solid #21262d;
-}
-
-.tadaza-tab-btn {
-  flex: 1;
-  padding: 10px 4px;
-  border: none;
-  background: transparent;
-  color: #57606a;
-  font-size: 12px;
-  font-weight: 600;
-  border-radius: 6px;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  transition: all 0.15s ease;
-}
-
-.tadaza-tab-btn svg {
-  width: 18px;
-  height: 18px;
-  stroke: currentColor;
-  transition: transform 0.15s ease;
-}
-
-.tadaza-tab-btn:hover svg {
-  transform: translateY(-1px);
-}
-
-body.dark .tadaza-tab-btn {
-  color: #8b949e;
-}
-
-.tadaza-tab-btn.active {
-  background: #ffffff;
-  color: #0068ff;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-}
-
-body.dark .tadaza-tab-btn.active {
-  background: #21262d;
-  color: #58a6ff;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-}
-
-/* Tab Content */
 .tadaza-content {
   flex: 1;
   overflow-y: auto;
-  padding: 16px 20px;
+  padding: 10px 24px 28px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 22px;
 }
 
+.tadaza-content::-webkit-scrollbar,
+.tadaza-tabs::-webkit-scrollbar {
+  width: 10px;
+}
+
+.tadaza-content::-webkit-scrollbar-thumb,
+.tadaza-tabs::-webkit-scrollbar-thumb {
+  background: var(--tz-switch-off);
+  border-radius: 10px;
+  border: 3px solid var(--tz-bg);
+}
+
+.tadaza-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ---- Sections: grouped list --------------------------------------------- */
 .tadaza-section {
   display: flex;
   flex-direction: column;
-  gap: 12px;
 }
 
-.tadaza-section-title {
-  font-size: 13px;
-  font-weight: 700;
-  text-transform: uppercase;
-  color: #0068ff;
-  letter-spacing: 0.5px;
-  margin: 0;
+.tadaza-section-title,
+body.tadaza-ascii-scene #tadaza-drawer .tadaza-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px 4px;
+  font-size: 12px;
+  font-weight: 600 !important;
+  color: var(--tz-muted) !important;
+  letter-spacing: 0.01em;
 }
 
-body.dark .tadaza-section-title {
-  color: #58a6ff;
+.tadaza-section > .tadaza-item-desc {
+  margin: -2px 4px 10px;
 }
 
+/* Rows inside a section are drawn as one card with hairline dividers. */
 .tadaza-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 14px;
-  background: rgba(128, 128, 128, 0.05);
-  border-radius: 10px;
-  border: 1px solid rgba(128, 128, 128, 0.1);
+  gap: 16px;
+  padding: 12px 16px;
+  background: var(--tz-card);
+  border: 1px solid var(--tz-card-border);
+  border-radius: 0;
+  margin: 0;
+  box-shadow: var(--tz-shadow);
 }
 
-body.dark .tadaza-item {
-  background: #21262d;
-  border: 1px solid #30363d;
+#tadaza-drawer [hidden] {
+  display: none !important;
+}
+
+/* Visible siblings only, so a hidden row never breaks the card's corners. */
+.tadaza-item:not(.tadaza-item:not([hidden]) + .tadaza-item) {
+  border-top-left-radius: var(--tz-radius);
+  border-top-right-radius: var(--tz-radius);
+}
+
+.tadaza-item:has(+ .tadaza-item:not([hidden])) {
+  border-bottom: none;
+}
+
+.tadaza-item:not([hidden]) + .tadaza-item {
+  border-top: none;
+  position: relative;
+}
+
+.tadaza-item:not([hidden]) + .tadaza-item::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 16px;
+  right: 0;
+  height: 1px;
+  background: var(--tz-divider);
+}
+
+.tadaza-item:not(:has(+ .tadaza-item:not([hidden]))) {
+  border-bottom-left-radius: var(--tz-radius);
+  border-bottom-right-radius: var(--tz-radius);
+}
+
+/* Dependent options (only active when the parent toggle is on) */
+.tadaza-item.sub-item {
+  padding-left: 32px;
+}
+
+.tadaza-item.sub-item::before {
+  left: 32px;
 }
 
 .tadaza-item-col {
@@ -282,29 +413,44 @@ body.dark .tadaza-item {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  max-width: 80%;
+  min-width: 0;
+  flex: 1;
 }
 
 .tadaza-item-title {
   font-size: 13.5px;
-  font-weight: 600;
+  font-weight: 500;
+  color: var(--tz-text);
 }
 
 .tadaza-item-desc {
-  font-size: 11.5px;
-  color: #57606a;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--tz-muted);
 }
 
-body.dark .tadaza-item-desc {
-  color: #8b949e;
+.tadaza-item-desc b {
+  color: var(--tz-text);
+  font-weight: 600;
 }
 
-/* Custom iOS / Fluent Toggle Switch */
+.tadaza-item.tadaza-item-disabled {
+  pointer-events: none;
+}
+
+/* Dim the content, not the card, so the grouped card stays intact. */
+.tadaza-item.tadaza-item-disabled > * {
+  opacity: 0.45;
+  transition: opacity 0.2s ease;
+}
+
+/* ---- Switch ---------------------------------------------------------------- */
 .tadaza-switch {
   position: relative;
   display: inline-block;
-  width: 44px;
-  height: 24px;
+  flex-shrink: 0;
+  width: 40px;
+  height: 22px;
 }
 
 .tadaza-switch input {
@@ -315,97 +461,74 @@ body.dark .tadaza-item-desc {
 
 .tadaza-slider {
   position: absolute;
+  inset: 0;
   cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  transition: .25s;
-  border-radius: 24px;
+  background: var(--tz-switch-off);
+  border-radius: 22px;
+  transition: background 0.2s ease;
 }
 
-body.dark .tadaza-slider {
-  background-color: #30363d;
-}
-
-.tadaza-slider:before {
-  position: absolute;
+.tadaza-slider::before {
   content: "";
-  height: 18px;
+  position: absolute;
   width: 18px;
-  left: 3px;
-  bottom: 3px;
-  background-color: white;
-  transition: .25s;
+  height: 18px;
+  left: 2px;
+  top: 2px;
+  background: #ffffff;
   border-radius: 50%;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.25);
+  transition: transform 0.2s cubic-bezier(0.3, 0.7, 0.4, 1);
 }
 
 .tadaza-switch input:checked + .tadaza-slider {
-  background-color: #0068ff;
+  background: var(--tz-accent);
 }
 
-body.dark .tadaza-switch input:checked + .tadaza-slider {
-  background-color: #1f6feb;
+.tadaza-switch input:checked + .tadaza-slider::before {
+  transform: translateX(18px);
 }
 
-.tadaza-switch input:checked + .tadaza-slider:before {
-  transform: translateX(20px);
-}
-
-/* Disabled Switch & Sub-Items */
-.tadaza-item.tadaza-item-disabled {
-  opacity: 0.45;
-  pointer-events: none;
-  transition: opacity 0.2s ease;
+.tadaza-switch input:focus-visible + .tadaza-slider {
+  outline: 2px solid var(--tz-accent);
+  outline-offset: 2px;
 }
 
 .tadaza-switch input:disabled + .tadaza-slider {
-  background-color: rgba(128, 128, 128, 0.18) !important;
-  cursor: not-allowed !important;
-  opacity: 0.5 !important;
+  cursor: not-allowed;
 }
 
-body.dark .tadaza-switch input:disabled + .tadaza-slider {
-  background-color: rgba(255, 255, 255, 0.08) !important;
-}
-
-.tadaza-switch input:disabled + .tadaza-slider:before {
-  background-color: #999999 !important;
-  box-shadow: none !important;
-  transform: translateX(0) !important;
-}
-
-/* Theme 3-State Buttons */
+/* ---- Segmented control (theme mode) --------------------------------------- */
 .tadaza-btn-group {
   display: flex;
-  background: rgba(128, 128, 128, 0.1);
-  padding: 4px;
-  border-radius: 8px;
-  gap: 4px;
   width: 100%;
-}
-
-body.dark .tadaza-btn-group {
-  background: #0d1117;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 10px;
+  background: var(--tz-input-bg);
 }
 
 .tadaza-btn-choice {
   flex: 1;
-  padding: 8px 10px;
-  border: none;
-  background: transparent;
-  color: inherit;
-  font-size: 12px;
-  font-weight: 500;
-  border-radius: 6px;
-  cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  transition: all 0.15s;
+  padding: 7px 10px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--tz-muted);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease, box-shadow 0.12s ease;
+}
+
+.tadaza-btn-choice:hover {
+  color: var(--tz-text);
 }
 
 .tadaza-btn-choice svg {
@@ -414,12 +537,18 @@ body.dark .tadaza-btn-group {
 }
 
 .tadaza-btn-choice.active {
-  background: #0068ff;
-  color: #ffffff;
+  background: var(--tz-card);
+  color: var(--tz-accent);
   font-weight: 600;
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.12);
 }
 
-/* Sliders & Inputs */
+body.dark .tadaza-btn-choice.active {
+  background: #323843;
+  box-shadow: none;
+}
+
+/* ---- Range ------------------------------------------------------------------ */
 .tadaza-range-wrap {
   display: flex;
   align-items: center;
@@ -429,145 +558,364 @@ body.dark .tadaza-btn-group {
 
 .tadaza-range {
   flex: 1;
-  accent-color: #0068ff;
+  height: 4px;
+  appearance: none;
+  -webkit-appearance: none;
+  border-radius: 4px;
+  background: var(--tz-switch-off);
+  outline: none;
+}
+
+.tadaza-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2px solid var(--tz-accent);
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.2);
+  cursor: pointer;
 }
 
 .tadaza-range-val {
+  min-width: 42px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: var(--tz-input-bg);
   font-size: 12px;
   font-weight: 600;
-  width: 36px;
-  text-align: right;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
 }
 
+/* ---- Select ----------------------------------------------------------------- */
 .tadaza-select {
-  padding: 8px 12px;
-  border-radius: 6px;
-  border: 1px solid rgba(128, 128, 128, 0.2);
-  background: #ffffff;
-  color: inherit;
-  font-size: 13px;
-  font-family: inherit;
-}
-
-body.dark .tadaza-select {
-  background: #161b22;
-  border: 1px solid #30363d;
-}
-
-/* Secondary Button */
-.tadaza-action-btn {
-  padding: 8px 14px;
-  background: #0068ff;
-  color: #ffffff;
-  border: none;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 600;
+  flex-shrink: 0;
+  max-width: 190px;
+  padding: 7px 30px 7px 11px;
+  border: 1px solid var(--tz-card-border);
+  border-radius: 8px;
+  background-color: var(--tz-input-bg);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23667085' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  color: var(--tz-text);
+  font: inherit;
+  font-size: 12.5px;
+  appearance: none;
+  -webkit-appearance: none;
   cursor: pointer;
-  display: flex;
+}
+
+.tadaza-select:hover {
+  border-color: var(--tz-subtle);
+}
+
+.tadaza-select:focus {
+  outline: 2px solid var(--tz-accent-soft);
+  border-color: var(--tz-accent);
+}
+
+.tadaza-select option {
+  background: var(--tz-card);
+  color: var(--tz-text);
+}
+
+/* ---- Buttons ------------------------------------------------------------------ */
+.tadaza-action-btn {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  transition: opacity 0.15s;
+  gap: 7px;
+  flex-shrink: 0;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 8px;
+  background: var(--tz-accent);
+  color: #ffffff;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.12s ease, transform 0.08s ease;
 }
 
 .tadaza-action-btn:hover {
-  opacity: 0.9;
+  background: var(--tz-accent-hover);
+}
+
+.tadaza-action-btn:active {
+  transform: scale(0.98);
+}
+
+.tadaza-action-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
 }
 
 .tadaza-action-btn.secondary {
-  background: rgba(128, 128, 128, 0.15);
-  color: inherit;
+  background: var(--tz-input-bg);
+  color: var(--tz-text);
 }
 
-/* --------------------------------------------------------------------------
-   Dynamic Theme Gallery Cards Grid
-   -------------------------------------------------------------------------- */
+.tadaza-action-btn.secondary:hover {
+  background: var(--tz-hover);
+}
+
+.tadaza-action-btn.block {
+  width: 100%;
+  height: 38px;
+}
+
+/* ---- Small pieces --------------------------------------------------------------- */
+.tadaza-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  background: var(--tz-accent-soft);
+  color: var(--tz-accent);
+}
+
+.tadaza-pill.success {
+  background: rgba(18, 183, 106, 0.12);
+  color: var(--tz-success);
+}
+
+.tadaza-pill.live {
+  background: linear-gradient(135deg, #10b981, #0fc3ff);
+  color: #ffffff;
+  font-size: 10px;
+  letter-spacing: 0.03em;
+}
+
+.tadaza-pill .profile-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 0 3px rgba(18, 183, 106, 0.2);
+}
+
+.tadaza-steps {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tadaza-diag {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tadaza-diag li {
+  display: flex;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--tz-text);
+}
+
+.tadaza-diag li.warn {
+  color: var(--tz-warning);
+}
+
+.tadaza-diag .dot {
+  width: 8px;
+  height: 8px;
+  margin-top: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--tz-success);
+}
+
+.tadaza-diag li.warn .dot {
+  background: var(--tz-warning);
+}
+
+.tadaza-diag li.info .dot {
+  background: var(--tz-subtle);
+}
+
+/* ---- Theme gallery ------------------------------------------------------------- */
 .tadaza-theme-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 10px;
-  margin-top: 10px;
 }
 
 .tadaza-theme-card {
   position: relative;
-  border-radius: 10px;
-  border: 2px solid rgba(128, 128, 128, 0.2);
-  background: rgba(128, 128, 128, 0.06);
-  padding: 10px;
-  cursor: pointer;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  overflow: hidden;
+  padding: 8px;
+  border: 1.5px solid var(--tz-card-border);
+  border-radius: var(--tz-radius);
+  background: var(--tz-card);
+  cursor: pointer;
   user-select: none;
-}
-
-body.dark .tadaza-theme-card {
-  border-color: rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.04);
+  overflow: hidden;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
 }
 
 .tadaza-theme-card:hover {
-  transform: translateY(-2px);
-  border-color: rgba(15, 195, 255, 0.5);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+  transform: translateY(-1px);
+  border-color: var(--tz-subtle);
 }
 
 .tadaza-theme-card.active {
-  border-color: #0fc3ff;
-  background: rgba(15, 195, 255, 0.12);
-  box-shadow: 0 0 16px rgba(15, 195, 255, 0.3);
+  border-color: var(--tz-accent);
+  box-shadow: 0 0 0 3px var(--tz-accent-soft);
 }
 
 .tadaza-theme-preview {
   width: 100%;
-  height: 48px;
-  border-radius: 6px;
+  height: 56px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 20px;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.15);
 }
 
 .tadaza-theme-preview.hawaiian {
   background: linear-gradient(135deg, #022b3a, #1a759f, #34a0a4);
 }
 
-.tadaza-theme-preview.rainforest {
-  background: linear-gradient(135deg, #021a12, #059669, #34d399);
+.tadaza-theme-preview.koi {
+  background: linear-gradient(135deg, #cdf0dc, #4fb894 55%, #1e7078);
 }
 
-.tadaza-theme-preview.bioforest {
-  background: linear-gradient(135deg, #021418, #06d6a0, #a855f7);
+.tadaza-theme-preview.galaxy {
+  background: linear-gradient(135deg, #2e2070, #8a42aa 60%, #de709c);
+}
+
+.tadaza-theme-preview.arctic {
+  background: linear-gradient(135deg, #eef8fc, #9ccfe8 55%, #3e84be);
+}
+
+.tadaza-theme-preview.spring {
+  background: linear-gradient(135deg, #fff2e6, #f7b6cc 60%, #de98c6);
 }
 
 .tadaza-theme-preview.none {
+  background: linear-gradient(135deg, #e4e8ee, #c5ccd6);
+}
+
+body.dark .tadaza-theme-preview.none {
   background: linear-gradient(135deg, #2b303c, #4b5563);
 }
 
 .tadaza-theme-card-title {
-  font-size: 12px;
-  font-weight: 600;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 0 2px 2px;
+  font-size: 12.5px;
+  font-weight: 600;
 }
 
 .tadaza-theme-card-tag {
-  font-size: 9px;
-  font-weight: 700;
-  padding: 1px 5px;
-  border-radius: 4px;
-  background: rgba(15, 195, 255, 0.2);
-  color: #0fc3ff;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--tz-input-bg);
+  color: var(--tz-muted);
+  white-space: nowrap;
 }
 
 .tadaza-theme-card.active .tadaza-theme-card-tag {
-  background: #0fc3ff;
+  background: var(--tz-accent);
   color: #ffffff;
 }
 
+.tadaza-theme-grid + .tadaza-item {
+  margin-top: 12px;
+}
+
+/* ---- Narrow windows: collapse sidebar to icons -------------------------------- */
+@media (max-width: 760px) {
+  .tadaza-sidebar {
+    width: 60px;
+    padding: 14px 8px;
+  }
+
+  .tadaza-brand {
+    justify-content: center;
+    padding: 0 0 14px;
+  }
+
+  .tadaza-brand-text,
+  .tadaza-tab-btn span,
+  .tadaza-sidebar-footer {
+    display: none;
+  }
+
+  .tadaza-tab-btn {
+    justify-content: center;
+    padding: 10px 0;
+  }
+}
+
+/* ---- Isolation from scene themes ------------------------------------------------
+   Scene CSS (02b) restyles Zalo's own buttons via [class*="btn"], header, aside...
+   These id-scoped rules keep the drawer's controls readable under every scene. */
+body.tadaza-ascii-scene #tadaza-drawer .tadaza-action-btn {
+  background: var(--tz-accent) !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+body.tadaza-ascii-scene #tadaza-drawer .tadaza-action-btn:hover {
+  background: var(--tz-accent-hover) !important;
+}
+
+body.tadaza-ascii-scene #tadaza-drawer .tadaza-action-btn.secondary {
+  background: var(--tz-input-bg) !important;
+  color: var(--tz-text) !important;
+}
+
+body.tadaza-ascii-scene #tadaza-drawer .tadaza-action-btn.secondary:hover {
+  background: var(--tz-hover) !important;
+}
+
+body.tadaza-ascii-scene #tadaza-drawer .tadaza-tab-btn,
+body.tadaza-ascii-scene #tadaza-drawer .tadaza-close-btn,
+body.tadaza-ascii-scene #tadaza-drawer .tadaza-btn-choice {
+  background: transparent !important;
+  color: var(--tz-muted) !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+body.tadaza-ascii-scene #tadaza-drawer .tadaza-tab-btn:hover,
+body.tadaza-ascii-scene #tadaza-drawer .tadaza-close-btn:hover {
+  background: var(--tz-hover) !important;
+  color: var(--tz-text) !important;
+}
+
+body.tadaza-ascii-scene #tadaza-drawer .tadaza-tab-btn.active {
+  background: var(--tz-accent-soft) !important;
+  color: var(--tz-accent) !important;
+}
+
+body.tadaza-ascii-scene #tadaza-drawer .tadaza-btn-choice.active {
+  background: var(--tz-card) !important;
+  color: var(--tz-accent) !important;
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.12) !important;
+}

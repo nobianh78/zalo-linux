@@ -645,7 +645,8 @@ function updateHawaiianTheme(themeCfg) {
   const isEnabled = !!(themeCfg && themeCfg.hawaiian_theme);
 
   if (!isEnabled) {
-    document.body.classList.remove('tadaza-theme-hawaiian');
+    document.body.classList.remove('tadaza-theme-hawaiian', 'tadaza-scene-hawaiian');
+    if (!document.body.className.match(/tadaza-scene-(?!hawaiian)/)) document.body.classList.remove('tadaza-ascii-scene');
     if (hawaiianContainer) {
       hawaiianContainer.style.display = 'none';
     }
@@ -658,7 +659,7 @@ function updateHawaiianTheme(themeCfg) {
   }
 
   // Enable Theme
-  document.body.classList.add('tadaza-theme-hawaiian');
+  document.body.classList.add('tadaza-theme-hawaiian', 'tadaza-ascii-scene', 'tadaza-scene-hawaiian');
   initHawaiianStatics();
 
   if (!hawaiianContainer) {
@@ -839,605 +840,863 @@ function hawaiianLoop(now) {
   }
 
 /* ==========================================================================
-   MODULE: 02c_ecosystem_themes.js
+   MODULE: 02d_ascii_scenes.js
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
-   2c. Living Ecosystem Dynamic Themes (ASCII / Pixel-Art Simulation)
-   - Tropical Rainforest (Cơn Mưa Rừng Nhiệt Đới)
-   - Bioluminescent Night Forest (Rừng Ánh Sáng Sinh Học Đêm)
-   Engineered in the authentic ASCII-matrix style of Hawaiian Lagoon (< 3% CPU)
+   2d. ASCII Scene Engine + scenes in the Hawaiian Lagoon style
+   - Hồ Sen Cá Koi (koi)   - Dải Ngân Hà (galaxy)
+   - Bắc Cực (arctic)       - Mùa Xuân (spring)
+
+   Pipeline (same as Hawaiian): vector shapes are drawn into a COLS x ROWS
+   sample canvas, then every covered cell is painted as a coloured block with
+   an ASCII glyph on top. Static decor is rasterised once; moving actors are
+   sampled every frame inside their bounding box. Reuses hwHash / hwMix /
+   hwRgb / hwLum / hwEll / hwPose from 02_hawaiian_theme.js.
    -------------------------------------------------------------------------- */
 
-let ecoAnimId = null;
-let ecoEngineRunning = false;
-let ecoContainer = null;
-let ecoCanvas = null;
-let ecoCtx = null;
-let ecoLastTime = 0;
-let ecoT0 = 0;
-let ecoTargetFps = 20;
-let ecoFpsInterval = 1000 / 20;
-let ecoActiveType = null;
+const AS_W = 1944, AS_H = 1760, AS_CW = 16, AS_CH = 22;
+const AS_COLS = Math.ceil(AS_W / AS_CW), AS_ROWS = Math.ceil(AS_H / AS_CH);
+const AS_TAU = Math.PI * 2;
+const AS_FONT = '500 15px "Geist Mono", monospace';
+const AS_RAMP = "8%XSSt%t;:";
+const AS_EDGE = "',.o:;";
 
-// Geometry matching Hawaiian Lagoon for resolution fidelity
-const ECO_W = 1944;
-const ECO_H = 1760;
-const ECO_CW = 16;
-const ECO_CH = 22;
-const ECO_COLS = Math.ceil(ECO_W / ECO_CW);
-const ECO_ROWS = Math.ceil(ECO_H / ECO_CH);
-const ECO_TAU = Math.PI * 2;
+const asState = {
+  scene: null, container: null, canvas: null, ctx: null,
+  animId: null, running: false, t0: 0, last: 0, interval: 50,
+  builtFor: null, ox: null, bgc: null, bgx: null, decc: null, decx: null
+};
+const asBuf = new Float32Array(AS_COLS * AS_ROWS * 4);
+let asBBox = { minI: 0, maxI: 0, minJ: 0, maxJ: 0 };
 
-// Offscreen buffers for rasterization & statics
-let eco_oc, eco_ox, eco_bgc, eco_bgx;
-let ecoStaticsBuilt = false;
-let ecoCurrentStaticType = null;
+// ---------------------------------------------------------------------------
+// Core helpers
+// ---------------------------------------------------------------------------
+function asBgAt(sc, x, y) {
+  const [dx, dy] = sc.dir || [0.45, 0.9];
+  const k = Math.min(1, Math.max(0, (x * dx + y * dy) / (AS_W * dx + AS_H * dy)));
+  const S = sc.stops;
+  for (let i = 1; i < S.length; i++) {
+    if (k <= S[i][0]) return hwMix(S[i - 1][1], S[i][1], (k - S[i - 1][0]) / (S[i][0] - S[i - 1][0]));
+  }
+  return S[S.length - 1][1];
+}
 
-const ecoHash = (a, b, c) => {
-  let h = Math.sin(a * 127.1 + b * 311.7 + c * 74.7) * 43758.5453;
-  return h - Math.floor(h);
+function asRR(g, x, y, w, h, r, fill) {
+  g.beginPath();
+  g.moveTo(x + r, y);
+  g.arcTo(x + w, y, x + w, y + h, r);
+  g.arcTo(x + w, y + h, x, y + h, r);
+  g.arcTo(x, y + h, x, y, r);
+  g.arcTo(x, y, x + w, y, r);
+  g.closePath();
+  g.fillStyle = fill;
+  g.fill();
+}
+
+function asPut(g, x, y, a, s, draw) {
+  g.save(); g.translate(x, y); g.rotate(a); if (s !== 1) g.scale(s, s); draw(g); g.restore();
+}
+
+function asSample(draw) {
+  const ox = asState.ox;
+  ox.setTransform(1, 0, 0, 1, 0, 0);
+  ox.clearRect(0, 0, AS_COLS, AS_ROWS);
+  ox.setTransform(AS_COLS / AS_W, 0, 0, AS_ROWS / AS_H, 0, 0);
+  draw(ox);
+  const d = ox.getImageData(0, 0, AS_COLS, AS_ROWS).data;
+  let minI = AS_COLS, maxI = -1, minJ = AS_ROWS, maxJ = -1;
+  for (let j = 0; j < AS_ROWS; j++) {
+    for (let i = 0; i < AS_COLS; i++) {
+      const p = (j * AS_COLS + i) * 4, al = d[p + 3];
+      if (al > 10) {
+        asBuf[p] = d[p]; asBuf[p + 1] = d[p + 1]; asBuf[p + 2] = d[p + 2]; asBuf[p + 3] = al / 255;
+        if (i < minI) minI = i; if (i > maxI) maxI = i;
+        if (j < minJ) minJ = j; if (j > maxJ) maxJ = j;
+      } else {
+        asBuf[p + 3] = 0;
+      }
+    }
+  }
+  asBBox = maxI >= minI ? { minI, maxI, minJ, maxJ } : { minI: 0, maxI: -1, minJ: 0, maxJ: -1 };
+  return asBuf;
+}
+
+/** Paint sampled cells as coloured blocks + glyphs (the Hawaiian look). */
+function asCells(ctx, sc, L, b, t, depth, flicker) {
+  const sprink = sc.sprinkle || ["#ff5fa2", "#16c79a", "#8b6cff", "#ffb000"];
+  for (let j = b.minJ; j <= b.maxJ; j++) {
+    for (let i = b.minI; i <= b.maxI; i++) {
+      const o = (j * AS_COLS + i) * 4, a = L[o + 3];
+      if (a < 0.12) continue;
+      const x = i * AS_CW, y = j * AS_CH;
+      let c = [L[o], L[o + 1], L[o + 2]];
+      if (depth) c = hwMix(c, asBgAt(sc, x, y), depth);
+      const fl = flicker ? hwHash(i, j, Math.floor(t * 7)) : 0.5;
+      const alpha = depth ? 0.9 : 1;
+      if (a > 0.5) {
+        ctx.fillStyle = hwRgb(c, alpha);
+        ctx.fillRect(x + 1, y + 1, AS_CW - 2, AS_CH - 2);
+        const l = hwLum(c);
+        const ch = AS_RAMP[Math.max(0, Math.min(AS_RAMP.length - 1, Math.floor(1 + l * 5 + (flicker ? fl * 4 : 0))))];
+        ctx.fillStyle = flicker && fl < 0.04 ? sprink[(fl * 100) | 0] : hwRgb(l < 0.42 ? hwMix(c, [255, 255, 255], 0.62) : hwMix(c, [0, 0, 0], 0.58), depth ? 0.6 : 1);
+        ctx.fillText(ch, x + AS_CW / 2, y + AS_CH / 2 + 1);
+      } else {
+        ctx.fillStyle = hwRgb(c, Math.min(1, a * 1.6) * (depth ? 0.6 : 1));
+        ctx.fillText(AS_EDGE[((flicker ? fl : hwHash(i, j, 1)) * AS_EDGE.length) | 0], x + AS_CW / 2, y + AS_CH / 2 + 1);
+      }
+    }
+  }
+}
+
+/** Draw one glyph snapped to the cell grid. */
+function asGlyph(ctx, ch, x, y, color) {
+  if (x < -AS_CW || y < -AS_CH || x > AS_W || y > AS_H) return;
+  ctx.fillStyle = color;
+  ctx.fillText(ch, Math.floor(x / AS_CW) * AS_CW + AS_CW / 2, Math.floor(y / AS_CH) * AS_CH + AS_CH / 2 + 1);
+}
+
+// ---------------------------------------------------------------------------
+// Shared ambient effects
+// ---------------------------------------------------------------------------
+/** Hawaiian-style moving light caustics drawn as ~ and - glyphs. */
+function asCaustics(ctx, t, T, rgb, strength) {
+  const w = AS_TAU / T;
+  for (let j = 0; j < AS_ROWS; j += 2) {
+    for (let i = 0; i < AS_COLS; i += 2) {
+      const x = i * AS_CW, y = j * AS_CH;
+      const v = Math.sin(x * 0.011 + y * 0.004 + w * 2 * t + 1.6 * Math.sin(y * 0.007 - w * 3 * t))
+              + Math.sin(-x * 0.006 + y * 0.012 - w * 3 * t + 1.6 * Math.sin(x * 0.008 + w * 2 * t));
+      if (v > 1.45) {
+        const k = Math.min(1, (v - 1.45) / 1.2);
+        ctx.fillStyle = `rgba(${rgb},${(0.18 + 0.4 * k) * (strength || 1)})`;
+        ctx.fillText(k > 0.6 ? "~" : "-", x + AS_CW / 2, y + AS_CH / 2);
+      }
+    }
+  }
+}
+
+/** Random twinkling glyphs (stars / sparkles). */
+function asTwinkle(ctx, raw, density, chars, rgb, maxA) {
+  const step = Math.floor(raw * 4);
+  const ph = (raw * 4) % 1;
+  for (let j = 0; j < AS_ROWS; j++) {
+    for (let i = 0; i < AS_COLS; i++) {
+      const h = hwHash(i, j, 7);
+      if (h > density) continue;
+      const tw = 0.5 + 0.5 * Math.sin(raw * (1.5 + h * 40) + h * 900);
+      const blink = hwHash(i, j, step % 97) > 0.97 ? Math.sin(ph * Math.PI) : 0;
+      const a = Math.min(1, (0.25 + 0.55 * tw + blink * 0.6) * (maxA || 1));
+      ctx.fillStyle = `rgba(${rgb},${a})`;
+      ctx.fillText(chars[(h / density * chars.length) | 0] || chars[0], i * AS_CW + AS_CW / 2, j * AS_CH + AS_CH / 2 + 1);
+    }
+  }
+}
+
+/** Falling particles (snow, petals). Uses raw time so motion never jumps. */
+function asFall(ctx, raw, n, opt) {
+  for (let k = 0; k < n; k++) {
+    const h1 = hwHash(k, 1, 3), h2 = hwHash(k, 2, 5), h3 = hwHash(k, 3, 7);
+    const speed = opt.speed[0] + h2 * (opt.speed[1] - opt.speed[0]);
+    const y = ((h1 * (AS_H + 120) + raw * speed) % (AS_H + 120)) - 60;
+    let x = h3 * AS_W + raw * (opt.drift || 0) + Math.sin(raw * (0.6 + h2) + k) * (opt.sway || 30);
+    x = ((x % AS_W) + AS_W) % AS_W;
+    const ch = opt.chars[(hwHash(k, 9, 1) * opt.chars.length) | 0];
+    const col = opt.colors[(hwHash(k, 4, 2) * opt.colors.length) | 0];
+    asGlyph(ctx, ch, x, y, col);
+  }
+}
+
+/** Expanding ripple rings drawn with glyphs. */
+function asRipples(ctx, raw, spots, rgb) {
+  for (let k = 0; k < spots.length; k++) {
+    const [cx, cy, maxR, period] = spots[k];
+    const ph = ((raw / period) + hwHash(k, 5, 5)) % 1;
+    const r = 10 + ph * maxR;
+    const n = Math.max(10, Math.floor(r / 9));
+    const a = 0.55 * (1 - ph);
+    for (let q = 0; q < n; q++) {
+      const ang = q / n * AS_TAU;
+      asGlyph(ctx, ph < 0.5 ? "o" : "·", cx + Math.cos(ang) * r, cy + Math.sin(ang) * r * 0.62, `rgba(${rgb},${a})`);
+    }
+  }
+}
+
+/** Bubble / sparkle trail behind a moving actor path. */
+function asTrail(ctx, fn, t, opt) {
+  const n = opt.n || 12;
+  for (let k = 1; k <= n; k++) {
+    const [x, y, a] = hwPose(fn, t - k * (opt.gap || 0.09) - (opt.lag || 0.3));
+    const side = (hwHash(k, opt.seed || 1, 3) - 0.5) * k * (opt.spread || 9);
+    const px = x + side * -Math.sin(a), py = y + side * Math.cos(a);
+    const ch = opt.chars[(hwHash(k, opt.seed || 1, Math.floor(t * 5)) * opt.chars.length) | 0];
+    asGlyph(ctx, ch, px, py, `rgba(${opt.rgb},${(opt.alpha || 0.5) * (1 - k / (n + 1))})`);
+  }
+}
+
+// Lissajous path helper centred on the canvas
+const asLoop = (T, ax, ay, fx, fy, px, py, cx, cy) => (t) => {
+  const w = AS_TAU / T;
+  return [(cx || 972) + ax * Math.cos(fx * w * t + px), (cy || 880) + ay * Math.sin(fy * w * t + py)];
 };
 
-const ecoMix = (a, b, k) => [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k];
-const ecoRgb = (c, a = 1) => `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${a})`;
+// ===========================================================================
+// SCENE 1: Hồ Sen Cá Koi
+// ===========================================================================
+const KOI_T = 30;
+const KOI_PAL = {
+  kohaku: { base: "#f7f3ec", fin: "rgba(250,246,238,0.85)", spots: [[60, -10, 42, 28, "#e3462e"], [-5, 14, 32, 22, "#e3462e"], [112, 0, 18, 15, "#e3462e"]] },
+  showa: { base: "#2c2a2a", fin: "rgba(70,66,66,0.9)", spots: [[45, -10, 34, 20, "#e3462e"], [-10, 12, 28, 15, "#f7f3ec"], [100, 8, 16, 12, "#f7f3ec"]] },
+  ogon: { base: "#f2bf3d", fin: "rgba(255,226,140,0.9)", spots: [[30, 0, 70, 12, "#ffe08a"]] },
+  chagoi: { base: "#ef8a2a", fin: "rgba(248,184,112,0.9)", spots: [[40, 0, 60, 14, "#ffc48a"]] },
+  tancho: { base: "#f7f3ec", fin: "rgba(250,246,238,0.85)", spots: [[108, 0, 17, 17, "#e3462e"]] },
+  sanke: { base: "#f7f3ec", fin: "rgba(250,246,238,0.85)", spots: [[55, -12, 32, 18, "#e3462e"], [0, 14, 22, 12, "#e3462e"], [80, 16, 10, 8, "#2c2a2a"], [-30, -10, 12, 8, "#2c2a2a"]] }
+};
 
-const ECO_RAMP = "8%XSSt%t;:";
-const ECO_EDGE = "',.o:;";
-
-// ---------------------------------------------------------------------------
-// Ecosystem State: Rainforest (Tropical Rain)
-// ---------------------------------------------------------------------------
-let rainDrops = [];
-let rainRipples = [];
-let rainFrogs = [];
-let rainLilies = [];
-
-function initRainforestState() {
-  rainDrops = [];
-  for (let i = 0; i < 90; i++) {
-    rainDrops.push({
-      x: Math.random() * ECO_W,
-      y: Math.random() * ECO_H,
-      speed: 24 + Math.random() * 18,
-      len: 18 + Math.random() * 22,
-      thickness: 1 + Math.random() * 1.5,
-      alpha: 0.25 + Math.random() * 0.45,
-      char: ["/", "|", "'", "!", ":", ";"][(Math.random() * 6) | 0]
-    });
+function koiFish(g, t, ph, p) {
+  const b = 0.28 * Math.sin(AS_TAU * 40 * t / KOI_T + ph);
+  g.save(); g.translate(-40, 0); g.rotate(b * 0.6);
+  hwEll(g, -40, 0, 66, 32, 0, p.base);
+  g.translate(-98, 0); g.rotate(b);
+  g.beginPath(); g.moveTo(4, 0);
+  g.quadraticCurveTo(-40, -16, -82, -50); g.quadraticCurveTo(-58, 0, -82, 50); g.quadraticCurveTo(-40, 16, 4, 0);
+  g.fillStyle = p.fin; g.fill();
+  g.restore();
+  for (const m of [-1, 1]) {
+    g.save(); g.translate(50, 30 * m); g.rotate(m * (0.85 + 0.3 * Math.sin(AS_TAU * 40 * t / KOI_T + ph + 1)));
+    hwEll(g, 0, 26 * m, 14, 32, 0, p.fin); g.restore();
   }
-
-  rainRipples = [];
-  for (let i = 0; i < 16; i++) {
-    rainRipples.push({
-      x: 100 + Math.random() * (ECO_W - 200),
-      y: 1100 + Math.random() * (ECO_H - 1180),
-      r: Math.random() * 50,
-      maxR: 35 + Math.random() * 45,
-      speed: 0.8 + Math.random() * 0.9,
-      alpha: 1
-    });
-  }
-
-  rainFrogs = [
-    { x: 380, y: 1120, scale: 0.9, blinkTimer: 0, breathPhase: 0 },
-    { x: 1540, y: 1160, scale: 0.85, blinkTimer: 2, breathPhase: 1.5 }
-  ];
-
-  rainLilies = [
-    { x: 580, y: 1340, rot: 0.2, driftOffset: 0 },
-    { x: 1220, y: 1420, rot: -0.4, driftOffset: 2 }
-  ];
+  hwEll(g, 30, 0, 96, 50, 0, p.base);
+  hwEll(g, 112, 0, 34, 34, 0, p.base);
+  for (const [x, y, rx, ry, c] of p.spots) hwEll(g, x, y, rx, ry, 0, c);
+  hwEll(g, 128, -14, 5, 5, 0, "#1b1b1b"); hwEll(g, 128, 14, 5, 5, 0, "#1b1b1b");
 }
 
-// ---------------------------------------------------------------------------
-// Ecosystem State: Bioforest (Bioluminescent Night Forest)
-// ---------------------------------------------------------------------------
-let bioSpores = [];
-let bioMushrooms = [];
-let bioButterflies = [];
-let bioFireflies = [];
-
-function initBioforestState() {
-  bioSpores = [];
-  for (let i = 0; i < 75; i++) {
-    bioSpores.push({
-      x: Math.random() * ECO_W,
-      y: Math.random() * ECO_H,
-      speedY: -(0.6 + Math.random() * 1.4),
-      speedX: (Math.random() - 0.5) * 0.8,
-      size: 6 + Math.random() * 10,
-      char: ["✦", "*", "·", "°", "+", "o"][(Math.random() * 6) | 0],
-      color: Math.random() > 0.4 ? [6, 214, 160] : [192, 132, 252],
-      alpha: 0.3 + Math.random() * 0.6,
-      wobbleSpeed: 0.5 + Math.random() * 1.5
-    });
-  }
-
-  bioMushrooms = [
-    { x: 260, y: 1480, scale: 1.2, color: [0, 245, 212], pulsePhase: 0 },
-    { x: 420, y: 1540, scale: 0.85, color: [167, 139, 250], pulsePhase: 1.8 },
-    { x: 1680, y: 1460, scale: 1.15, color: [6, 214, 160], pulsePhase: 3.2 },
-    { x: 1520, y: 1530, scale: 0.9, color: [244, 114, 182], pulsePhase: 4.5 }
-  ];
-
-  bioButterflies = [
-    { pathFn: (t) => [972 + 650 * Math.sin(t * 0.4), 780 + 320 * Math.cos(t * 0.8) + 80 * Math.sin(t * 1.6)], color: [0, 245, 212] },
-    { pathFn: (t) => [972 + 780 * Math.cos(t * 0.35 + 2), 650 + 280 * Math.sin(t * 0.7 + 1)], color: [192, 132, 252] }
-  ];
-
-  bioFireflies = [];
-  for (let i = 0; i < 24; i++) {
-    bioFireflies.push({
-      baseX: 100 + Math.random() * (ECO_W - 200),
-      baseY: 400 + Math.random() * (ECO_H - 600),
-      range: 40 + Math.random() * 60,
-      phase: Math.random() * ECO_TAU,
-      speed: 0.3 + Math.random() * 0.6
-    });
-  }
+function koiLotus(g, s) {
+  for (let k = 0; k < 8; k++) { g.save(); g.rotate(k * AS_TAU / 8); hwEll(g, 40 * s, 0, 40 * s, 17 * s, 0, "#f6b4cb"); g.restore(); }
+  for (let k = 0; k < 6; k++) { g.save(); g.rotate(k * AS_TAU / 6 + 0.3); hwEll(g, 24 * s, 0, 26 * s, 12 * s, 0, "#ea7aa3"); g.restore(); }
+  hwEll(g, 0, 0, 14 * s, 14 * s, 0, "#ffd65e");
 }
 
-// ---------------------------------------------------------------------------
-// Build Pre-Rendered Statics (Canopy & Lake for Rain, Ancient Trees for Bio)
-// ---------------------------------------------------------------------------
-function buildEcoStatics(type) {
-  if (ecoStaticsBuilt && ecoCurrentStaticType === type) return;
-  ecoCurrentStaticType = type;
-  ecoStaticsBuilt = true;
+function koiPad(g, r, notch, flower) {
+  g.beginPath(); g.moveTo(0, 0); g.arc(0, 0, r, notch + 0.32, notch - 0.32 + AS_TAU); g.closePath();
+  g.fillStyle = "#3e9649"; g.fill();
+  g.beginPath(); g.moveTo(0, 0); g.arc(0, 0, r * 0.7, notch + 0.5, notch - 0.5 + AS_TAU); g.closePath();
+  g.fillStyle = "#5bb75c"; g.fill();
+  if (flower) { g.save(); g.translate(r * 0.15, -r * 0.1); koiLotus(g, flower); g.restore(); }
+}
 
-  if (!eco_bgc) {
-    eco_bgc = document.createElement("canvas");
-    eco_bgc.width = ECO_W;
-    eco_bgc.height = ECO_H;
-    eco_bgx = eco_bgc.getContext("2d");
+function koiDragonfly(g, t) {
+  const f = Math.abs(Math.sin(AS_TAU * 240 * t / KOI_T));
+  for (const [x, m] of [[20, -1], [20, 1], [-10, -1], [-10, 1]]) {
+    g.save(); g.translate(x, 0); g.rotate(m * (x > 0 ? 1.25 : 1.85)); g.scale(1, 0.6 + 0.4 * f);
+    hwEll(g, 0, 46 * m, 13, 48, 0, "rgba(214,240,255,0.75)"); g.restore();
   }
+  hwEll(g, -40, 0, 70, 8, 0, "#1f6f8b");
+  hwEll(g, 18, 0, 22, 13, 0, "#2a8aa8");
+  hwEll(g, 44, 0, 14, 14, 0, "#145a73");
+}
 
-  eco_bgx.clearRect(0, 0, ECO_W, ECO_H);
+const KOI_PATHS = [
+  asLoop(KOI_T, 1050, 600, 1, 1, 0.2, 0.2),
+  asLoop(KOI_T, 760, 1000, -1, -1, 2.0, 2.0, 920, 900),
+  asLoop(KOI_T, 1150, 520, 1, 2, 3.9, 4.4),
+  asLoop(KOI_T, 900, 760, -2, -1, 1.2, 0.4, 1000, 860),
+  asLoop(KOI_T, 1250, 820, 1, -1, 5.1, 5.1, 940, 900),
+  asLoop(KOI_T, 640, 560, 2, 2, 0.9, 2.5, 1000, 820)
+];
+const KOI_FISH = [["kohaku", 1.5], ["showa", 1.35], ["ogon", 1.25], ["tancho", 1.4], ["sanke", 1.3], ["chagoi", 1.2]];
+const KOI_PADS = [[300, 380, 140, 0.5, 0.9], [1620, 300, 120, 2.2, 0], [1720, 1360, 150, 3.4, 1.0], [460, 1440, 110, 4.6, 0], [1080, 1580, 95, 1.2, 0.7], [980, 230, 90, 5.4, 0], [180, 900, 100, 0.2, 0.8]];
 
-  if (type === 'rainforest') {
-    // 1. Deep Rainforest Gradient
-    const g = eco_bgx.createLinearGradient(0, 0, 0, ECO_H);
-    g.addColorStop(0, "#03160f");
-    g.addColorStop(0.55, "#06281c");
-    g.addColorStop(0.72, "#042017");
-    g.addColorStop(1, "#02120d");
-    eco_bgx.fillStyle = g;
-    eco_bgx.fillRect(0, 0, ECO_W, ECO_H);
-
-    // 2. Hanging Palm & Monstera Canopy Foliage
-    eco_bgx.fillStyle = "rgba(4, 38, 26, 0.85)";
-    for (let x = 0; x < ECO_W; x += 180) {
-      eco_bgx.beginPath();
-      eco_bgx.moveTo(x - 60, 0);
-      eco_bgx.quadraticCurveTo(x + 40, 240 + Math.sin(x) * 40, x + 120, 0);
-      eco_bgx.fill();
+const SCENE_KOI = {
+  id: "koi", T: KOI_T,
+  stops: [[0, [204, 240, 220]], [0.42, [118, 204, 176]], [0.78, [56, 154, 142]], [1, [30, 112, 120]]],
+  grid: "rgba(255,255,255,0.06)",
+  decorDepth: 0.55,
+  decor(g) {
+    const stone = (x, y, r, c) => hwEll(g, x, y, r, r * 0.72, hwHash(x, y, 2) * 3, c);
+    for (const [x, y, r] of [[60, 120, 90], [150, 60, 60], [1880, 120, 80], [1800, 1700, 100], [1900, 1580, 70], [80, 1700, 90], [200, 1640, 60], [1000, 1730, 70]]) stone(x, y, r, hwHash(x, y, 1) > 0.5 ? "#9aa59c" : "#7f8b84");
+    g.strokeStyle = "#2f7d4a"; g.lineWidth = 9; g.lineCap = "round";
+    for (const [x, y] of [[700, 1650], [760, 1690], [1380, 120], [1440, 80], [80, 600], [1880, 900]]) {
+      for (let k = 0; k < 4; k++) { g.beginPath(); g.moveTo(x + k * 18, y); g.quadraticCurveTo(x + k * 18 + 40, y - 120, x + k * 18 - 20, y - 220 - k * 20); g.stroke(); }
     }
+  },
+  light(ctx, t) {
+    ctx.save(); ctx.globalCompositeOperation = "screen";
+    for (let k = 0; k < 3; k++) {
+      const off = ((t / KOI_T + k / 3) % 1) * (AS_W + AS_H) * 1.2 - AS_H * 0.6;
+      const gr = ctx.createLinearGradient(off, 0, off + 300, 180);
+      gr.addColorStop(0, "rgba(255,255,255,0)"); gr.addColorStop(0.5, "rgba(255,255,230,0.09)"); gr.addColorStop(1, "rgba(255,255,255,0)");
+      ctx.fillStyle = gr; ctx.fillRect(0, 0, AS_W, AS_H);
+    }
+    ctx.restore();
+  },
+  ambient(ctx, t, raw) {
+    asCaustics(ctx, t, KOI_T, "255,255,255", 0.8);
+    asRipples(ctx, raw, [[620, 700, 120, 5], [1300, 520, 140, 6.5], [1450, 1100, 110, 4.2], [820, 1250, 130, 5.7], [1120, 880, 100, 7.1]], "255,255,255");
+  },
+  actors(g, t) {
+    KOI_FISH.forEach(([kind, s], k) => {
+      const [x, y, a] = hwPose(KOI_PATHS[k], t);
+      asPut(g, x, y, a, s, (g) => koiFish(g, t, k * 1.7, KOI_PAL[kind]));
+    });
+    const w = AS_TAU / KOI_T;
+    const dfx = 972 + 1100 * Math.sin(w * 2 * t + 0.5), dfy = 700 + 520 * Math.sin(w * 3 * t);
+    const [, , da] = hwPose((tt) => [972 + 1100 * Math.sin(w * 2 * tt + 0.5), 700 + 520 * Math.sin(w * 3 * tt)], t);
+    asPut(g, dfx, dfy, da, 1.2, (g) => koiDragonfly(g, t));
+    for (const [x, y, r, notch, flower] of KOI_PADS) {
+      const k = hwHash(x, y, 4) * 6;
+      asPut(g, x + 30 * Math.sin(w * t + k), y + 22 * Math.cos(w * t + k), 0.15 * Math.sin(w * t + k), 1, (g) => koiPad(g, r, notch, flower));
+    }
+  },
+  shadow: "rgba(8,60,50,0.16)",
+  trails(ctx, t) {
+    KOI_PATHS.slice(0, 4).forEach((fn, k) => asTrail(ctx, fn, t, { chars: "~·o.", rgb: "255,255,255", seed: k + 1, n: 9, alpha: 0.45, lag: 0.45 }));
+  },
+  front(ctx, t, raw) {
+    asFall(ctx, raw, 26, { speed: [8, 18], drift: 14, sway: 40, chars: ["*", "°", "·"], colors: ["rgba(246,170,200,0.85)", "rgba(255,214,228,0.8)", "rgba(234,122,163,0.75)"] });
+  }
+};
 
-    // 3. Side Rainforest Trunks
-    eco_bgx.fillStyle = "#02100a";
-    eco_bgx.fillRect(0, 0, 120, ECO_H);
-    eco_bgx.fillRect(ECO_W - 120, 0, 120, ECO_H);
+// ===========================================================================
+// SCENE 2: Dải Ngân Hà
+// ===========================================================================
+const GX_T = 40;
+const gxOsc = (t, n, ph) => Math.sin(AS_TAU * n * t / GX_T + (ph || 0));
 
-    // Subtle ASCII grid texture
-    eco_bgx.fillStyle = "rgba(16, 185, 129, 0.04)";
-    for (let x = 0; x < ECO_W; x += ECO_CW) eco_bgx.fillRect(x, 0, 1, ECO_H);
-    for (let y = 0; y < ECO_H; y += ECO_CH) eco_bgx.fillRect(0, y, ECO_W, 1);
+function gxAstronaut(g, t) {
+  const k = gxOsc(t, 6), k2 = gxOsc(t, 6, 1.4);
+  asRR(g, -52, -60, 104, 96, 18, "#c9ccd8");                  // backpack
+  g.save(); g.translate(-30, 50); g.rotate(0.2 + 0.25 * k); asRR(g, -18, 0, 36, 92, 16, "#eef0f6"); asRR(g, -20, 76, 40, 26, 10, "#9aa0b4"); g.restore();
+  g.save(); g.translate(30, 50); g.rotate(-0.2 - 0.25 * k2); asRR(g, -18, 0, 36, 92, 16, "#eef0f6"); asRR(g, -20, 76, 40, 26, 10, "#9aa0b4"); g.restore();
+  g.save(); g.translate(-56, -20); g.rotate(0.9 + 0.35 * k2); asRR(g, -15, 0, 30, 84, 14, "#eef0f6"); hwEll(g, 0, 88, 17, 15, 0, "#9aa0b4"); g.restore();
+  g.save(); g.translate(56, -20); g.rotate(-0.9 - 0.35 * k); asRR(g, -15, 0, 30, 84, 14, "#eef0f6"); hwEll(g, 0, 88, 17, 15, 0, "#9aa0b4"); g.restore();
+  asRR(g, -50, -50, 100, 116, 30, "#f6f7fb");                  // torso
+  asRR(g, -26, -6, 52, 34, 8, "#d8dbe6");
+  hwEll(g, -12, 10, 7, 7, 0, "#ff5d6c"); hwEll(g, 8, 10, 7, 7, 0, "#4fb6ff");
+  hwEll(g, 0, -92, 62, 58, 0, "#f6f7fb");                      // helmet
+  hwEll(g, 4, -90, 46, 38, 0, "#24346e");                      // visor
+  hwEll(g, 18, -104, 14, 9, -0.5, "#8fc6ff");
+}
 
-    // Lake Water Surface divider
-    eco_bgx.fillStyle = "rgba(16, 185, 129, 0.08)";
-    eco_bgx.fillRect(0, 1150, ECO_W, ECO_H - 1150);
+function gxRocket(g, t) {
+  const f = 0.75 + 0.25 * Math.abs(gxOsc(t, 120));
+  hwEll(g, -150, 0, 70 * f, 26, 0, "#ff9a3c");
+  hwEll(g, -132, 0, 44 * f, 15, 0, "#ffe066");
+  for (const m of [-1, 1]) {
+    g.beginPath(); g.moveTo(-70, 30 * m); g.lineTo(-118, 74 * m); g.lineTo(-104, 30 * m); g.closePath(); g.fillStyle = "#ff5d5d"; g.fill();
+  }
+  asRR(g, -110, -36, 170, 72, 30, "#f3f4f8");
+  g.beginPath(); g.moveTo(56, -36); g.quadraticCurveTo(130, -30, 150, 0); g.quadraticCurveTo(130, 30, 56, 36); g.closePath(); g.fillStyle = "#ff5d5d"; g.fill();
+  hwEll(g, 10, 0, 22, 22, 0, "#9aa3b8"); hwEll(g, 10, 0, 15, 15, 0, "#5fb8ff");
+  asRR(g, -96, -8, 40, 16, 6, "#ff5d5d");
+}
 
-  } else if (type === 'bioforest') {
-    // 1. Mystic Night Forest Gradient
-    const g = eco_bgx.createLinearGradient(0, 0, 0, ECO_H);
-    g.addColorStop(0, "#021015");
-    g.addColorStop(0.5, "#041a20");
-    g.addColorStop(0.78, "#03191a");
-    g.addColorStop(1, "#010e11");
-    eco_bgx.fillStyle = g;
-    eco_bgx.fillRect(0, 0, ECO_W, ECO_H);
-
-    // 2. Ancient Tree Silhouettes & Moss Glade
-    eco_bgx.fillStyle = "rgba(2, 16, 20, 0.9)";
-    // Left Sacred Tree
-    eco_bgx.beginPath();
-    eco_bgx.moveTo(0, ECO_H);
-    eco_bgx.quadraticCurveTo(180, 900, 80, 0);
-    eco_bgx.lineTo(0, 0);
-    eco_bgx.fill();
-
-    // Right Sacred Tree
-    eco_bgx.beginPath();
-    eco_bgx.moveTo(ECO_W, ECO_H);
-    eco_bgx.quadraticCurveTo(ECO_W - 180, 950, ECO_W - 70, 0);
-    eco_bgx.lineTo(ECO_W, 0);
-    eco_bgx.fill();
-
-    // Subtle ASCII grid texture
-    eco_bgx.fillStyle = "rgba(6, 214, 160, 0.04)";
-    for (let x = 0; x < ECO_W; x += ECO_CW) eco_bgx.fillRect(x, 0, 1, ECO_H);
-    for (let y = 0; y < ECO_H; y += ECO_CH) eco_bgx.fillRect(0, y, ECO_W, 1);
+function gxUfo(g, t) {
+  hwEll(g, 0, -26, 58, 46, 0, "rgba(150,240,255,0.85)");
+  hwEll(g, 0, -20, 18, 22, 0, "#6fdc7a"); hwEll(g, -7, -28, 5, 6, 0, "#14301a"); hwEll(g, 7, -28, 5, 6, 0, "#14301a");
+  hwEll(g, 0, 8, 150, 40, 0, "#8f95a8");
+  hwEll(g, 0, 0, 140, 32, 0, "#cfd3de");
+  const cols = ["#ffe066", "#ff6fa8", "#6fe0ff"];
+  for (let k = 0; k < 7; k++) {
+    const on = Math.sin(AS_TAU * 30 * t / GX_T + k * 1.3) > 0;
+    hwEll(g, -108 + k * 36, 14, 9, 7, 0, on ? cols[k % 3] : "#6b7184");
   }
 }
 
-// ---------------------------------------------------------------------------
-// Render Simulation: Tropical Rain (Cơn Mưa Rừng Nhiệt Đới)
-// ---------------------------------------------------------------------------
-function drawRainforest(ctx, t) {
-  ctx.drawImage(eco_bgc, 0, 0);
+function gxComet(g, t) {
+  for (let k = 6; k >= 1; k--) hwEll(g, -k * 46, 0, 60 + k * 6, 10 + k * 3.2, 0, k % 2 ? "rgba(159,232,255,0.55)" : "rgba(198,166,255,0.5)");
+  hwEll(g, 0, 0, 34, 34, 0, "#bff3ff");
+  hwEll(g, 4, 0, 22, 22, 0, "#ffffff");
+}
 
-  ctx.font = '600 15px "JetBrains Mono", Consolas, monospace';
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-
-  // 1. Falling Raindrop Streaks in ASCII
-  for (const d of rainDrops) {
-    d.y += d.speed;
-    d.x -= 2.5; // Gentle wind angle
-
-    if (d.y > ECO_H + 20) {
-      d.y = -20;
-      d.x = Math.random() * (ECO_W + 200);
-    }
-    if (d.x < -20) d.x = ECO_W + 20;
-
-    const cellX = Math.floor(d.x / ECO_CW) * ECO_CW + ECO_CW / 2;
-    const cellY = Math.floor(d.y / ECO_CH) * ECO_CH + ECO_CH / 2;
-
-    ctx.fillStyle = `rgba(110, 231, 183, ${d.alpha})`;
-    ctx.fillText(d.char, cellX, cellY);
-
-    // Droplet streak line
-    ctx.strokeStyle = `rgba(16, 185, 129, ${d.alpha * 0.6})`;
-    ctx.lineWidth = d.thickness;
-    ctx.beginPath();
-    ctx.moveTo(d.x, d.y);
-    ctx.lineTo(d.x + 4, d.y - d.len);
-    ctx.stroke();
+function gxSatellite(g, t) {
+  const r = gxOsc(t, 2) * 0.2;
+  g.rotate(r);
+  for (const m of [-1, 1]) {
+    asRR(g, -36, m > 0 ? 34 : -120, 72, 86, 4, "#3d6fd8");
+    g.fillStyle = "#9cc2ff"; for (let q = 1; q < 4; q++) g.fillRect(-36, (m > 0 ? 34 : -120) + q * 21, 72, 3);
   }
+  asRR(g, -30, -30, 60, 60, 8, "#e8c26a");
+  hwEll(g, 46, 0, 18, 26, 0, "#f3f4f8");
+}
 
-  // 2. Pond Surface Ripples (ASCII Concentric Expanding Rings)
-  for (const r of rainRipples) {
-    r.r += r.speed;
-    if (r.r > r.maxR) {
-      r.r = 2;
-      r.x = 100 + Math.random() * (ECO_W - 200);
-      r.y = 1180 + Math.random() * (ECO_H - 1240);
+const GX_P = {
+  astro: asLoop(GX_T, 520, 360, 1, 1, 0.6, 0.6, 980, 760),
+  rocket: asLoop(GX_T, 1300, 760, -1, -2, 2.4, 1.1),
+  ufo: asLoop(GX_T, 1050, 300, 2, 3, 4.0, 0.5, 972, 520),
+  comet1: (t) => { const u = (t / GX_T * 2) % 1; return [-300 + u * (AS_W + 600), 200 + u * 900]; },
+  comet2: (t) => { const u = (t / GX_T * 2 + 0.5) % 1; return [AS_W + 300 - u * (AS_W + 600), 1500 - u * 500]; },
+  sat: asLoop(GX_T, 800, 600, 1, -1, 4.8, 3.3, 972, 1000)
+};
+
+const SCENE_GALAXY = {
+  id: "galaxy", T: GX_T,
+  dir: [0.6, 0.8],
+  stops: [[0, [46, 32, 108]], [0.35, [78, 48, 152]], [0.7, [138, 66, 170]], [1, [222, 112, 156]]],
+  grid: "rgba(255,255,255,0.05)",
+  sprinkle: ["#ffe066", "#6fe0ff", "#ff8ad8", "#a6ff9a"],
+  backdrop(g) {
+    g.save(); g.globalCompositeOperation = "screen";
+    for (const [x, y, r, c] of [[500, 600, 700, "rgba(90,220,255,0.18)"], [1500, 900, 800, "rgba(255,110,200,0.18)"], [1000, 300, 600, "rgba(160,120,255,0.2)"]]) {
+      const gr = g.createRadialGradient(x, y, 0, x, y, r); gr.addColorStop(0, c); gr.addColorStop(1, "rgba(0,0,0,0)");
+      g.fillStyle = gr; g.fillRect(0, 0, AS_W, AS_H);
     }
-
-    const ringAlpha = (1 - r.r / r.maxR) * 0.7;
-    const ringGlyph = r.r < 12 ? "." : (r.r < 24 ? "o" : (r.r < 36 ? "O" : "~"));
-
-    ctx.fillStyle = `rgba(167, 243, 208, ${ringAlpha})`;
-    for (let a = 0; a < ECO_TAU; a += 0.8) {
-      const rx = r.x + Math.cos(a) * r.r * 1.6;
-      const ry = r.y + Math.sin(a) * r.r * 0.6;
-      ctx.fillText(ringGlyph, Math.floor(rx / ECO_CW) * ECO_CW + ECO_CW / 2, Math.floor(ry / ECO_CH) * ECO_CH + ECO_CH / 2);
-    }
+    g.restore();
+  },
+  decorDepth: 0.12,
+  decor(g) {
+    // ringed planet
+    g.save(); g.translate(1640, 1420);
+    g.save(); g.beginPath(); g.arc(0, 0, 210, 0, AS_TAU); g.clip();
+    const bands = ["#f6cf8f", "#e8a35c", "#f3dcae", "#d98a4b", "#f6cf8f", "#e8b070"];
+    bands.forEach((c, k) => { g.fillStyle = c; g.fillRect(-220, -220 + k * 74, 440, 74); });
+    g.restore();
+    g.rotate(-0.32); g.lineWidth = 30; g.strokeStyle = "#f6e6bf"; g.beginPath(); g.ellipse(0, 0, 360, 80, 0, 0.05 * Math.PI, 0.95 * Math.PI); g.stroke();
+    g.restore();
+    // moon
+    hwEll(g, 260, 280, 150, 150, 0, "#dcd6ec");
+    for (const [x, y, r] of [[210, 230, 34], [310, 330, 26], [230, 360, 18], [330, 220, 20]]) hwEll(g, x, y, r, r, 0, "#b8afd0");
+    // small planets
+    hwEll(g, 1560, 300, 74, 74, 0, "#6fc3ff"); hwEll(g, 1560, 300, 74, 18, 0.2, "#4a9be0");
+    hwEll(g, 330, 1500, 48, 48, 0, "#ff8fb1");
+  },
+  ambient(ctx, t, raw) {
+    asTwinkle(ctx, raw, 0.03, ["·", ".", "+", "*", "·"], "255,255,255", 0.9);
+  },
+  actors(g, t) {
+    let [x, y] = GX_P.comet1(t); asPut(g, x, y, Math.atan2(900, AS_W + 600), 1.2, (g) => gxComet(g, t));
+    [x, y] = GX_P.comet2(t); asPut(g, x, y, Math.PI + Math.atan2(500, AS_W + 600), 0.9, (g) => gxComet(g, t));
+    let a;
+    [x, y] = GX_P.sat(t); asPut(g, x, y, 0.4, 1.1, (g) => gxSatellite(g, t));
+    [x, y] = GX_P.ufo(t); asPut(g, x, y, 0.08 * gxOsc(t, 8), 1.25, (g) => gxUfo(g, t));
+    [x, y, a] = hwPose(GX_P.rocket, t); asPut(g, x, y, a, 1.3, (g) => gxRocket(g, t));
+    [x, y] = GX_P.astro(t); asPut(g, x, y, AS_TAU * t / GX_T, 1.25, (g) => gxAstronaut(g, t));
+  },
+  shadow: null,
+  trails(ctx, t) {
+    asTrail(ctx, GX_P.rocket, t, { chars: "*+·.", rgb: "255,190,110", seed: 3, n: 16, gap: 0.08, lag: 0.55, spread: 7, alpha: 0.75 });
+    asTrail(ctx, GX_P.ufo, t, { chars: "·.", rgb: "150,240,255", seed: 5, n: 8, gap: 0.12, lag: 0.4, alpha: 0.4 });
   }
+};
 
-  // 3. Resting Tree Frogs (Animated breathing sac & blinking)
-  for (const f of rainFrogs) {
-    const breath = Math.sin(t * 3 + f.breathPhase) * 4;
-    const isBlinking = (Math.sin(t * 0.8 + f.blinkTimer) > 0.95);
+// ===========================================================================
+// SCENE 3: Bắc Cực
+// ===========================================================================
+const AR_T = 36;
+const arOsc = (t, n, ph) => Math.sin(AS_TAU * n * t / AR_T + (ph || 0));
 
-    ctx.save();
-    ctx.translate(f.x, f.y);
-    ctx.scale(f.scale, f.scale);
+function arOrca(g, t, ph) {
+  const b = 0.2 * arOsc(t, 20, ph);
+  g.save(); g.translate(-60, 0); g.rotate(b);
+  g.beginPath(); g.moveTo(10, -48); g.quadraticCurveTo(-90, -26, -170, -10); g.lineTo(-170, 10); g.quadraticCurveTo(-90, 26, 10, 48); g.fillStyle = "#1d232a"; g.fill();
+  g.translate(-170, 0); g.rotate(b * 1.4);
+  g.beginPath(); g.moveTo(0, 0); g.quadraticCurveTo(-24, -70, -60, -76); g.quadraticCurveTo(-36, -22, -46, 0); g.quadraticCurveTo(-36, 22, -60, 76); g.quadraticCurveTo(-24, 70, 0, 0); g.fillStyle = "#1d232a"; g.fill();
+  g.restore();
+  for (const m of [-1, 1]) { g.save(); g.translate(70, 50 * m); g.rotate(m * (0.9 + 0.2 * arOsc(t, 20, ph + 1))); hwEll(g, 0, 34 * m, 18, 42, 0, "#1d232a"); g.restore(); }
+  hwEll(g, 30, 0, 160, 56, 0, "#222a32");
+  hwEll(g, -40, 0, 46, 30, 0, "#7f8c96");
+  hwEll(g, 0, 0, 34, 9, 0, "#0f1418");
+  for (const m of [-1, 1]) hwEll(g, 140, 30 * m, 30, 12, 0.3 * m, "#f4f8fa");
+}
 
-    // Big Lily Pad Leaf
-    ctx.beginPath();
-    ctx.ellipse(0, 40, 140, 48, 0, 0, ECO_TAU);
-    ctx.fillStyle = "#064e3b";
-    ctx.fill();
-    ctx.strokeStyle = "#047857";
-    ctx.lineWidth = 2;
-    ctx.stroke();
+function arPenguin(g, t, ph) {
+  const f = arOsc(t, 90, ph);
+  for (const m of [-1, 1]) { g.save(); g.translate(8, 18 * m); g.rotate(m * (1.1 + 0.6 * f)); hwEll(g, 0, 22 * m, 8, 26, 0, "#262c35"); g.restore(); }
+  hwEll(g, -36, 0, 16, 10, 0, "#262c35");
+  hwEll(g, 0, 0, 52, 22, 0, "#2b323c");
+  hwEll(g, 36, 0, 20, 18, 0, "#2b323c");
+  hwEll(g, 40, -8, 7, 6, 0, "#f6f8fa"); hwEll(g, 40, 8, 7, 6, 0, "#f6f8fa");
+  hwEll(g, 58, 0, 10, 5, 0, "#f4a23c");
+}
 
-    // Frog Body
-    ctx.beginPath();
-    ctx.ellipse(0, 0, 48 + breath, 34, 0, 0, ECO_TAU);
-    ctx.fillStyle = "#10b981";
-    ctx.fill();
+function arBeluga(g, t) {
+  const b = 0.18 * arOsc(t, 14, 2);
+  g.save(); g.translate(-50, 0); g.rotate(b);
+  g.beginPath(); g.moveTo(0, -36); g.quadraticCurveTo(-70, -20, -130, -8); g.lineTo(-130, 8); g.quadraticCurveTo(-70, 20, 0, 36); g.fillStyle = "#d9e6ec"; g.fill();
+  g.translate(-130, 0); g.rotate(b * 1.4);
+  g.beginPath(); g.moveTo(0, 0); g.quadraticCurveTo(-18, -50, -46, -56); g.quadraticCurveTo(-28, -16, -36, 0); g.quadraticCurveTo(-28, 16, -46, 56); g.quadraticCurveTo(-18, 50, 0, 0); g.fillStyle = "#c9d9e2"; g.fill();
+  g.restore();
+  for (const m of [-1, 1]) hwEll(g, 50, 40 * m, 30, 12, 0.6 * m, "#c9d9e2");
+  hwEll(g, 20, 0, 110, 44, 0, "#e8f1f5");
+  hwEll(g, 118, 0, 34, 30, 0, "#eef5f8");
+}
 
-    // Frog Eyes
-    for (const m of [-1, 1]) {
-      ctx.beginPath();
-      ctx.arc(26 * m, -26, 14, 0, ECO_TAU);
-      ctx.fillStyle = "#059669";
-      ctx.fill();
+function arBear(g, t) {
+  const step = arOsc(t, 30);
+  for (const [x, y, ph] of [[50, -34, 0], [50, 34, Math.PI], [-50, -36, Math.PI], [-50, 36, 0]]) {
+    hwEll(g, x + 12 * (ph ? -step : step), y * 1.15, 22, 16, 0, "#e8dcc0");
+  }
+  hwEll(g, -64, 0, 16, 14, 0, "#efe5cc");
+  hwEll(g, 0, 0, 92, 52, 0, "#f4ecd6");
+  hwEll(g, 98, 0, 36, 30, 0, "#f6efdc");
+  for (const m of [-1, 1]) hwEll(g, 84, 26 * m, 10, 9, 0, "#e3d6b8");
+  hwEll(g, 134, 0, 9, 9, 0, "#20242a");
+}
 
-      if (!isBlinking) {
-        ctx.beginPath();
-        ctx.arc(26 * m, -26, 7, 0, ECO_TAU);
-        ctx.fillStyle = "#fde047";
-        ctx.fill();
-        ctx.beginPath();
-        ctx.arc(26 * m, -26, 3, 0, ECO_TAU);
-        ctx.fillStyle = "#022c22";
-        ctx.fill();
-      } else {
-        ctx.strokeStyle = "#022c22";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(18 * m, -26);
-        ctx.lineTo(34 * m, -26);
-        ctx.stroke();
+function arSeal(g, t) {
+  const lift = 0.25 * arOsc(t, 6);
+  for (const m of [-1, 1]) hwEll(g, -70, 18 * m, 26, 10, 0.5 * m, "#7a8792");
+  hwEll(g, 0, 0, 80, 34, 0, "#8d9aa4");
+  for (const [x, y] of [[-20, -10], [10, 12], [30, -14], [-40, 8]]) hwEll(g, x, y, 6, 5, 0, "#6f7d87");
+  g.save(); g.translate(70, 0); g.rotate(lift);
+  hwEll(g, 20, 0, 32, 28, 0, "#9aa7b0"); hwEll(g, 34, -10, 5, 5, 0, "#1b2228"); hwEll(g, 34, 10, 5, 5, 0, "#1b2228"); hwEll(g, 48, 0, 6, 5, 0, "#3a444c");
+  g.restore();
+  for (const m of [-1, 1]) hwEll(g, 30, 34 * m, 22, 9, 0.4 * m, "#7a8792");
+}
+
+const AR_FLOES = [[290, 330, 250, 1], [1700, 1480, 270, 2], [1660, 270, 170, 3], [190, 1480, 190, 4], [1040, 1620, 140, 5]];
+const arFloe = (g, x, y, r, seed, fill) => {
+  g.beginPath();
+  for (let k = 0; k < 11; k++) {
+    const a = k / 11 * AS_TAU, rr = r * (0.78 + 0.32 * hwHash(seed, k, 3));
+    g.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr * 0.8);
+  }
+  g.closePath(); g.fillStyle = fill; g.fill();
+};
+
+const AR_P = {
+  orcaA: asLoop(AR_T, 1050, 560, 1, 1, 0.5, 0.5, 972, 860),
+  orcaB: asLoop(AR_T, 1150, 640, -1, -1, 3.3, 3.3, 972, 900),
+  pod: asLoop(AR_T, 900, 520, 2, 3, 1.4, 0.2, 972, 900),
+  beluga: asLoop(AR_T, 1250, 380, 1, 2, 4.6, 1.0, 972, 1000)
+};
+const AR_POD = [[0, 0], [-170, -110], [-170, 115], [-330, 0], [-350, -210], [-340, 205]];
+
+const SCENE_ARCTIC = {
+  id: "arctic", T: AR_T,
+  stops: [[0, [236, 248, 252]], [0.4, [178, 222, 240]], [0.78, [104, 174, 214]], [1, [62, 132, 190]]],
+  grid: "rgba(255,255,255,0.08)",
+  sprinkle: ["#5cc8ff", "#ffffff", "#a5e8ff", "#ff8fb1"],
+  decorDepth: 0.06,
+  decor(g) {
+    for (const [x, y, r, s] of AR_FLOES) { arFloe(g, x + 10, y + 14, r * 1.04, s, "#a9cfe0"); arFloe(g, x, y, r, s, "#f7fbfd"); }
+    // igloo on the first floe
+    hwEll(g, 300, 330, 120, 104, 0, "#e3eef4"); hwEll(g, 300, 330, 92, 80, 0, "#f9fcfd");
+    g.strokeStyle = "#c3d7e2"; g.lineWidth = 6;
+    for (const r of [40, 70, 98]) { g.beginPath(); g.ellipse(300, 330, r, r * 0.86, 0, 0, AS_TAU); g.stroke(); }
+    asRR(g, 380, 304, 90, 52, 22, "#e3eef4"); hwEll(g, 455, 330, 20, 20, 0, "#7f9cad");
+  },
+  light(ctx, t) {
+    ctx.save(); ctx.globalCompositeOperation = "screen";
+    for (let k = 0; k < 3; k++) {
+      const off = ((t / AR_T + k / 3) % 1) * (AS_W + AS_H) * 1.2 - AS_H * 0.6;
+      const gr = ctx.createLinearGradient(off, 0, off + 260, 160);
+      gr.addColorStop(0, "rgba(255,255,255,0)"); gr.addColorStop(0.5, "rgba(240,250,255,0.10)"); gr.addColorStop(1, "rgba(255,255,255,0)");
+      ctx.fillStyle = gr; ctx.fillRect(0, 0, AS_W, AS_H);
+    }
+    ctx.restore();
+  },
+  ambient(ctx, t) { asCaustics(ctx, t, AR_T, "255,255,255", 0.9); },
+  actors(g, t) {
+    let [x, y, a] = hwPose(AR_P.beluga, t); asPut(g, x, y, a, 1.2, (g) => arBeluga(g, t));
+    [x, y, a] = hwPose(AR_P.orcaA, t); asPut(g, x, y, a, 1.35, (g) => arOrca(g, t, 0));
+    [x, y, a] = hwPose(AR_P.orcaB, t); asPut(g, x, y, a, 1.15, (g) => arOrca(g, t, 2));
+    [x, y, a] = hwPose(AR_P.pod, t);
+    const ca = Math.cos(a), sa = Math.sin(a);
+    AR_POD.forEach(([px, py], k) => {
+      const wob = 10 * arOsc(t, 9, k);
+      asPut(g, x + px * ca - (py + wob) * sa, y + px * sa + (py + wob) * ca, a + 0.12 * arOsc(t, 11, k), 1.35, (g) => arPenguin(g, t, k));
+    });
+    // bear walks around the big floe, seal rests on another
+    const ba = AS_TAU * 2 * t / AR_T;
+    asPut(g, 1700 + 150 * Math.cos(ba), 1480 + 110 * Math.sin(ba), ba + Math.PI / 2, 1.15, (g) => arBear(g, t));
+    asPut(g, 210, 1480, -0.3, 1.2, (g) => arSeal(g, t));
+    asPut(g, 1660, 280, 2.6, 0.9, (g) => arSeal(g, t + 7));
+  },
+  shadow: "rgba(30,80,110,0.16)",
+  trails(ctx, t) {
+    asTrail(ctx, AR_P.orcaA, t, { chars: ".·o°", rgb: "255,255,255", seed: 1, lag: 0.5 });
+    asTrail(ctx, AR_P.orcaB, t, { chars: ".·o°", rgb: "255,255,255", seed: 2, lag: 0.45 });
+    asTrail(ctx, AR_P.pod, t, { chars: ".·o", rgb: "255,255,255", seed: 3, lag: 0.35, n: 10 });
+  },
+  front(ctx, t, raw) {
+    asFall(ctx, raw, 150, { speed: [40, 90], drift: -18, sway: 26, chars: ["*", "·", "+", "."], colors: ["rgba(255,255,255,0.9)", "rgba(255,255,255,0.7)", "rgba(230,246,255,0.8)"] });
+  }
+};
+
+// ===========================================================================
+// SCENE 4: Mùa Xuân
+// ===========================================================================
+const SP_T = 32;
+const spOsc = (t, n, ph) => Math.sin(AS_TAU * n * t / SP_T + (ph || 0));
+
+function spBlossom(g, s, c1, c2) {
+  for (let k = 0; k < 5; k++) { g.save(); g.rotate(k * AS_TAU / 5); hwEll(g, 30 * s, 0, 30 * s, 22 * s, 0, c1); g.restore(); }
+  hwEll(g, 0, 0, 13 * s, 13 * s, 0, c2);
+}
+
+function spSwallow(g, t, ph) {
+  const f = spOsc(t, 70, ph);
+  g.beginPath(); g.moveTo(-40, -6); g.lineTo(-110, -34); g.lineTo(-62, 0); g.lineTo(-110, 34); g.lineTo(-40, 6); g.closePath(); g.fillStyle = "#22304f"; g.fill();
+  for (const m of [-1, 1]) {
+    g.save(); g.scale(1, 0.35 + 0.65 * Math.abs(f));
+    g.beginPath(); g.moveTo(10, 0); g.quadraticCurveTo(-10, 90 * m, -70, 150 * m); g.quadraticCurveTo(-20, 70 * m, -30, 0); g.closePath(); g.fillStyle = "#2a3a60"; g.fill();
+    g.restore();
+  }
+  hwEll(g, 0, 0, 52, 18, 0, "#22304f");
+  hwEll(g, 8, 6, 34, 10, 0, "#f3efe9");
+  hwEll(g, 44, 0, 16, 14, 0, "#b53a2e");
+}
+
+function spKite(g, t, c1, c2) {
+  g.beginPath(); g.moveTo(90, 0); g.lineTo(0, -64); g.lineTo(-120, 0); g.lineTo(0, 64); g.closePath(); g.fillStyle = c1; g.fill();
+  g.beginPath(); g.moveTo(90, 0); g.lineTo(0, -64); g.lineTo(0, 64); g.closePath(); g.fillStyle = c2; g.fill();
+  g.strokeStyle = "#6b3f2a"; g.lineWidth = 5; g.beginPath(); g.moveTo(90, 0); g.lineTo(-120, 0); g.moveTo(0, -64); g.lineTo(0, 64); g.stroke();
+}
+
+function spButterfly(g, t, ph, c1, c2) {
+  const f = 0.3 + 0.7 * Math.abs(spOsc(t, 110, ph));
+  for (const m of [-1, 1]) {
+    g.save(); g.scale(1, f);
+    hwEll(g, 14, 30 * m, 26, 34, 0.3 * m, c1); hwEll(g, -18, 26 * m, 20, 24, -0.3 * m, c2);
+    g.restore();
+  }
+  hwEll(g, 0, 0, 34, 6, 0, "#3b2a24");
+}
+
+function spLantern(g) {
+  g.fillStyle = "#6b3f2a"; g.fillRect(-2, -120, 4, 120);
+  asRR(g, -26, -8, 52, 16, 5, "#f2c14e");
+  hwEll(g, 0, 50, 56, 52, 0, "#e33b2e");
+  hwEll(g, -18, 50, 14, 46, 0, "#f05a45");
+  asRR(g, -26, 92, 52, 16, 5, "#f2c14e");
+  for (let k = -2; k <= 2; k++) { g.fillStyle = "#f2c14e"; g.fillRect(k * 6 - 2, 108, 4, 40); }
+}
+
+const SP_P = {
+  flock: asLoop(SP_T, 1150, 420, 1, 2, 0.4, 0.9, 972, 760),
+  kiteA: asLoop(SP_T, 420, 160, 1, 2, 0.0, 0.0, 1100, 520),
+  kiteB: asLoop(SP_T, 360, 140, -1, -2, 2.0, 1.0, 700, 980),
+  bf1: asLoop(SP_T, 600, 300, 3, 2, 0.3, 0.9, 900, 1250),
+  bf2: asLoop(SP_T, 520, 360, -2, 3, 2.1, 1.5, 1300, 1100),
+  bf3: asLoop(SP_T, 700, 240, 2, -3, 4.2, 0.6, 700, 600)
+};
+const SP_FLOCK = [[0, 0], [-120, -80], [-120, 90], [-240, -160], [-240, 170], [-360, -60], [-360, 70]];
+const SP_FLOWERS = [[0.05, 300, 1.2], [0.3, 1100, 1.0], [0.55, 640, 1.3], [0.78, 1400, 0.9]];
+
+const SCENE_SPRING = {
+  id: "spring", T: SP_T,
+  dir: [0.3, 1],
+  stops: [[0, [255, 242, 230]], [0.4, [255, 216, 216]], [0.75, [247, 182, 204]], [1, [222, 152, 198]]],
+  grid: "rgba(255,255,255,0.10)",
+  sprinkle: ["#ff5f8f", "#ffb000", "#ffffff", "#e33b2e"],
+  backdrop(g) {
+    const gr = g.createRadialGradient(1640, 260, 0, 1640, 260, 420);
+    gr.addColorStop(0, "rgba(255,236,170,0.85)"); gr.addColorStop(0.45, "rgba(255,214,150,0.35)"); gr.addColorStop(1, "rgba(255,214,150,0)");
+    g.fillStyle = gr; g.fillRect(0, 0, AS_W, AS_H);
+  },
+  decorDepth: 0.14,
+  decor(g) {
+    // distant hills
+    g.fillStyle = "#e2a8c4";
+    g.beginPath(); g.moveTo(0, AS_H); for (let x = 0; x <= AS_W; x += 60) g.lineTo(x, 1560 - 90 * Math.sin(x * 0.004) - 50 * Math.sin(x * 0.011 + 1)); g.lineTo(AS_W, AS_H); g.closePath(); g.fill();
+    g.fillStyle = "#d48fb3";
+    g.beginPath(); g.moveTo(0, AS_H); for (let x = 0; x <= AS_W; x += 60) g.lineTo(x, 1660 - 60 * Math.sin(x * 0.006 + 2)); g.lineTo(AS_W, AS_H); g.closePath(); g.fill();
+    // peach branches
+    g.strokeStyle = "#6b3f2a"; g.lineCap = "round";
+    const branch = (pts, w) => { g.lineWidth = w; g.beginPath(); g.moveTo(pts[0], pts[1]); g.quadraticCurveTo(pts[2], pts[3], pts[4], pts[5]); g.stroke(); };
+    branch([-40, 120, 300, 80, 640, 260], 30); branch([300, 110, 380, 0, 520, -20], 18); branch([460, 200, 560, 320, 760, 330], 16);
+    branch([AS_W + 40, 1180, 1700, 1180, 1380, 1340], 30); branch([1680, 1190, 1620, 1060, 1520, 1000], 16);
+    for (const [x, y, s] of [[620, 250, 1.3], [520, 180, 1.0], [760, 330, 1.2], [700, 260, 0.9], [420, 70, 1.1], [520, -10, 1.0], [250, 120, 1.0], [360, 170, 0.8], [1400, 1330, 1.3], [1520, 1290, 1.0], [1520, 1000, 1.1], [1610, 1070, 0.9], [1760, 1200, 1.2], [1860, 1150, 1.0]]) {
+      g.save(); g.translate(x, y); g.rotate(hwHash(x, y, 1) * AS_TAU); spBlossom(g, s, hwHash(x, y, 2) > 0.5 ? "#f7a6c1" : "#fbc4d6", "#d94f7c"); g.restore();
+    }
+  },
+  light(ctx, t) {
+    ctx.save(); ctx.globalCompositeOperation = "screen";
+    for (let k = 0; k < 3; k++) {
+      const off = ((t / SP_T + k / 3) % 1) * (AS_W + AS_H) * 1.2 - AS_H * 0.6;
+      const gr = ctx.createLinearGradient(off, 0, off + 300, 200);
+      gr.addColorStop(0, "rgba(255,255,255,0)"); gr.addColorStop(0.5, "rgba(255,240,210,0.10)"); gr.addColorStop(1, "rgba(255,255,255,0)");
+      ctx.fillStyle = gr; ctx.fillRect(0, 0, AS_W, AS_H);
+    }
+    ctx.restore();
+  },
+  ambient(ctx, t, raw) { asTwinkle(ctx, raw, 0.004, ["+", "*", "·"], "255,255,255", 0.8); },
+  actors(g, t) {
+    // lanterns hanging from the top branch
+    for (const [x, y, ph] of [[560, 240, 0], [700, 300, 1.4]]) asPut(g, x, y, 0.12 * spOsc(t, 6, ph), 1, (g) => { g.translate(0, 120); spLantern(g); });
+    // kites with ribbon tails
+    for (const [fn, c1, c2, s] of [[SP_P.kiteA, "#e84a4a", "#ffd23f", 1.25], [SP_P.kiteB, "#3a8dde", "#ffffff", 1.05]]) {
+      const [x, y] = fn(t);
+      asPut(g, x, y, -0.5 + 0.15 * spOsc(t, 5), s, (g) => spKite(g, t, c1, c2));
+      for (let k = 1; k <= 6; k++) {
+        const [tx, ty] = fn(t - k * 0.12);
+        asPut(g, tx - 110 * s - k * 22, ty + 70 + k * 26, spOsc(t, 10, k) * 0.6, 1, (g) => { hwEll(g, -10, 0, 16, 8, 0.6, c1); hwEll(g, 10, 0, 16, 8, -0.6, c2); });
       }
     }
-    ctx.restore();
+    // swallow flock
+    let [x, y, a] = hwPose(SP_P.flock, t);
+    const ca = Math.cos(a), sa = Math.sin(a);
+    SP_FLOCK.forEach(([px, py], k) => {
+      const wob = 16 * spOsc(t, 7, k);
+      asPut(g, x + px * ca - (py + wob) * sa, y + px * sa + (py + wob) * ca, a + 0.12 * spOsc(t, 9, k), 0.95, (g) => spSwallow(g, t, k));
+    });
+    // butterflies
+    [x, y, a] = hwPose(SP_P.bf1, t); asPut(g, x, y, a, 1.1, (g) => spButterfly(g, t, 0, "#ff9b3d", "#ffd23f"));
+    [x, y, a] = hwPose(SP_P.bf2, t); asPut(g, x, y, a, 1.0, (g) => spButterfly(g, t, 1, "#4aa3ff", "#a7d8ff"));
+    [x, y, a] = hwPose(SP_P.bf3, t); asPut(g, x, y, a, 0.9, (g) => spButterfly(g, t, 2, "#ff6fa8", "#ffd1e3"));
+    // big drifting blossoms
+    for (const [p0, y0, s] of SP_FLOWERS) {
+      const u = (p0 + t / SP_T) % 1;
+      asPut(g, -200 + u * (AS_W + 400), y0 + u * 360 + 30 * spOsc(t, 3, p0 * 9), AS_TAU * 2 * t / SP_T + p0 * 6, s * 1.6, (g) => spBlossom(g, 1, "#f48fb1", "#c2185b"));
+    }
+  },
+  shadow: "rgba(150,70,100,0.12)",
+  trails(ctx, t) {
+    asTrail(ctx, SP_P.kiteA, t, { chars: "·*", rgb: "255,255,255", seed: 4, n: 8, lag: 0.3, alpha: 0.5 });
+  },
+  front(ctx, t, raw) {
+    asFall(ctx, raw, 120, { speed: [30, 70], drift: 26, sway: 50, chars: ["*", "°", "·", ","], colors: ["rgba(240,98,146,0.85)", "rgba(248,187,208,0.9)", "rgba(255,255,255,0.8)", "rgba(236,64,122,0.7)"] });
   }
-}
+};
+
+const AS_SCENES = { koi: SCENE_KOI, galaxy: SCENE_GALAXY, arctic: SCENE_ARCTIC, spring: SCENE_SPRING };
+const AS_LEGACY = { rainforest: "koi", bioforest: "galaxy" };
 
 // ---------------------------------------------------------------------------
-// Render Simulation: Bioluminescent Night Forest (Rừng Ánh Sáng Sinh Học Đêm)
+// Engine
 // ---------------------------------------------------------------------------
-function drawBioforest(ctx, t) {
-  ctx.drawImage(eco_bgc, 0, 0);
-
-  ctx.font = '600 15px "JetBrains Mono", Consolas, monospace';
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-
-  // 1. Giant Bioluminescent Mushrooms (Pulsing glowing caps)
-  for (const m of bioMushrooms) {
-    const pulse = 0.7 + 0.3 * Math.sin(t * 1.5 + m.pulsePhase);
-    ctx.save();
-    ctx.translate(m.x, m.y);
-    ctx.scale(m.scale, m.scale);
-
-    // Glowing Stem
-    ctx.beginPath();
-    ctx.moveTo(-16, 0);
-    ctx.quadraticCurveTo(-10, -80, -22, -150);
-    ctx.lineTo(22, -150);
-    ctx.quadraticCurveTo(10, -80, 16, 0);
-    ctx.closePath();
-    ctx.fillStyle = "rgba(4, 40, 48, 0.85)";
-    ctx.fill();
-
-    // Giant Bioluminescent Cap
-    ctx.beginPath();
-    ctx.ellipse(0, -150, 130, 65, 0, Math.PI, 0, false);
-    ctx.closePath();
-    const capGrad = ctx.createRadialGradient(0, -180, 10, 0, -150, 140);
-    capGrad.addColorStop(0, ecoRgb(m.color, 0.95 * pulse));
-    capGrad.addColorStop(0.7, ecoRgb(m.color, 0.5 * pulse));
-    capGrad.addColorStop(1, "transparent");
-    ctx.fillStyle = capGrad;
-    ctx.shadowColor = ecoRgb(m.color, 0.9);
-    ctx.shadowBlur = 35 * pulse;
-    ctx.fill();
-    ctx.shadowBlur = 0;
-
-    // Concentric Luminescent Cap Spots (ASCII characters)
-    ctx.fillStyle = "#ffffff";
-    for (let k = -4; k <= 4; k++) {
-      const spotX = k * 24;
-      const spotY = -160 - Math.cos(k * 0.4) * 20;
-      ctx.fillText(k % 2 === 0 ? "✦" : "·", spotX, spotY);
-    }
-
-    ctx.restore();
+function asBuildStatics(sc) {
+  if (asState.builtFor === sc.id) return;
+  const mk = (w, h, read) => { const c = document.createElement("canvas"); c.width = w; c.height = h; return [c, c.getContext("2d", read ? { willReadFrequently: true } : undefined)]; };
+  if (!asState.ox) {
+    [, asState.ox] = mk(AS_COLS, AS_ROWS, true);
+    [asState.bgc, asState.bgx] = mk(AS_W, AS_H);
+    [asState.decc, asState.decx] = mk(AS_W, AS_H);
   }
+  const bg = asState.bgx, [dx, dy] = sc.dir || [0.45, 0.9];
+  const gr = bg.createLinearGradient(0, 0, AS_W * dx, AS_H * dy);
+  sc.stops.forEach(([k, c]) => gr.addColorStop(k, hwRgb(c)));
+  bg.globalCompositeOperation = "source-over";
+  bg.fillStyle = gr; bg.fillRect(0, 0, AS_W, AS_H);
+  if (sc.backdrop) sc.backdrop(bg);
+  bg.fillStyle = sc.grid || "rgba(255,255,255,0.07)";
+  for (let x = 0; x < AS_W; x += AS_CW) bg.fillRect(x, 0, 1, AS_H);
+  for (let y = 0; y < AS_H; y += AS_CH) bg.fillRect(0, y, AS_W, 1);
 
-  // 2. Rising Bioluminescent Spores (Floating upwards like embers)
-  for (const s of bioSpores) {
-    s.y += s.speedY;
-    s.x += Math.sin(t * s.wobbleSpeed + s.y * 0.01) * 1.2 + s.speedX;
-
-    if (s.y < -30) {
-      s.y = ECO_H + 20;
-      s.x = Math.random() * ECO_W;
-    }
-    if (s.x > ECO_W + 30) s.x = -20;
-    if (s.x < -30) s.x = ECO_W + 20;
-
-    const cellX = Math.floor(s.x / ECO_CW) * ECO_CW + ECO_CW / 2;
-    const cellY = Math.floor(s.y / ECO_CH) * ECO_CH + ECO_CH / 2;
-
-    const flick = 0.5 + 0.5 * Math.sin(t * 3 + s.x);
-    ctx.fillStyle = ecoRgb(s.color, s.alpha * flick);
-    ctx.fillText(s.char, cellX, cellY);
+  const dec = asState.decx;
+  dec.clearRect(0, 0, AS_W, AS_H);
+  if (sc.decor) {
+    const buf = asSample((g) => sc.decor(g));
+    dec.font = AS_FONT; dec.textAlign = "center"; dec.textBaseline = "middle";
+    asCells(dec, sc, buf, { minI: 0, maxI: AS_COLS - 1, minJ: 0, maxJ: AS_ROWS - 1 }, 0, sc.decorDepth || 0, false);
   }
+  asState.builtFor = sc.id;
+}
 
-  // 3. Sacred Moon Spirit Butterflies (Fluttering in graceful curved loops)
-  for (const b of bioButterflies) {
-    const [bx, by] = b.pathFn(t);
-    const flap = Math.sin(t * 14);
+function asDraw(raw) {
+  const sc = asState.scene, ctx = asState.ctx;
+  if (!sc || !ctx) return;
+  const t = ((raw % sc.T) + sc.T) % sc.T;
+  ctx.drawImage(asState.bgc, 0, 0);
+  ctx.drawImage(asState.decc, 0, 0);
+  if (sc.light) sc.light(ctx, t);
+  ctx.font = AS_FONT; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  if (sc.ambient) sc.ambient(ctx, t, raw);
 
-    ctx.save();
-    ctx.translate(bx, by);
-
-    // Glowing aura
-    ctx.beginPath();
-    ctx.arc(0, 0, 24, 0, ECO_TAU);
-    ctx.fillStyle = ecoRgb(b.color, 0.25);
-    ctx.fill();
-
-    // Butterfly Wings
-    for (const m of [-1, 1]) {
-      ctx.save();
-      ctx.scale(m * flap, 1);
-      ctx.beginPath();
-      ctx.ellipse(18, -10, 24, 15, 0.4, 0, ECO_TAU);
-      ctx.fillStyle = ecoRgb(b.color, 0.85);
-      ctx.shadowColor = ecoRgb(b.color, 1);
-      ctx.shadowBlur = 15;
-      ctx.fill();
-      ctx.shadowBlur = 0;
-      ctx.restore();
+  const buf = asSample((g) => sc.actors(g, t));
+  const b = asBBox;
+  if (sc.shadow) {
+    ctx.fillStyle = sc.shadow;
+    for (let j = b.minJ; j <= b.maxJ && j < AS_ROWS - 2; j++) {
+      for (let i = b.minI; i <= b.maxI && i < AS_COLS - 2; i++) {
+        if (buf[(j * AS_COLS + i) * 4 + 3] > 0.3) ctx.fillRect((i + 2) * AS_CW, (j + 2) * AS_CH, AS_CW, AS_CH);
+      }
     }
-
-    // Body
-    ctx.beginPath();
-    ctx.ellipse(0, 0, 4, 12, 0, 0, ECO_TAU);
-    ctx.fillStyle = "#ffffff";
-    ctx.fill();
-    ctx.restore();
   }
+  if (sc.trails) sc.trails(ctx, t);
+  asCells(ctx, sc, buf, b, t, 0, true);
+  if (sc.front) sc.front(ctx, t, raw);
+}
 
-  // 4. Fireflies glowing in the moss beds
-  for (const ff of bioFireflies) {
-    const fx = ff.baseX + Math.sin(t * ff.speed + ff.phase) * ff.range;
-    const fy = ff.baseY + Math.cos(t * ff.speed * 0.8 + ff.phase) * (ff.range * 0.5);
-    const glow = Math.max(0, Math.sin(t * 2.5 + ff.phase));
+function asResize() {
+  if (!asState.canvas) return;
+  const s = Math.max(window.innerWidth / AS_W, window.innerHeight / AS_H);
+  asState.canvas.style.transform = `translate(-50%, -50%) scale(${s})`;
+}
 
-    ctx.beginPath();
-    ctx.arc(fx, fy, 2.5, 0, ECO_TAU);
-    ctx.fillStyle = `rgba(253, 224, 71, ${glow * 0.75})`;
-    ctx.shadowColor = "#fde047";
-    ctx.shadowBlur = 10 * glow;
-    ctx.fill();
-    ctx.shadowBlur = 0;
+function asLoopFrame(now) {
+  if (!asState.running) return;
+  asState.animId = requestAnimationFrame(asLoopFrame);
+  const focused = typeof document.hasFocus === "function" ? document.hasFocus() : true;
+  const interval = focused ? asState.interval : Math.max(asState.interval, 200);
+  const elapsed = now - asState.last;
+  if (elapsed >= interval) {
+    asState.last = now - (elapsed % interval);
+    asDraw((now - asState.t0) / 1000);
   }
 }
 
-// ---------------------------------------------------------------------------
-// Unified Canvas Loop & Manager
-// ---------------------------------------------------------------------------
-function resizeEcoCanvas() {
-  if (!ecoCanvas) return;
-  const s = Math.max(window.innerWidth / ECO_W, window.innerHeight / ECO_H);
-  ecoCanvas.style.transform = `translate(-50%, -50%) scale(${s})`;
+function asStop() {
+  if (asState.animId) cancelAnimationFrame(asState.animId);
+  asState.animId = null;
+  asState.running = false;
+  if (asState.scene) document.body.classList.remove(`tadaza-scene-${asState.scene.id}`);
+  asState.scene = null;
+  if (!document.body.classList.contains("tadaza-scene-hawaiian")) document.body.classList.remove("tadaza-ascii-scene");
+  if (asState.container) asState.container.style.display = "none";
 }
 
-function ecoLoop(now) {
-  if (!ecoEngineRunning || !ecoActiveType) return;
-  ecoAnimId = requestAnimationFrame(ecoLoop);
+function asStart(id, opacity, fps) {
+  const sc = AS_SCENES[id];
+  if (!sc) return asStop();
+  if (asState.scene && asState.scene.id !== id) document.body.classList.remove(`tadaza-scene-${asState.scene.id}`);
+  asState.scene = sc;
+  document.body.classList.add("tadaza-ascii-scene", `tadaza-scene-${id}`);
 
-  // Throttle down to 5 FPS if unfocused to preserve battery & CPU
-  const isFocused = typeof document.hasFocus === 'function' ? document.hasFocus() : true;
-  const effectiveInterval = isFocused ? ecoFpsInterval : Math.max(ecoFpsInterval, 200);
-
-  const elapsed = now - ecoLastTime;
-  if (elapsed >= effectiveInterval) {
-    ecoLastTime = now - (elapsed % effectiveInterval);
-    const t = (now - ecoT0) / 1000;
-
-    if (ecoActiveType === 'rainforest') {
-      drawRainforest(ecoCtx, t);
-    } else if (ecoActiveType === 'bioforest') {
-      drawBioforest(ecoCtx, t);
-    }
-  }
-}
-
-function stopEcoCanvas() {
-  if (ecoAnimId) {
-    cancelAnimationFrame(ecoAnimId);
-    ecoAnimId = null;
-  }
-  ecoEngineRunning = false;
-  ecoActiveType = null;
-  if (ecoContainer) {
-    ecoContainer.style.display = 'none';
-  }
-}
-
-function startEcoCanvas(type, opacity, fps) {
-  ecoActiveType = type;
-  buildEcoStatics(type);
-
-  if (type === 'rainforest') {
-    initRainforestState();
-  } else if (type === 'bioforest') {
-    initBioforestState();
-  }
-
-  if (!ecoContainer) {
-    ecoContainer = document.createElement('div');
-    ecoContainer.id = 'tadaza-eco-theme-container';
-    ecoContainer.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;overflow:hidden;';
-
-    ecoCanvas = document.createElement('canvas');
-    ecoCanvas.id = 'tadaza-eco-theme-canvas';
-    ecoCanvas.width = ECO_W;
-    ecoCanvas.height = ECO_H;
-    ecoCanvas.style.cssText = 'position:absolute;top:50%;left:50%;transform-origin:center center;';
-    ecoCtx = ecoCanvas.getContext('2d');
-
-    ecoContainer.appendChild(ecoCanvas);
-    document.body.prepend(ecoContainer);
-
-    window.addEventListener('resize', resizeEcoCanvas);
-    document.addEventListener('visibilitychange', () => {
+  if (!asState.container) {
+    const box = document.createElement("div");
+    box.id = "tadaza-ascii-container";
+    const cv = document.createElement("canvas");
+    cv.id = "tadaza-ascii-canvas";
+    cv.width = AS_W; cv.height = AS_H;
+    box.appendChild(cv);
+    document.body.prepend(box);
+    asState.container = box; asState.canvas = cv; asState.ctx = cv.getContext("2d");
+    window.addEventListener("resize", asResize);
+    document.addEventListener("visibilitychange", () => {
       if (document.hidden) {
-        if (ecoAnimId) cancelAnimationFrame(ecoAnimId);
-        ecoAnimId = null;
-      } else if (ecoEngineRunning) {
-        ecoT0 = performance.now();
-        ecoLastTime = ecoT0;
-        ecoAnimId = requestAnimationFrame(ecoLoop);
+        if (asState.animId) cancelAnimationFrame(asState.animId);
+        asState.animId = null;
+      } else if (asState.running && !asState.animId) {
+        asState.last = performance.now();
+        asState.animId = requestAnimationFrame(asLoopFrame);
       }
     });
   }
-
-  ecoContainer.style.display = 'block';
-  ecoContainer.style.opacity = opacity !== undefined ? opacity : 0.85;
-  resizeEcoCanvas();
-
-  ecoTargetFps = Math.min(fps || 20, 30);
-  ecoFpsInterval = 1000 / ecoTargetFps;
-  ecoEngineRunning = true;
-
-  if (!ecoAnimId) {
-    ecoT0 = performance.now();
-    ecoLastTime = ecoT0;
-    ecoAnimId = requestAnimationFrame(ecoLoop);
+  asBuildStatics(sc);
+  asState.container.style.display = "block";
+  asState.container.style.opacity = opacity !== undefined ? opacity : 0.85;
+  asResize();
+  asState.interval = 1000 / Math.min(fps || 20, 30);
+  asState.running = true;
+  if (!asState.animId) {
+    asState.t0 = performance.now();
+    asState.last = asState.t0;
+    asState.animId = requestAnimationFrame(asLoopFrame);
   }
 }
 
 // ---------------------------------------------------------------------------
-// Global Dispatcher: updateDynamicThemes(themeCfg)
+// Global dispatcher used by applyTheme(): picks Hawaiian or an ASCII scene
 // ---------------------------------------------------------------------------
 function updateDynamicThemes(themeCfg) {
   if (!themeCfg) return;
-
-  const ALL_THEME_CLASSES = [
-    'tadaza-theme-hawaiian',
-    'tadaza-theme-rainforest',
-    'tadaza-theme-bioforest'
-  ];
-
-  let active = themeCfg.active_preset;
-  if (!active) {
-    active = themeCfg.hawaiian_theme ? 'hawaiian' : 'none';
-  }
-
-  // Remove existing theme classes
-  for (const cls of ALL_THEME_CLASSES) {
-    document.body.classList.remove(cls);
-  }
+  let active = themeCfg.active_preset || (themeCfg.hawaiian_theme ? "hawaiian" : "none");
+  if (AS_LEGACY[active]) active = AS_LEGACY[active];
 
   const opacity = themeCfg.theme_opacity !== undefined ? themeCfg.theme_opacity : (themeCfg.hawaiian_opacity !== undefined ? themeCfg.hawaiian_opacity : 0.85);
   const fps = themeCfg.theme_fps || themeCfg.hawaiian_fps || 20;
 
-  if (active === 'hawaiian') {
-    stopEcoCanvas();
-    if (typeof updateHawaiianTheme === 'function') {
-      updateHawaiianTheme({
-        ...themeCfg,
-        hawaiian_theme: true,
-        hawaiian_opacity: opacity,
-        hawaiian_fps: fps
-      });
-    }
-  } else if (active === 'rainforest' || active === 'bioforest') {
-    // Stop Hawaiian if running
-    if (typeof updateHawaiianTheme === 'function') {
-      updateHawaiianTheme({ ...themeCfg, hawaiian_theme: false });
-    }
-
-    document.body.classList.add(`tadaza-theme-${active}`);
-    startEcoCanvas(active, opacity, fps);
+  if (active === "hawaiian") {
+    asStop();
+    if (typeof updateHawaiianTheme === "function") updateHawaiianTheme({ ...themeCfg, hawaiian_theme: true, hawaiian_opacity: opacity, hawaiian_fps: fps });
   } else {
-    // None
-    stopEcoCanvas();
-    if (typeof updateHawaiianTheme === 'function') {
-      updateHawaiianTheme({ ...themeCfg, hawaiian_theme: false });
-    }
+    if (typeof updateHawaiianTheme === "function") updateHawaiianTheme({ ...themeCfg, hawaiian_theme: false });
+    if (AS_SCENES[active]) asStart(active, opacity, fps);
+    else asStop();
   }
 }
 
@@ -3807,7 +4066,26 @@ function updateDynamicThemes(themeCfg) {
     }
   }
 
-  let activeTab = 'theme'; // 'theme' | 'privacy' | 'translate'
+  let activeTab = 'theme'; // see TADAZA_TABS
+
+  const TADAZA_TABS = [
+    { id: 'theme', label: 'Giao diện', title: 'Giao diện',
+      icon: '<circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/>' },
+    { id: 'privacy', label: 'Riêng tư', title: 'Riêng tư',
+      icon: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>' },
+    { id: 'translate', label: 'Dịch nhanh', title: 'Dịch tin nhắn',
+      icon: '<path d="M5 8l6 6"/><path d="M4 14l6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="M22 22l-5-10-5 10"/><path d="M14 18h6"/>' },
+    { id: 'markdown', label: 'Markdown', title: 'Markdown & Code',
+      icon: '<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>' },
+    { id: 'quick_parser', label: 'VietQR & Vận đơn', title: 'Nhận diện thông minh',
+      icon: '<rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>' },
+    { id: 'floating_chat', label: 'Chat nổi', title: 'Bong bóng chat nổi',
+      icon: '<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>' },
+    { id: 'profiles', label: 'Tài khoản', title: 'Đa tài khoản',
+      icon: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>' },
+    { id: 'system', label: 'Hệ thống', title: 'Hệ thống & Linux',
+      icon: '<rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>' }
+  ];
 
   function renderDrawerContent() {
     const drawer = document.getElementById('tadaza-drawer');
@@ -3819,82 +4097,44 @@ function updateDynamicThemes(themeCfg) {
     const p = currentConfig.privacy;
     const tr = currentConfig.translate;
 
+    const tabDef = TADAZA_TABS.find(x => x.id === activeTab) || TADAZA_TABS[0];
+
     drawer.innerHTML = `
-      <div class="tadaza-header">
-        <div class="tadaza-title-wrap">
-          <span class="tadaza-badge">LINUX</span>
-          <h2 class="tadaza-title">TADaZa Control Center</h2>
+      <div class="tadaza-sidebar">
+        <div class="tadaza-brand">
+          <div class="tadaza-brand-logo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 11a2 2 0 0 1 2-2h1a2 2 0 0 0 2-2 2 2 0 0 1 4 0 2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v1a2 2 0 0 0 2 2 2 2 0 0 1 0 4 2 2 0 0 0-2 2v1a2 2 0 0 1-2 2h-1a2 2 0 0 0-2 2 2 2 0 0 1-4 0 2 2 0 0 0-2-2H6a2 2 0 0 1-2-2v-1a2 2 0 0 0-2-2 2 2 0 0 1 0-4 2 2 0 0 0 2-2z"/>
+            </svg>
+          </div>
+          <div class="tadaza-brand-text">
+            <span class="tadaza-brand-name">TADaZa</span>
+            <span class="tadaza-brand-sub">Tiện ích Zalo Linux</span>
+          </div>
         </div>
-        <button class="tadaza-close-btn" id="tadaza-close" title="Đóng">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
+        <div class="tadaza-tabs">
+          ${TADAZA_TABS.map(tab => `
+            <button class="tadaza-tab-btn ${activeTab === tab.id ? 'active' : ''}" data-tab="${tab.id}" title="${tab.title}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${tab.icon}</svg>
+              <span>${tab.label}</span>
+            </button>
+          `).join('')}
+        </div>
       </div>
 
-      <div class="tadaza-tabs">
-        <button class="tadaza-tab-btn ${activeTab === 'theme' ? 'active' : ''}" data-tab="theme">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle>
-            <circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle>
-            <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle>
-            <circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle>
-            <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"></path>
-          </svg>
-          <span>Giao diện</span>
-        </button>
-        <button class="tadaza-tab-btn ${activeTab === 'privacy' ? 'active' : ''}" data-tab="privacy">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-          </svg>
-          <span>Riêng tư</span>
-        </button>
-        <button class="tadaza-tab-btn ${activeTab === 'translate' ? 'active' : ''}" data-tab="translate">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M5 8l6 6"></path>
-            <path d="M4 14l6-6 2-3"></path>
-            <path d="M2 5h12"></path>
-            <path d="M7 2h1"></path>
-            <path d="M22 22l-5-10-5 10"></path>
-            <path d="M14 18h6"></path>
-          </svg>
-          <span>Dịch thuật</span>
-        </button>
-        <button class="tadaza-tab-btn ${activeTab === 'markdown' ? 'active' : ''}" data-tab="markdown">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="16 18 22 12 16 6"></polyline>
-            <polyline points="8 6 2 12 8 18"></polyline>
-          </svg>
-          <span>Markdown & Code</span>
-        </button>
-        <button class="tadaza-tab-btn ${activeTab === 'quick_parser' ? 'active' : ''}" data-tab="quick_parser">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="5" width="20" height="14" rx="2"></rect>
-            <line x1="2" y1="10" x2="22" y2="10"></line>
-          </svg>
-          <span>Trích xuất & VietQR</span>
-        </button>
-        <button class="tadaza-tab-btn ${activeTab === 'floating_chat' ? 'active' : ''}" data-tab="floating_chat">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
-            <circle cx="12" cy="12" r="3" fill="#89b4fa" stroke="none"></circle>
-          </svg>
-          <span>Chat Head nổi</span>
-        </button>
-        <button class="tadaza-tab-btn ${activeTab === 'profiles' ? 'active' : ''}" data-tab="profiles">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-            <circle cx="9" cy="7" r="4"></circle>
-            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-          </svg>
-          <span>Đa tài khoản</span>
-        </button>
-      </div>
-
-      <div class="tadaza-content">
-        ${renderTabContent()}
+      <div class="tadaza-main">
+        <div class="tadaza-header">
+          <h2 class="tadaza-title">${tabDef.title}</h2>
+          <button class="tadaza-close-btn" id="tadaza-close" title="Đóng">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <div class="tadaza-content">
+          ${renderTabContent()}
+        </div>
       </div>
     `;
 
@@ -3931,7 +4171,7 @@ function updateDynamicThemes(themeCfg) {
       const themeFps = t.theme_fps || t.hawaiian_fps || 20;
       return `
         <div class="tadaza-section">
-          <h3 class="tadaza-section-title">Chế độ hiển thị (Theme)</h3>
+          <h3 class="tadaza-section-title">Chế độ màu</h3>
           <div class="tadaza-item tadaza-item-col">
             <div class="tadaza-btn-group" id="group-theme-mode">
               <button class="tadaza-btn-choice ${t.mode === 'light' ? 'active' : ''}" data-mode="light">
@@ -3952,7 +4192,7 @@ function updateDynamicThemes(themeCfg) {
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
                 </svg>
-                <span>Tối (Dark)</span>
+                <span>Tối</span>
               </button>
               <button class="tadaza-btn-choice ${t.mode === 'system' ? 'active' : ''}" data-mode="system">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -3963,16 +4203,14 @@ function updateDynamicThemes(themeCfg) {
                 <span>Hệ thống</span>
               </button>
             </div>
-            <div class="tadaza-item-desc">Đồng bộ tự động theo theme tối của hệ điều hành hoặc chọn màu tối chuyên sâu.</div>
           </div>
         </div>
 
         <div class="tadaza-section">
-          <h3 class="tadaza-section-title">Phông chữ & Cỡ chữ</h3>
+          <h3 class="tadaza-section-title">Phông chữ</h3>
           <div class="tadaza-item">
             <div class="tadaza-item-info">
-              <span class="tadaza-item-title">Kiểu phông chữ</span>
-              <span class="tadaza-item-desc">Tối ưu hiển thị tiếng Việt sắc nét</span>
+              <span class="tadaza-item-title">Kiểu chữ</span>
             </div>
             <select class="tadaza-select" id="select-font">
               ${FONT_OPTIONS.map(opt => `<option value="${opt.value}" ${t.font_family === opt.value ? 'selected' : ''}>${opt.label}</option>`).join('')}
@@ -3981,8 +4219,7 @@ function updateDynamicThemes(themeCfg) {
 
           <div class="tadaza-item tadaza-item-col">
             <div class="tadaza-item-info">
-              <span class="tadaza-item-title">Kích thước chữ tin nhắn</span>
-              <span class="tadaza-item-desc">Điều chỉnh từ 12px đến 22px</span>
+              <span class="tadaza-item-title">Cỡ chữ tin nhắn</span>
             </div>
             <div class="tadaza-range-wrap">
               <input type="range" class="tadaza-range" id="range-fontsize" min="12" max="22" value="${t.font_size || 14}">
@@ -3992,16 +4229,16 @@ function updateDynamicThemes(themeCfg) {
         </div>
 
         <div class="tadaza-section">
-          <h3 class="tadaza-section-title">Hình nền cuộc trò chuyện</h3>
+          <h3 class="tadaza-section-title">Hình nền trò chuyện</h3>
           <div class="tadaza-item tadaza-item-col">
-            <div style="display:flex; gap:8px;">
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
               <button class="tadaza-action-btn" id="btn-choose-wallpaper">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
                   <circle cx="8.5" cy="8.5" r="1.5"></circle>
                   <polyline points="21 15 16 10 5 21"></polyline>
                 </svg>
-                <span>Chọn ảnh nền từ máy</span>
+                <span>Chọn ảnh…</span>
               </button>
               ${t.wallpaper ? '<button class="tadaza-action-btn secondary" id="btn-clear-wallpaper">Xóa nền</button>' : ''}
             </div>
@@ -4016,50 +4253,33 @@ function updateDynamicThemes(themeCfg) {
         </div>
 
         <div class="tadaza-section">
-          <h3 class="tadaza-section-title" style="display:flex; align-items:center; gap:8px;">
-            <span>Hệ sinh thái động (Ecosystem Themes)</span>
-            <span style="font-size:10px; padding:2px 7px; border-radius:8px; background:linear-gradient(135deg, #10b981, #0fc3ff); color:#fff; font-weight:700;">ASCII LIVE</span>
+          <h3 class="tadaza-section-title">
+            <span>Nền động</span>
+            <span class="tadaza-pill live">LIVE</span>
           </h3>
-          <div class="tadaza-item-desc" style="margin-bottom:8px;">
-            Mô phỏng hệ sinh thái sống động theo phong cách ASCII Art & kính mờ thủy sinh học.
-          </div>
+          <div class="tadaza-item-desc">Hoạt ảnh ASCII phía sau khung chat, tự giảm FPS khi Zalo không được chọn.</div>
 
           <div class="tadaza-theme-grid" id="tadaza-theme-presets-grid">
-            <div class="tadaza-theme-card ${activePreset === 'hawaiian' ? 'active' : ''}" data-preset="hawaiian">
-              <div class="tadaza-theme-preview hawaiian">🏝️</div>
-              <div class="tadaza-theme-card-title">
-                <span>Hawaiian Lagoon</span>
-                <span class="tadaza-theme-card-tag">SAN HÔ</span>
+            ${[
+              ['hawaiian', '🏝️', 'Hawaiian Lagoon', 'Đại dương'],
+              ['koi', '🎏', 'Hồ Sen Cá Koi', 'Hồ sen'],
+              ['galaxy', '🚀', 'Dải Ngân Hà', 'Vũ trụ'],
+              ['arctic', '🐧', 'Bắc Cực', 'Băng tuyết'],
+              ['spring', '🌸', 'Mùa Xuân', 'Hoa đào'],
+              ['none', '⚪', 'Mặc định', 'Tắt']
+            ].map(([id, icon, name, tag]) => `
+              <div class="tadaza-theme-card ${activePreset === id || (id === 'koi' && activePreset === 'rainforest') || (id === 'galaxy' && activePreset === 'bioforest') ? 'active' : ''}" data-preset="${id}">
+                <div class="tadaza-theme-preview ${id}">${icon}</div>
+                <div class="tadaza-theme-card-title">
+                  <span>${name}</span>
+                  <span class="tadaza-theme-card-tag">${tag}</span>
+                </div>
               </div>
-            </div>
-
-            <div class="tadaza-theme-card ${activePreset === 'rainforest' ? 'active' : ''}" data-preset="rainforest">
-              <div class="tadaza-theme-preview rainforest">🌧️</div>
-              <div class="tadaza-theme-card-title">
-                <span>Cơn Mưa Nhiệt Đới</span>
-                <span class="tadaza-theme-card-tag">MƯA RỪNG</span>
-              </div>
-            </div>
-
-            <div class="tadaza-theme-card ${activePreset === 'bioforest' ? 'active' : ''}" data-preset="bioforest">
-              <div class="tadaza-theme-preview bioforest">🌿</div>
-              <div class="tadaza-theme-card-title">
-                <span>Rừng Ánh Sáng Đêm</span>
-                <span class="tadaza-theme-card-tag">PHÁT QUANG</span>
-              </div>
-            </div>
-
-            <div class="tadaza-theme-card ${activePreset === 'none' ? 'active' : ''}" data-preset="none">
-              <div class="tadaza-theme-preview none">⚪</div>
-              <div class="tadaza-theme-card-title">
-                <span>Mặc định</span>
-                <span class="tadaza-theme-card-tag">OFF</span>
-              </div>
-            </div>
+            `).join('')}
           </div>
 
           ${activePreset !== 'none' ? `
-            <div class="tadaza-item tadaza-item-col sub-item" style="margin-top:12px;">
+            <div class="tadaza-item tadaza-item-col">
               <div class="tadaza-item-info">
                 <span class="tadaza-item-title">Độ rõ hình nền</span>
                 <span class="tadaza-item-desc">Độ mờ / trong suốt của hoạt ảnh nền</span>
@@ -4070,16 +4290,16 @@ function updateDynamicThemes(themeCfg) {
               </div>
             </div>
 
-            <div class="tadaza-item sub-item">
+            <div class="tadaza-item">
               <div class="tadaza-item-info">
-                <span class="tadaza-item-title">Tốc độ khung hình (FPS)</span>
-                <span class="tadaza-item-desc">Tự động giảm còn 5 FPS khi chuyển cửa sổ để tiết kiệm pin</span>
+                <span class="tadaza-item-title">Tốc độ khung hình</span>
+                <span class="tadaza-item-desc">Giảm còn 5 FPS khi chuyển sang cửa sổ khác</span>
               </div>
               <select class="tadaza-select" id="select-dynamic-theme-fps">
-                <option value="15" ${themeFps === 15 ? 'selected' : ''}>15 FPS (Cực mát máy)</option>
-                <option value="20" ${themeFps === 20 ? 'selected' : ''}>20 FPS (Khuyên dùng - Chuẩn)</option>
-                <option value="30" ${themeFps === 30 ? 'selected' : ''}>30 FPS (Mượt mà tối đa)</option>
-                <option value="10" ${themeFps === 10 ? 'selected' : ''}>10 FPS (Tiết kiệm pin)</option>
+                <option value="15" ${themeFps === 15 ? 'selected' : ''}>15 FPS (mát máy)</option>
+                <option value="20" ${themeFps === 20 ? 'selected' : ''}>20 FPS (khuyên dùng)</option>
+                <option value="30" ${themeFps === 30 ? 'selected' : ''}>30 FPS (mượt nhất)</option>
+                <option value="10" ${themeFps === 10 ? 'selected' : ''}>10 FPS (tiết kiệm pin)</option>
               </select>
             </div>
           ` : ''}
@@ -4090,7 +4310,7 @@ function updateDynamicThemes(themeCfg) {
     if (activeTab === 'privacy') {
       return `
         <div class="tadaza-section">
-          <h3 class="tadaza-section-title">Chống nhìn trộm (Anti-peeping)</h3>
+          <h3 class="tadaza-section-title">Chống nhìn trộm</h3>
           <div class="tadaza-item">
             <div class="tadaza-item-info">
               <span class="tadaza-item-title">Bật chống nhìn trộm</span>
@@ -4172,12 +4392,17 @@ function updateDynamicThemes(themeCfg) {
           </div>
         </div>
 
+      `;
+    }
+
+    if (activeTab === 'system') {
+      return `
         <div class="tadaza-section">
-          <h3 class="tadaza-section-title">Hệ thống & Cập nhật</h3>
+          <h3 class="tadaza-section-title">Cửa sổ & cập nhật</h3>
           <div class="tadaza-item">
             <div class="tadaza-item-info">
-              <span class="tadaza-item-title">Thu nhỏ xuống khay khi bấm nút đóng (X)</span>
-              <span class="tadaza-item-desc">Mặc định tắt (bấm X để thoát hẳn Zalo). Bật để thu nhỏ xuống khay Tray.</span>
+              <span class="tadaza-item-title">Thu nhỏ xuống khay khi đóng</span>
+              <span class="tadaza-item-desc">Bấm X sẽ ẩn Zalo xuống khay hệ thống thay vì thoát hẳn</span>
             </div>
             <label class="tadaza-switch">
               <input type="checkbox" id="toggle-close-to-tray" ${(currentConfig.system && currentConfig.system.close_to_tray) ? 'checked' : ''}>
@@ -4190,25 +4415,22 @@ function updateDynamicThemes(themeCfg) {
               <span class="tadaza-item-title">Kiểm tra cập nhật</span>
               <span class="tadaza-item-desc" id="tadaza-update-status">Kiểm tra phiên bản mới nhất từ GitHub Releases</span>
             </div>
-            <button class="tadaza-action-btn" id="btn-check-update" style="white-space:nowrap; padding:6px 12px; font-size:12px;">
+            <button class="tadaza-action-btn secondary" id="btn-check-update">
               Kiểm tra ngay
             </button>
           </div>
         </div>
 
         <div class="tadaza-section">
-          <h3 class="tadaza-section-title">Linux: Bộ gõ &amp; Hiển thị</h3>
-          <div class="tadaza-item" style="display:block;">
-            <div class="tadaza-item-info">
-              <span class="tadaza-item-title">Tình trạng hệ thống</span>
-              <span class="tadaza-item-desc" id="tadaza-linux-diag" style="white-space:pre-line;">Đang kiểm tra...</span>
-            </div>
+          <h3 class="tadaza-section-title">Bộ gõ & hiển thị</h3>
+          <div class="tadaza-item tadaza-item-col">
+            <ul class="tadaza-diag" id="tadaza-linux-diag"><li class="info"><span class="dot"></span><span>Đang kiểm tra…</span></li></ul>
           </div>
 
           <div class="tadaza-item">
             <div class="tadaza-item-info">
               <span class="tadaza-item-title">Chế độ hiển thị</span>
-              <span class="tadaza-item-desc">X11 (XWayland): gõ tiếng Việt ổn định trên mọi môi trường. Wayland gốc: nét hơn khi scale lẻ, nhưng trên GNOME bộ gõ sẽ không hoạt động (giới hạn của Electron 22).</span>
+              <span class="tadaza-item-desc">X11 gõ tiếng Việt ổn định. Wayland gốc nét hơn nhưng không gõ được tiếng Việt trên GNOME.</span>
             </div>
             <select class="tadaza-select" id="select-display-mode">
               <option value="x11" ${sys.display_mode !== 'wayland' ? 'selected' : ''}>X11 (khuyên dùng)</option>
@@ -4219,32 +4441,32 @@ function updateDynamicThemes(themeCfg) {
           <div class="tadaza-item">
             <div class="tadaza-item-info">
               <span class="tadaza-item-title">Tỉ lệ hiển thị (HiDPI)</span>
-              <span class="tadaza-item-desc">Dùng khi chữ bị mờ hoặc quá nhỏ ở chế độ X11 với màn hình scale lẻ.</span>
+              <span class="tadaza-item-desc">Dùng khi chữ bị mờ hoặc quá nhỏ trên màn hình scale lẻ</span>
             </div>
             <select class="tadaza-select" id="select-scale-factor">
               ${[0, 1, 1.25, 1.5, 1.75, 2].map(v => `<option value="${v}" ${Number(sys.scale_factor || 0) === v ? 'selected' : ''}>${v === 0 ? 'Tự động' : Math.round(v * 100) + '%'}</option>`).join('')}
             </select>
           </div>
 
-          <div class="tadaza-item" id="tadaza-relaunch-row" style="display:none;">
-            <div class="tadaza-item-info">
-              <span class="tadaza-item-title">Cần khởi động lại</span>
-              <span class="tadaza-item-desc">Thay đổi chế độ hiển thị / tỉ lệ có hiệu lực sau khi mở lại Zalo.</span>
-            </div>
-            <button class="tadaza-action-btn" id="btn-relaunch-zalo" style="white-space:nowrap; padding:6px 12px; font-size:12px;">
-              Khởi động lại
-            </button>
-          </div>
 
           <div class="tadaza-item">
             <div class="tadaza-item-info">
               <span class="tadaza-item-title">Số tin chưa đọc trên Dock &amp; khay</span>
-              <span class="tadaza-item-desc">Hiện số đỏ trên biểu tượng Zalo ở Ubuntu Dock / Dash to Dock / KDE Plasma và ở khay hệ thống.</span>
+              <span class="tadaza-item-desc">Ubuntu Dock, Dash to Dock, KDE Plasma và khay hệ thống</span>
             </div>
             <label class="tadaza-switch">
               <input type="checkbox" id="toggle-unread-badge" ${sys.unread_badge !== false ? 'checked' : ''}>
               <span class="tadaza-slider"></span>
             </label>
+          </div>
+          <div class="tadaza-item" id="tadaza-relaunch-row" hidden>
+            <div class="tadaza-item-info">
+              <span class="tadaza-item-title">Cần khởi động lại</span>
+              <span class="tadaza-item-desc">Thay đổi hiển thị có hiệu lực sau khi mở lại Zalo</span>
+            </div>
+            <button class="tadaza-action-btn" id="btn-relaunch-zalo" >
+              Khởi động lại
+            </button>
           </div>
         </div>
       `;
@@ -4253,7 +4475,7 @@ function updateDynamicThemes(themeCfg) {
     if (activeTab === 'translate') {
       return `
         <div class="tadaza-section">
-          <h3 class="tadaza-section-title">Dịch nhanh tin nhắn tại chỗ</h3>
+          <h3 class="tadaza-section-title">Dịch tại chỗ</h3>
           <div class="tadaza-item">
             <div class="tadaza-item-info">
               <span class="tadaza-item-title">Bật tiện ích dịch nhanh</span>
@@ -4275,13 +4497,16 @@ function updateDynamicThemes(themeCfg) {
             </select>
           </div>
 
+        </div>
+
+        <div class="tadaza-section">
+          <h3 class="tadaza-section-title">Cách dùng</h3>
           <div class="tadaza-item tadaza-item-col">
-            <span class="tadaza-item-title">Cách sử dụng:</span>
-            <div class="tadaza-item-desc">
-              1. Rê chuột vào bất kỳ tin nhắn nào trong cuộc trò chuyện.<br>
-              2. Nhấn vào nút dịch thuật xuất hiện ở góc tin nhắn.<br>
-              3. Bản dịch sẽ xuất hiện trực tiếp ngay dưới tin nhắn.
-            </div>
+            <ol class="tadaza-steps tadaza-item-desc">
+              <li>Rê chuột vào tin nhắn bất kỳ</li>
+              <li>Bấm nút dịch ở góc tin nhắn</li>
+              <li>Bản dịch hiện ngay bên dưới</li>
+            </ol>
           </div>
         </div>
       `;
@@ -4291,10 +4516,10 @@ function updateDynamicThemes(themeCfg) {
       const m = currentConfig.markdown || {};
       return `
         <div class="tadaza-section">
-          <h3 class="tadaza-section-title">Hỗ trợ Markdown & Mã nguồn (Code)</h3>
+          <h3 class="tadaza-section-title">Hiển thị</h3>
           <div class="tadaza-item">
             <div class="tadaza-item-info">
-              <span class="tadaza-item-title">Bật hiển thị Code & Markdown</span>
+              <span class="tadaza-item-title">Hiển thị Markdown & code</span>
               <span class="tadaza-item-desc">Tự động nhận diện block code \`\`\` và hiển thị dạng thẻ đẹp mắt</span>
             </div>
             <label class="tadaza-switch">
@@ -4305,7 +4530,7 @@ function updateDynamicThemes(themeCfg) {
 
           <div class="tadaza-item sub-item ${!m.enabled ? 'tadaza-item-disabled' : ''}">
             <div class="tadaza-item-info">
-              <span class="tadaza-item-title">Tô màu cú pháp (Syntax Highlight)</span>
+              <span class="tadaza-item-title">Tô màu cú pháp</span>
               <span class="tadaza-item-desc">Tô màu từ khóa, chuỗi, hàm cho JS, Python, Go, Rust, C++...</span>
             </div>
             <label class="tadaza-switch">
@@ -4316,7 +4541,7 @@ function updateDynamicThemes(themeCfg) {
 
           <div class="tadaza-item sub-item ${!m.enabled ? 'tadaza-item-disabled' : ''}">
             <div class="tadaza-item-info">
-              <span class="tadaza-item-title">Định dạng chữ nội dòng (Inline)</span>
+              <span class="tadaza-item-title">Định dạng trong dòng</span>
               <span class="tadaza-item-desc">Hỗ trợ \`code\`, **in đậm**, *nghiêng*, ~~gạch ngang~~</span>
             </div>
             <label class="tadaza-switch">
@@ -4327,17 +4552,17 @@ function updateDynamicThemes(themeCfg) {
         </div>
 
         <div class="tadaza-section">
-          <h3 class="tadaza-section-title">Code Studio nhanh</h3>
+          <h3 class="tadaza-section-title">Code Studio</h3>
           <div class="tadaza-item tadaza-item-col">
-            <button class="tadaza-action-btn" id="btn-open-code-studio" style="width: 100%; justify-content: center; height: 38px;">
+            <button class="tadaza-action-btn block" id="btn-open-code-studio">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="16 18 22 12 16 6"></polyline>
                 <polyline points="8 6 2 12 8 18"></polyline>
               </svg>
-              <span style="font-weight: 600;">Mở Code & Markdown Studio (Ctrl+Shift+M)</span>
+              <span>Mở Code Studio</span><span style="opacity:.7; font-weight:500;">Ctrl+Shift+M</span>
             </button>
-            <div class="tadaza-item-desc" style="margin-top: 8px;">
-              Tạo ảnh snippet phong cách macOS (Carbon) độ nét cao Retina 2x để gửi ngay vào Zalo hoặc chèn mã vào ô chat.
+            <div class="tadaza-item-desc">
+              Tạo ảnh code đẹp (độ nét 2x) để gửi vào Zalo, hoặc chèn code vào ô chat.
             </div>
           </div>
         </div>
@@ -4348,10 +4573,10 @@ function updateDynamicThemes(themeCfg) {
       const qp = currentConfig.quick_parser || {};
       return `
         <div class="tadaza-section">
-          <h3 class="tadaza-section-title">Nhận diện & Trích xuất thông minh</h3>
+          <h3 class="tadaza-section-title">Tự động nhận diện</h3>
           <div class="tadaza-item">
             <div class="tadaza-item-info">
-              <span class="tadaza-item-title">Bật Quick Parser</span>
+              <span class="tadaza-item-title">Bật nhận diện thông minh</span>
               <span class="tadaza-item-desc">Tự động nhận diện STK ngân hàng, mã vận đơn, số điện thoại</span>
             </div>
             <label class="tadaza-switch">
@@ -4362,8 +4587,8 @@ function updateDynamicThemes(themeCfg) {
 
           <div class="tadaza-item sub-item ${!qp.enabled ? 'tadaza-item-disabled' : ''}">
             <div class="tadaza-item-info">
-              <span class="tadaza-item-title">Trích xuất STK & Tạo VietQR</span>
-              <span class="tadaza-item-desc">Hiện nút tạo mã QR chuẩn VietQR (quét chuyển tiền ngay)</span>
+              <span class="tadaza-item-title">Số tài khoản → VietQR</span>
+              <span class="tadaza-item-desc">Tạo mã QR chuyển khoản từ STK trong tin nhắn</span>
             </div>
             <label class="tadaza-switch">
               <input type="checkbox" id="toggle-qp-bank" ${qp.enabled && qp.auto_detect_bank ? 'checked' : ''} ${!qp.enabled ? 'disabled' : ''}>
@@ -4373,8 +4598,8 @@ function updateDynamicThemes(themeCfg) {
 
           <div class="tadaza-item sub-item ${!qp.enabled ? 'tadaza-item-disabled' : ''}">
             <div class="tadaza-item-info">
-              <span class="tadaza-item-title">Tra cứu mã vận đơn</span>
-              <span class="tadaza-item-desc">Tự động nhận diện đơn Shopee Express (SPX), GHTK, ViettelPost, J&T</span>
+              <span class="tadaza-item-title">Mã vận đơn</span>
+              <span class="tadaza-item-desc">SPX, GHTK, ViettelPost, J&T — bấm để tra cứu</span>
             </div>
             <label class="tadaza-switch">
               <input type="checkbox" id="toggle-qp-tracking" ${qp.enabled && qp.auto_detect_tracking ? 'checked' : ''} ${!qp.enabled ? 'disabled' : ''}>
@@ -4384,8 +4609,8 @@ function updateDynamicThemes(themeCfg) {
 
           <div class="tadaza-item sub-item ${!qp.enabled ? 'tadaza-item-disabled' : ''}">
             <div class="tadaza-item-info">
-              <span class="tadaza-item-title">Nhận diện Số điện thoại</span>
-              <span class="tadaza-item-desc">Hiện nút bấm 1-click Copy số điện thoại nhanh</span>
+              <span class="tadaza-item-title">Số điện thoại</span>
+              <span class="tadaza-item-desc">Hiện nút sao chép nhanh</span>
             </div>
             <label class="tadaza-switch">
               <input type="checkbox" id="toggle-qp-phone" ${qp.enabled && qp.auto_detect_phone ? 'checked' : ''} ${!qp.enabled ? 'disabled' : ''}>
@@ -4411,11 +4636,11 @@ function updateDynamicThemes(themeCfg) {
       const conv = getActiveConversation();
       return `
         <div class="tadaza-section">
-          <h3 class="tadaza-section-title">Bong bóng chat rời (Desktop Floating PiP)</h3>
+          <h3 class="tadaza-section-title">Bong bóng chat</h3>
           <div class="tadaza-item">
             <div class="tadaza-item-info">
-              <span class="tadaza-item-title">Bật Bong bóng chat rời</span>
-              <span class="tadaza-item-desc">Hiện biểu tượng ghim Chat Head trên thanh tiêu đề cuộc trò chuyện</span>
+              <span class="tadaza-item-title">Bật bong bóng chat nổi</span>
+              <span class="tadaza-item-desc">Thêm nút ghim trên thanh tiêu đề cuộc trò chuyện</span>
             </div>
             <label class="tadaza-switch">
               <input type="checkbox" id="toggle-fc-enabled" ${fc.enabled ? 'checked' : ''}>
@@ -4425,8 +4650,8 @@ function updateDynamicThemes(themeCfg) {
 
           <div class="tadaza-item sub-item ${!fc.enabled ? 'tadaza-item-disabled' : ''}">
             <div class="tadaza-item-info">
-              <span class="tadaza-item-title">Tự động thu nhỏ khi click ra ngoài</span>
-              <span class="tadaza-item-desc">Tự động thu về bong bóng tròn nhỏ khi chuyển sang ứng dụng khác</span>
+              <span class="tadaza-item-title">Tự thu nhỏ khi rời cửa sổ</span>
+              <span class="tadaza-item-desc">Thu về bong bóng tròn khi chuyển sang ứng dụng khác</span>
             </div>
             <label class="tadaza-switch">
               <input type="checkbox" id="toggle-fc-auto-collapse" ${fc.enabled && fc.auto_collapse_blur ? 'checked' : ''} ${!fc.enabled ? 'disabled' : ''}>
@@ -4438,15 +4663,15 @@ function updateDynamicThemes(themeCfg) {
         <div class="tadaza-section">
           <h3 class="tadaza-section-title">Thao tác nhanh</h3>
           <div class="tadaza-item tadaza-item-col">
-            <button class="tadaza-action-btn" id="btn-pin-current-chat" style="width: 100%; justify-content: center; height: 38px;">
+            <button class="tadaza-action-btn block" id="btn-pin-current-chat">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
                 <circle cx="12" cy="12" r="3" fill="#89b4fa" stroke="none"></circle>
               </svg>
-              <span style="font-weight: 600;">Ghim cuộc trò chuyện hiện tại ra Bong bóng</span>
+              <span>Ghim cuộc trò chuyện hiện tại</span>
             </button>
-            <div class="tadaza-item-desc" style="margin-top: 8px;">
-              ${conv ? `Đang mở: <b>${escapeHtml(conv.name)}</b>` : 'Hãy mở một cuộc trò chuyện để ghim nhanh ra góc màn hình desktop!'}
+            <div class="tadaza-item-desc">
+              ${conv ? `Đang mở: <b>${escapeHtml(conv.name)}</b>` : 'Mở một cuộc trò chuyện để ghim ra màn hình.'}
             </div>
           </div>
         </div>
@@ -4460,36 +4685,40 @@ function updateDynamicThemes(themeCfg) {
 
       return `
         <div class="tadaza-section">
-          <h3 class="tadaza-section-title">Hệ thống Đa tài khoản (Profiles)</h3>
+          <h3 class="tadaza-section-title">Đang dùng</h3>
+          <div class="tadaza-item">
+            <div class="tadaza-item-info">
+              <span class="tadaza-item-title">${escapeHtml(curName)}</span>
+              <span class="tadaza-item-desc">Mỗi tài khoản có dữ liệu và phiên đăng nhập riêng</span>
+            </div>
+            <span class="tadaza-pill success"><span class="profile-dot"></span>Đang chạy</span>
+          </div>
           <div class="tadaza-item tadaza-item-col">
-            <div class="tadaza-item-desc" style="line-height: 1.6;">
-              Lưu trữ nhiều phiên đăng nhập Zalo độc lập (Tài khoản cá nhân, Tài khoản bán hàng, Công việc) ngay trên ứng dụng máy tính, không cần mở Zalo Web trên trình duyệt.
-            </div>
-            <div style="margin-top: 10px; padding: 10px 14px; border-radius: 10px; background: rgba(0, 104, 255, 0.08); border: 1px solid rgba(0, 104, 255, 0.2); display: flex; align-items: center; justify-content: space-between;">
-              <div style="font-size: 13px;">Tài khoản hiện tại: <b style="color: #0068ff;">${escapeHtml(curName)}</b></div>
-              <span class="tadaza-profile-badge-active"><span class="profile-dot"></span> Đang chạy</span>
-            </div>
-            <button class="tadaza-action-btn" id="btn-open-profiles-modal-from-drawer" style="width: 100%; justify-content: center; height: 40px; margin-top: 12px; font-weight: 600; background: #0068ff; color: white;">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <button class="tadaza-action-btn block" id="btn-open-profiles-modal-from-drawer">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                 <circle cx="9" cy="7" r="4"></circle>
                 <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
                 <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
               </svg>
-              <span>Mở Bảng Quản lý Đa tài khoản</span>
+              <span>Quản lý tài khoản</span><span style="opacity:.7; font-weight:500;">Ctrl+Shift+P</span>
             </button>
           </div>
         </div>
 
         <div class="tadaza-section">
-          <h3 class="tadaza-section-title">Tính năng nổi bật</h3>
-          <div class="tadaza-item tadaza-item-col">
-            <span class="tadaza-item-title">⚡ 1. Chuyển đổi 1-Click (Quick Switch)</span>
-            <div class="tadaza-item-desc">Hoán đổi phiên làm việc và khởi động lại vào tài khoản mới chỉ trong 1-2 giây, dữ liệu tin nhắn tách biệt tuyệt đối an toàn.</div>
+          <h3 class="tadaza-section-title">Có thể làm gì</h3>
+          <div class="tadaza-item">
+            <div class="tadaza-item-info">
+              <span class="tadaza-item-title">Chuyển tài khoản</span>
+              <span class="tadaza-item-desc">Khởi động lại vào tài khoản khác trong vài giây, tin nhắn tách biệt</span>
+            </div>
           </div>
-          <div class="tadaza-item tadaza-item-col" style="margin-top: 8px;">
-            <span class="tadaza-item-title">🚀 2. Mở song song (Dual Windows)</span>
-            <div class="tadaza-item-desc">Mở đồng thời 2 hoặc nhiều cửa sổ Zalo cạnh nhau trên màn hình để vừa chat cá nhân vừa trả lời khách hàng cùng lúc!</div>
+          <div class="tadaza-item">
+            <div class="tadaza-item-info">
+              <span class="tadaza-item-title">Mở song song</span>
+              <span class="tadaza-item-desc">Chạy nhiều cửa sổ Zalo cùng lúc, mỗi cửa sổ một tài khoản</span>
+            </div>
           </div>
         </div>
       `;
@@ -4717,6 +4946,9 @@ function updateDynamicThemes(themeCfg) {
         });
       }
 
+    }
+
+    if (activeTab === 'system') {
       const closeToTray = drawer.querySelector('#toggle-close-to-tray');
       if (closeToTray) {
         closeToTray.addEventListener('change', () => {
@@ -4746,29 +4978,29 @@ function updateDynamicThemes(themeCfg) {
       // Linux: input method / display backend / badge
       const diagEl = drawer.querySelector('#tadaza-linux-diag');
       if (diagEl && window.electronAPI && window.electronAPI.invoke) {
+        const row = (cls, text) => `<li class="${cls}"><span class="dot"></span><span>${escapeHtml(text)}</span></li>`;
         window.electronAPI.invoke('tadaza:linux-diagnostics').then(d => {
           if (!d || d.error) {
-            diagEl.textContent = 'Không đọc được thông tin hệ thống' + (d && d.error ? ': ' + d.error : '');
+            diagEl.innerHTML = row('warn', 'Không đọc được thông tin hệ thống' + (d && d.error ? ': ' + d.error : ''));
             return;
           }
           const imName = d.inputMethod === 'fcitx' ? 'Fcitx5' : d.inputMethod === 'ibus' ? 'IBus' : null;
-          const imLine = imName
-            ? `${d.gtkImModuleFound === false ? '⚠️' : '✅'} Bộ gõ: ${imName} (GTK_IM_MODULE=${d.gtkImModule || 'mặc định'}${d.gtkImModuleSource === 'auto' ? ', tự cấu hình' : ''})`
-            : '⚠️ Không thấy ibus/fcitx5 đang chạy — hãy cài ibus-bamboo, ibus-unikey hoặc fcitx5-unikey';
-          const lines = [
-            `🖥️ Phiên: ${d.session === 'wayland' ? 'Wayland' : 'X11'}${d.desktop ? ' · ' + d.desktop : ''} → Zalo đang chạy ${d.displayMode === 'wayland' ? 'Wayland gốc' : 'X11/XWayland'}`,
-            imLine,
-            `${d.pipewireCapture ? '✅ Chia sẻ màn hình qua PipeWire (xdg-desktop-portal)' : '✅ Chia sẻ màn hình qua X11'}`,
-            `🔴 Badge: ${d.desktopFileId || '?'}${d.scaleFactor ? ' · Tỉ lệ ép ' + Math.round(d.scaleFactor * 100) + '%' : ''}`
-          ].concat((d.warnings || []).map(w => '⚠️ ' + w));
-          diagEl.textContent = lines.join('\n');
+          const items = [
+            row('ok', `Phiên ${d.session === 'wayland' ? 'Wayland' : 'X11'}${d.desktop ? ' (' + d.desktop + ')' : ''} — Zalo chạy ${d.displayMode === 'wayland' ? 'Wayland gốc' : 'X11'}`),
+            imName
+              ? row(d.gtkImModuleFound === false ? 'warn' : 'ok', `Bộ gõ ${imName} — GTK_IM_MODULE=${d.gtkImModule || 'mặc định'}`)
+              : row('warn', 'Chưa thấy bộ gõ — cài ibus-bamboo, ibus-unikey hoặc fcitx5-unikey'),
+            row('ok', d.pipewireCapture ? 'Chia sẻ màn hình qua PipeWire' : 'Chia sẻ màn hình qua X11'),
+            row('info', `Badge dock: ${d.desktopFileId || '?'}${d.scaleFactor ? ' · tỉ lệ ' + Math.round(d.scaleFactor * 100) + '%' : ''}`)
+          ].concat((d.warnings || []).map(w => row('warn', w)));
+          diagEl.innerHTML = items.join('');
         }).catch(e => {
-          diagEl.textContent = 'Không đọc được thông tin hệ thống: ' + e.message;
+          diagEl.innerHTML = row('warn', 'Không đọc được thông tin hệ thống: ' + e.message);
         });
       }
 
       const relaunchRow = drawer.querySelector('#tadaza-relaunch-row');
-      const showRelaunch = () => { if (relaunchRow) relaunchRow.style.display = ''; };
+      const showRelaunch = () => { if (relaunchRow) relaunchRow.hidden = false; };
 
       const displayMode = drawer.querySelector('#select-display-mode');
       if (displayMode) {

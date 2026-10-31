@@ -5,6 +5,23 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@500&family=Manrope:wght@300;500;600;700&display=swap');
 
+/* Shared palette for every ASCII scene theme. Defaults = Hawaiian Lagoon;
+   other scenes override these in 02e_ascii_scenes.css. */
+body.tadaza-ascii-scene {
+  --sc-accent: #0fc3ff;
+  --sc-accent-rgb: 15, 195, 255;
+  --sc-accent2-rgb: 130, 220, 240;
+  --sc-accent-deep-rgb: 16, 140, 180;
+  --sc-accent-deeper-rgb: 10, 105, 138;
+  --sc-glass-rgb: 6, 30, 42;
+  --sc-glass-light-rgb: 10, 44, 58;
+  --sc-glass-deep-rgb: 3, 16, 25;
+  --sc-text: #e2f1f8;
+  --sc-text-2: #c4e9f5;
+  --sc-text-3: #729ba9;
+  --sc-bg: #04222c;
+}
+
 /* Container for the live animated Hawaiian Lagoon Canvas */
 #tadaza-hawaiian-container {
   position: fixed;
@@ -14,7 +31,7 @@
   overflow: hidden;
   pointer-events: none;
   z-index: 0;
-  background: #04222c;
+  background: var(--sc-bg);
   display: none;
   opacity: 0.85;
   transition: opacity 0.4s ease;
@@ -34,10 +51,10 @@
    0. Global Chromium Focus / Active Outline & Underline Reset
    Eliminates blue/black focus rings, outlines and underlines on click
    -------------------------------------------------------------------------- */
-body.tadaza-theme-hawaiian *:focus,
-body.tadaza-theme-hawaiian *:focus-visible,
-body.tadaza-theme-hawaiian *:active,
-body.tadaza-theme-hawaiian *:focus-within {
+body.tadaza-ascii-scene *:focus,
+body.tadaza-ascii-scene *:focus-visible,
+body.tadaza-ascii-scene *:active,
+body.tadaza-ascii-scene *:focus-within {
   outline: none !important;
   outline-color: transparent !important;
   outline-style: none !important;
@@ -45,22 +62,22 @@ body.tadaza-theme-hawaiian *:focus-within {
   -webkit-focus-ring-color: transparent !important;
 }
 
-body.tadaza-theme-hawaiian .conv-item:focus,
-body.tadaza-theme-hawaiian .conv-item:active,
-body.tadaza-theme-hawaiian .conv-item:focus-visible,
-body.tadaza-theme-hawaiian [class*="conv-item"]:focus,
-body.tadaza-theme-hawaiian [class*="conv-item"]:active,
-body.tadaza-theme-hawaiian [class*="conv-item"]:focus-visible,
-body.tadaza-theme-hawaiian #input_chat:focus,
-body.tadaza-theme-hawaiian #input_chat:active,
-body.tadaza-theme-hawaiian .rich-input:focus,
-body.tadaza-theme-hawaiian .rich-input:active,
-body.tadaza-theme-hawaiian [id^="richInput"]:focus,
-body.tadaza-theme-hawaiian [id^="richInput"]:active,
-body.tadaza-theme-hawaiian .chat-input__content:focus,
-body.tadaza-theme-hawaiian .chat-input__content:focus-within,
-body.tadaza-theme-hawaiian #chatView:focus,
-body.tadaza-theme-hawaiian #messageViewContainer:focus {
+body.tadaza-ascii-scene .conv-item:focus,
+body.tadaza-ascii-scene .conv-item:active,
+body.tadaza-ascii-scene .conv-item:focus-visible,
+body.tadaza-ascii-scene [class*="conv-item"]:focus,
+body.tadaza-ascii-scene [class*="conv-item"]:active,
+body.tadaza-ascii-scene [class*="conv-item"]:focus-visible,
+body.tadaza-ascii-scene #input_chat:focus,
+body.tadaza-ascii-scene #input_chat:active,
+body.tadaza-ascii-scene .rich-input:focus,
+body.tadaza-ascii-scene .rich-input:active,
+body.tadaza-ascii-scene [id^="richInput"]:focus,
+body.tadaza-ascii-scene [id^="richInput"]:active,
+body.tadaza-ascii-scene .chat-input__content:focus,
+body.tadaza-ascii-scene .chat-input__content:focus-within,
+body.tadaza-ascii-scene #chatView:focus,
+body.tadaza-ascii-scene #messageViewContainer:focus {
   outline: none !important;
   outline-offset: 0 !important;
   box-shadow: none !important;
@@ -70,44 +87,44 @@ body.tadaza-theme-hawaiian #messageViewContainer:focus {
 /* --------------------------------------------------------------------------
    1. Unified Theme Tokens (Synchronized across Light & Dark Modes)
    -------------------------------------------------------------------------- */
-body.tadaza-theme-hawaiian,
+body.tadaza-ascii-scene,
 body.dark.tadaza-theme-hawaiian,
 body.tadaza-deep-dark.tadaza-theme-hawaiian {
-  background-color: #04222c !important;
+  background-color: var(--sc-bg) !important;
   color: #ffffff !important;
 
   /* Surfaces & Layers - Unified Frosted Deep Teal Palette */
-  --surface-background: rgba(6, 30, 42, 0.65) !important;
-  --surface-background-subtle: rgba(4, 24, 34, 0.75) !important;
-  --surface-background-overlay: rgba(4, 20, 28, 0.85) !important;
-  --surface-alt: rgba(8, 38, 52, 0.55) !important;
-  --layer-background: rgba(6, 30, 42, 0.65) !important;
-  --layer-background-subtle: rgba(4, 24, 34, 0.75) !important;
+  --surface-background: rgba(var(--sc-glass-rgb), 0.65) !important;
+  --surface-background-subtle: rgba(var(--sc-glass-rgb), 0.75) !important;
+  --surface-background-overlay: rgba(var(--sc-glass-rgb), 0.85) !important;
+  --surface-alt: rgba(var(--sc-glass-rgb), 0.55) !important;
+  --layer-background: rgba(var(--sc-glass-rgb), 0.65) !important;
+  --layer-background-subtle: rgba(var(--sc-glass-rgb), 0.75) !important;
   --layer-background-hover: rgba(255, 255, 255, 0.1) !important;
-  --layer-background-selected: rgba(15, 195, 255, 0.18) !important;
-  --layer-background-navbar-normal: rgba(4, 24, 34, 0.8) !important;
-  --layer-background-navbar-sublevel-normal: rgba(6, 30, 42, 0.65) !important;
-  --layer-background-leftmenu: rgba(4, 24, 34, 0.8) !important;
+  --layer-background-selected: rgba(var(--sc-accent-rgb), 0.18) !important;
+  --layer-background-navbar-normal: rgba(var(--sc-glass-rgb), 0.8) !important;
+  --layer-background-navbar-sublevel-normal: rgba(var(--sc-glass-rgb), 0.65) !important;
+  --layer-background-leftmenu: rgba(var(--sc-glass-rgb), 0.8) !important;
   --bg-default: transparent !important;
-  --title-bar: rgba(4, 22, 32, 0.96) !important;
+  --title-bar: rgba(var(--sc-glass-rgb), 0.96) !important;
 
   /* Zalo Message Bubble Variables - Eliminate white background boxes */
-  --white-message: rgba(10, 44, 58, 0.9) !important;
-  --white-message-selected: rgba(15, 195, 255, 0.28) !important;
-  --blue-message: linear-gradient(135deg, rgba(16, 140, 180, 0.92), rgba(10, 105, 138, 0.96)) !important;
-  --blue-message-selected: rgba(15, 195, 255, 0.35) !important;
-  --layer-accent-message: rgba(15, 195, 255, 0.2) !important;
+  --white-message: rgba(var(--sc-glass-light-rgb), 0.9) !important;
+  --white-message-selected: rgba(var(--sc-accent-rgb), 0.28) !important;
+  --blue-message: linear-gradient(135deg, rgba(var(--sc-accent-deep-rgb), 0.92), rgba(var(--sc-accent-deeper-rgb), 0.96)) !important;
+  --blue-message-selected: rgba(var(--sc-accent-rgb), 0.35) !important;
+  --layer-accent-message: rgba(var(--sc-accent-rgb), 0.2) !important;
   --self-bubble-chat-shadow: 0 4px 18px rgba(0, 0, 0, 0.35) !important;
   --shadow-bubble: 0 4px 18px rgba(0, 0, 0, 0.35) !important;
 
   /* Button Variables - Prevent white-on-white button invisibility */
   --button-tertiary-neutral-normal: rgba(255, 255, 255, 0.12) !important;
-  --button-tertiary-neutral-hover: rgba(15, 195, 255, 0.25) !important;
-  --button-tertiary-neutral-pressed: rgba(15, 195, 255, 0.35) !important;
+  --button-tertiary-neutral-hover: rgba(var(--sc-accent-rgb), 0.25) !important;
+  --button-tertiary-neutral-pressed: rgba(var(--sc-accent-rgb), 0.35) !important;
   --button-tertiary-neutral-text: #ffffff !important;
-  --button-secondary-neutral-normal: rgba(15, 195, 255, 0.18) !important;
-  --button-secondary-neutral-hover: rgba(15, 195, 255, 0.3) !important;
-  --button-secondary-neutral-pressed: rgba(15, 195, 255, 0.42) !important;
+  --button-secondary-neutral-normal: rgba(var(--sc-accent-rgb), 0.18) !important;
+  --button-secondary-neutral-hover: rgba(var(--sc-accent-rgb), 0.3) !important;
+  --button-secondary-neutral-pressed: rgba(var(--sc-accent-rgb), 0.42) !important;
   --button-secondary-neutral-text: #ffffff !important;
   --button-ghost-neutral-normal: transparent !important;
   --button-ghost-neutral-hover: rgba(255, 255, 255, 0.1) !important;
@@ -115,14 +132,14 @@ body.tadaza-deep-dark.tadaza-theme-hawaiian {
 
   /* Text Contrast - Crisp White & Soft Lagoon Pastel */
   --text-primary: #ffffff !important;
-  --text-secondary: #9fc7d5 !important;
-  --text-placeholder: #729ba9 !important;
-  --text-disabled: #527a8a !important;
+  --text-secondary: var(--sc-text-2) !important;
+  --text-placeholder: var(--sc-text-3) !important;
+  --text-disabled: var(--sc-text-3) !important;
   --text-on-color: #ffffff !important;
 
   /* Icons */
-  --icon-primary: #e6f7fa !important;
-  --icon-secondary: #8ec2d2 !important;
+  --icon-primary: var(--sc-text) !important;
+  --icon-secondary: var(--sc-text-2) !important;
 
   /* Borders & Dividers */
   --divider: rgba(255, 255, 255, 0.08) !important;
@@ -139,14 +156,14 @@ body.tadaza-deep-dark.tadaza-theme-hawaiian {
 /* --------------------------------------------------------------------------
    2. App Roots & Structural Layouts (Transparent Base)
    -------------------------------------------------------------------------- */
-body.tadaza-theme-hawaiian #app,
-body.tadaza-theme-hawaiian #app-layout,
-body.tadaza-theme-hawaiian #app-page,
-body.tadaza-theme-hawaiian #container,
-body.tadaza-theme-hawaiian .app-container,
-body.tadaza-theme-hawaiian .main-page,
-body.tadaza-theme-hawaiian .page-container,
-body.tadaza-theme-hawaiian main {
+body.tadaza-ascii-scene #app,
+body.tadaza-ascii-scene #app-layout,
+body.tadaza-ascii-scene #app-page,
+body.tadaza-ascii-scene #container,
+body.tadaza-ascii-scene .app-container,
+body.tadaza-ascii-scene .main-page,
+body.tadaza-ascii-scene .page-container,
+body.tadaza-ascii-scene main {
   background: transparent !important;
   background-color: transparent !important;
 }
@@ -155,36 +172,36 @@ body.tadaza-theme-hawaiian main {
    3. Chat Center Area (Pure Transparent Viewport)
    Allows the animated Hawaiian Lagoon Live Canvas to shine through 100%
    -------------------------------------------------------------------------- */
-body.tadaza-theme-hawaiian #chatViewContainer {
+body.tadaza-ascii-scene #chatViewContainer {
   background: transparent !important;
   background-color: transparent !important;
 }
 
-body.tadaza-theme-hawaiian #chatView,
-body.tadaza-theme-hawaiian #messageViewContainer,
-body.tadaza-theme-hawaiian #messageViewScroll,
-body.tadaza-theme-hawaiian #messageView,
-body.tadaza-theme-hawaiian #innerScrollContainerId,
-body.tadaza-theme-hawaiian .main__center,
-body.tadaza-theme-hawaiian .chat-content,
-body.tadaza-theme-hawaiian .chat-content-audit,
-body.tadaza-theme-hawaiian .chat-box-list,
-body.tadaza-theme-hawaiian .chat-list-scroll,
-body.tadaza-theme-hawaiian .chat-list,
-body.tadaza-theme-hawaiian .chat-item-spacing,
-body.tadaza-theme-hawaiian .chat-box,
-body.tadaza-theme-hawaiian .main-chat,
-body.tadaza-theme-hawaiian .chat-area,
-body.tadaza-theme-hawaiian .chat-view,
-body.tadaza-theme-hawaiian .message-view,
-body.tadaza-theme-hawaiian .message-view__scroll,
-body.tadaza-theme-hawaiian .chat-conversation-history,
-body.tadaza-theme-hawaiian .chat-message-list,
-body.tadaza-theme-hawaiian .messages-container,
-body.tadaza-theme-hawaiian .new-messages-container,
-body.tadaza-theme-hawaiian .conversation-viewport,
-body.tadaza-theme-hawaiian article,
-body.tadaza-theme-hawaiian article#chatView {
+body.tadaza-ascii-scene #chatView,
+body.tadaza-ascii-scene #messageViewContainer,
+body.tadaza-ascii-scene #messageViewScroll,
+body.tadaza-ascii-scene #messageView,
+body.tadaza-ascii-scene #innerScrollContainerId,
+body.tadaza-ascii-scene .main__center,
+body.tadaza-ascii-scene .chat-content,
+body.tadaza-ascii-scene .chat-content-audit,
+body.tadaza-ascii-scene .chat-box-list,
+body.tadaza-ascii-scene .chat-list-scroll,
+body.tadaza-ascii-scene .chat-list,
+body.tadaza-ascii-scene .chat-item-spacing,
+body.tadaza-ascii-scene .chat-box,
+body.tadaza-ascii-scene .main-chat,
+body.tadaza-ascii-scene .chat-area,
+body.tadaza-ascii-scene .chat-view,
+body.tadaza-ascii-scene .message-view,
+body.tadaza-ascii-scene .message-view__scroll,
+body.tadaza-ascii-scene .chat-conversation-history,
+body.tadaza-ascii-scene .chat-message-list,
+body.tadaza-ascii-scene .messages-container,
+body.tadaza-ascii-scene .new-messages-container,
+body.tadaza-ascii-scene .conversation-viewport,
+body.tadaza-ascii-scene article,
+body.tadaza-ascii-scene article#chatView {
   background: transparent !important;
   background-color: transparent !important;
   backdrop-filter: none !important;
@@ -197,46 +214,46 @@ body.tadaza-theme-hawaiian article#chatView {
    -------------------------------------------------------------------------- */
 
 /* A. Left Navigation Bar */
-body.tadaza-theme-hawaiian nav,
-body.tadaza-theme-hawaiian .nav__tabs,
-body.tadaza-theme-hawaiian .nav {
-  background: rgba(4, 24, 34, 0.8) !important;
+body.tadaza-ascii-scene nav,
+body.tadaza-ascii-scene .nav__tabs,
+body.tadaza-ascii-scene .nav {
+  background: rgba(var(--sc-glass-rgb), 0.8) !important;
   backdrop-filter: blur(20px) !important;
   -webkit-backdrop-filter: blur(20px) !important;
   border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 
 /* B. Conversation Thread List (Middle-Left Column) */
-body.tadaza-theme-hawaiian .conv-list,
-body.tadaza-theme-hawaiian [class*="conv-list"],
-body.tadaza-theme-hawaiian [class*="thread-list"],
-body.tadaza-theme-hawaiian #conversationList,
-body.tadaza-theme-hawaiian .main-tab__content {
-  background: rgba(6, 30, 42, 0.65) !important;
+body.tadaza-ascii-scene .conv-list,
+body.tadaza-ascii-scene [class*="conv-list"],
+body.tadaza-ascii-scene [class*="thread-list"],
+body.tadaza-ascii-scene #conversationList,
+body.tadaza-ascii-scene .main-tab__content {
+  background: rgba(var(--sc-glass-rgb), 0.65) !important;
   backdrop-filter: blur(20px) saturate(140%) !important;
   -webkit-backdrop-filter: blur(20px) saturate(140%) !important;
   border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 
 /* C. Right Sidebar ("Thông tin hội thoại" - Chat Info Panel) */
-body.tadaza-theme-hawaiian aside,
-body.tadaza-theme-hawaiian #chatInfoGeneral,
-body.tadaza-theme-hawaiian [class*="chat-info"],
-body.tadaza-theme-hawaiian #sideBodyScrollBox,
-body.tadaza-theme-hawaiian .side-body,
-body.tadaza-theme-hawaiian .side-body-scroll-box {
-  background: rgba(6, 30, 42, 0.65) !important;
+body.tadaza-ascii-scene aside,
+body.tadaza-ascii-scene #chatInfoGeneral,
+body.tadaza-ascii-scene [class*="chat-info"],
+body.tadaza-ascii-scene #sideBodyScrollBox,
+body.tadaza-ascii-scene .side-body,
+body.tadaza-ascii-scene .side-body-scroll-box {
+  background: rgba(var(--sc-glass-rgb), 0.65) !important;
   backdrop-filter: blur(20px) saturate(140%) !important;
   -webkit-backdrop-filter: blur(20px) saturate(140%) !important;
   border-left: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 
 /* D. Top Chat Header & Search Bar Harmonization */
-body.tadaza-theme-hawaiian header,
-body.tadaza-theme-hawaiian #header,
-body.tadaza-theme-hawaiian .chat-bar,
-body.tadaza-theme-hawaiian #contact-search {
-  background: rgba(4, 22, 32, 0.96) !important;
+body.tadaza-ascii-scene header,
+body.tadaza-ascii-scene #header,
+body.tadaza-ascii-scene .chat-bar,
+body.tadaza-ascii-scene #contact-search {
+  background: rgba(var(--sc-glass-rgb), 0.96) !important;
   backdrop-filter: blur(24px) saturate(140%) !important;
   -webkit-backdrop-filter: blur(24px) saturate(140%) !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
@@ -244,15 +261,15 @@ body.tadaza-theme-hawaiian #contact-search {
 }
 
 /* Ensure avatar, name and inner title elements have NO isolated background box */
-body.tadaza-theme-hawaiian .threadChat,
-body.tadaza-theme-hawaiian .threadChat__title,
-body.tadaza-theme-hawaiian .threadChat__avatar,
-body.tadaza-theme-hawaiian .main-title-container,
-body.tadaza-theme-hawaiian .header-title,
-body.tadaza-theme-hawaiian [class*="chat-header"],
-body.tadaza-theme-hawaiian .chat-title,
-body.tadaza-theme-hawaiian .header-title-container,
-body.tadaza-theme-hawaiian .header-subtitle {
+body.tadaza-ascii-scene .threadChat,
+body.tadaza-ascii-scene .threadChat__title,
+body.tadaza-ascii-scene .threadChat__avatar,
+body.tadaza-ascii-scene .main-title-container,
+body.tadaza-ascii-scene .header-title,
+body.tadaza-ascii-scene [class*="chat-header"],
+body.tadaza-ascii-scene .chat-title,
+body.tadaza-ascii-scene .header-title-container,
+body.tadaza-ascii-scene .header-subtitle {
   background: transparent !important;
   background-color: transparent !important;
   border: none !important;
@@ -262,145 +279,145 @@ body.tadaza-theme-hawaiian .header-subtitle {
 }
 
 /* Header Buttons Container & Tool Buttons (Call, Search, Sidebar) */
-body.tadaza-theme-hawaiian #headerBtns,
-body.tadaza-theme-hawaiian header #headerBtns {
+body.tadaza-ascii-scene #headerBtns,
+body.tadaza-ascii-scene header #headerBtns {
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
 }
 
-body.tadaza-theme-hawaiian header button,
-body.tadaza-theme-hawaiian #header button,
-body.tadaza-theme-hawaiian #headerBtns button,
-body.tadaza-theme-hawaiian #headerBtns .z--btn--v2,
-body.tadaza-theme-hawaiian #headerBtns [class*="btn"],
-body.tadaza-theme-hawaiian #headerBtns .rel,
-body.tadaza-theme-hawaiian header .z--btn--v2,
-body.tadaza-theme-hawaiian header [class*="btn"],
-body.tadaza-theme-hawaiian .chat-bar button {
+body.tadaza-ascii-scene header button,
+body.tadaza-ascii-scene #header button,
+body.tadaza-ascii-scene #headerBtns button,
+body.tadaza-ascii-scene #headerBtns .z--btn--v2,
+body.tadaza-ascii-scene #headerBtns [class*="btn"],
+body.tadaza-ascii-scene #headerBtns .rel,
+body.tadaza-ascii-scene header .z--btn--v2,
+body.tadaza-ascii-scene header [class*="btn"],
+body.tadaza-ascii-scene .chat-bar button {
   background: transparent !important;
   background-color: transparent !important;
-  color: #c4e9f5 !important;
+  color: var(--sc-text-2) !important;
   border: none !important;
   box-shadow: none !important;
   border-radius: 8px !important;
   transition: all 0.2s ease !important;
 }
 
-body.tadaza-theme-hawaiian header button:hover,
-body.tadaza-theme-hawaiian #header button:hover,
-body.tadaza-theme-hawaiian #headerBtns button:hover,
-body.tadaza-theme-hawaiian #headerBtns .z--btn--v2:hover,
-body.tadaza-theme-hawaiian #headerBtns [class*="btn"]:hover,
-body.tadaza-theme-hawaiian header .z--btn--v2:hover,
-body.tadaza-theme-hawaiian header [class*="btn"]:hover,
-body.tadaza-theme-hawaiian .chat-bar button:hover {
+body.tadaza-ascii-scene header button:hover,
+body.tadaza-ascii-scene #header button:hover,
+body.tadaza-ascii-scene #headerBtns button:hover,
+body.tadaza-ascii-scene #headerBtns .z--btn--v2:hover,
+body.tadaza-ascii-scene #headerBtns [class*="btn"]:hover,
+body.tadaza-ascii-scene header .z--btn--v2:hover,
+body.tadaza-ascii-scene header [class*="btn"]:hover,
+body.tadaza-ascii-scene .chat-bar button:hover {
   background: rgba(255, 255, 255, 0.12) !important;
   color: #ffffff !important;
   border-radius: 8px !important;
   box-shadow: none !important;
 }
 
-body.tadaza-theme-hawaiian #headerBtns .z--btn--v2.active,
-body.tadaza-theme-hawaiian #headerBtns button.active,
-body.tadaza-theme-hawaiian #headerBtns [class*="active"],
-body.tadaza-theme-hawaiian header .z--btn--v2.active {
-  background: rgba(15, 195, 255, 0.2) !important;
-  border: 1px solid rgba(15, 195, 255, 0.45) !important;
-  color: #0fc3ff !important;
+body.tadaza-ascii-scene #headerBtns .z--btn--v2.active,
+body.tadaza-ascii-scene #headerBtns button.active,
+body.tadaza-ascii-scene #headerBtns [class*="active"],
+body.tadaza-ascii-scene header .z--btn--v2.active {
+  background: rgba(var(--sc-accent-rgb), 0.2) !important;
+  border: 1px solid rgba(var(--sc-accent-rgb), 0.45) !important;
+  color: var(--sc-accent) !important;
   border-radius: 8px !important;
 }
 
-body.tadaza-theme-hawaiian #headerBtns svg,
-body.tadaza-theme-hawaiian #headerBtns i,
-body.tadaza-theme-hawaiian header svg,
-body.tadaza-theme-hawaiian header i {
-  color: #c4e9f5 !important;
-  fill: #c4e9f5 !important;
+body.tadaza-ascii-scene #headerBtns svg,
+body.tadaza-ascii-scene #headerBtns i,
+body.tadaza-ascii-scene header svg,
+body.tadaza-ascii-scene header i {
+  color: var(--sc-text-2) !important;
+  fill: var(--sc-text-2) !important;
   transition: color 0.2s ease, fill 0.2s ease !important;
 }
 
-body.tadaza-theme-hawaiian #headerBtns .z--btn--v2:hover svg,
-body.tadaza-theme-hawaiian #headerBtns .z--btn--v2:hover i,
-body.tadaza-theme-hawaiian #headerBtns button:hover svg,
-body.tadaza-theme-hawaiian #headerBtns button:hover i {
+body.tadaza-ascii-scene #headerBtns .z--btn--v2:hover svg,
+body.tadaza-ascii-scene #headerBtns .z--btn--v2:hover i,
+body.tadaza-ascii-scene #headerBtns button:hover svg,
+body.tadaza-ascii-scene #headerBtns button:hover i {
   color: #ffffff !important;
   fill: #ffffff !important;
 }
 
 /* E. Bottom Chat Input Bar */
-body.tadaza-theme-hawaiian #chatInput,
-body.tadaza-theme-hawaiian .chat-input-container,
-body.tadaza-theme-hawaiian .chat-input__content,
-body.tadaza-theme-hawaiian .chat-box-input,
-body.tadaza-theme-hawaiian .chat-box-bar {
-  background: rgba(4, 28, 38, 0.88) !important;
+body.tadaza-ascii-scene #chatInput,
+body.tadaza-ascii-scene .chat-input-container,
+body.tadaza-ascii-scene .chat-input__content,
+body.tadaza-ascii-scene .chat-box-input,
+body.tadaza-ascii-scene .chat-box-bar {
+  background: rgba(var(--sc-glass-rgb), 0.88) !important;
   backdrop-filter: blur(20px) !important;
   -webkit-backdrop-filter: blur(20px) !important;
   border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 
 /* Bottom Chat Toolbar - High Visibility & Contrast for Media/Sticker/File Icons */
-body.tadaza-theme-hawaiian .chat-box-bar,
-body.tadaza-theme-hawaiian .left-chat-box-bar,
-body.tadaza-theme-hawaiian .right-chat-box-bar {
+body.tadaza-ascii-scene .chat-box-bar,
+body.tadaza-ascii-scene .left-chat-box-bar,
+body.tadaza-ascii-scene .right-chat-box-bar {
   background: transparent !important;
 }
 
-body.tadaza-theme-hawaiian .left-chat-box-bar .chat-box-toolbar-button,
-body.tadaza-theme-hawaiian .left-chat-box-bar .z--btn--v2,
-body.tadaza-theme-hawaiian .left-chat-box-bar button,
-body.tadaza-theme-hawaiian .left-chat-box-bar [class*="btn"],
-body.tadaza-theme-hawaiian .chat-box-toolbar-button {
+body.tadaza-ascii-scene .left-chat-box-bar .chat-box-toolbar-button,
+body.tadaza-ascii-scene .left-chat-box-bar .z--btn--v2,
+body.tadaza-ascii-scene .left-chat-box-bar button,
+body.tadaza-ascii-scene .left-chat-box-bar [class*="btn"],
+body.tadaza-ascii-scene .chat-box-toolbar-button {
   background: transparent !important;
   border: none !important;
   border-radius: 6px !important;
   transition: all 0.2s ease !important;
 }
 
-body.tadaza-theme-hawaiian .left-chat-box-bar i,
-body.tadaza-theme-hawaiian .left-chat-box-bar svg,
-body.tadaza-theme-hawaiian .left-chat-box-bar path,
-body.tadaza-theme-hawaiian .left-chat-box-bar [class*="fa-"],
-body.tadaza-theme-hawaiian .chat-box-toolbar-button i,
-body.tadaza-theme-hawaiian .chat-box-toolbar-button svg,
-body.tadaza-theme-hawaiian .chat-box-toolbar-button path {
-  color: #e2f1f8 !important;
-  fill: #e2f1f8 !important;
+body.tadaza-ascii-scene .left-chat-box-bar i,
+body.tadaza-ascii-scene .left-chat-box-bar svg,
+body.tadaza-ascii-scene .left-chat-box-bar path,
+body.tadaza-ascii-scene .left-chat-box-bar [class*="fa-"],
+body.tadaza-ascii-scene .chat-box-toolbar-button i,
+body.tadaza-ascii-scene .chat-box-toolbar-button svg,
+body.tadaza-ascii-scene .chat-box-toolbar-button path {
+  color: var(--sc-text) !important;
+  fill: var(--sc-text) !important;
   opacity: 0.95 !important;
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4)) !important;
   transition: all 0.18s ease !important;
 }
 
-body.tadaza-theme-hawaiian .left-chat-box-bar .chat-box-toolbar-button:hover,
-body.tadaza-theme-hawaiian .left-chat-box-bar .z--btn--v2:hover,
-body.tadaza-theme-hawaiian .left-chat-box-bar button:hover,
-body.tadaza-theme-hawaiian .left-chat-box-bar [class*="btn"]:hover,
-body.tadaza-theme-hawaiian .chat-box-toolbar-button:hover {
+body.tadaza-ascii-scene .left-chat-box-bar .chat-box-toolbar-button:hover,
+body.tadaza-ascii-scene .left-chat-box-bar .z--btn--v2:hover,
+body.tadaza-ascii-scene .left-chat-box-bar button:hover,
+body.tadaza-ascii-scene .left-chat-box-bar [class*="btn"]:hover,
+body.tadaza-ascii-scene .chat-box-toolbar-button:hover {
   background: rgba(255, 255, 255, 0.14) !important;
 }
 
-body.tadaza-theme-hawaiian .left-chat-box-bar .chat-box-toolbar-button:hover i,
-body.tadaza-theme-hawaiian .left-chat-box-bar .chat-box-toolbar-button:hover svg,
-body.tadaza-theme-hawaiian .left-chat-box-bar .chat-box-toolbar-button:hover path,
-body.tadaza-theme-hawaiian .chat-box-toolbar-button:hover i,
-body.tadaza-theme-hawaiian .chat-box-toolbar-button:hover svg {
+body.tadaza-ascii-scene .left-chat-box-bar .chat-box-toolbar-button:hover i,
+body.tadaza-ascii-scene .left-chat-box-bar .chat-box-toolbar-button:hover svg,
+body.tadaza-ascii-scene .left-chat-box-bar .chat-box-toolbar-button:hover path,
+body.tadaza-ascii-scene .chat-box-toolbar-button:hover i,
+body.tadaza-ascii-scene .chat-box-toolbar-button:hover svg {
   color: #ffffff !important;
   fill: #ffffff !important;
   opacity: 1 !important;
   transform: translateY(-1px);
 }
 
-body.tadaza-theme-hawaiian .left-chat-box-bar .chat-box-toolbar-button.active,
-body.tadaza-theme-hawaiian .chat-box-toolbar-button.active {
-  background: rgba(15, 195, 255, 0.22) !important;
+body.tadaza-ascii-scene .left-chat-box-bar .chat-box-toolbar-button.active,
+body.tadaza-ascii-scene .chat-box-toolbar-button.active {
+  background: rgba(var(--sc-accent-rgb), 0.22) !important;
   border-radius: 6px !important;
 }
 
-body.tadaza-theme-hawaiian .left-chat-box-bar .chat-box-toolbar-button.active i,
-body.tadaza-theme-hawaiian .left-chat-box-bar .chat-box-toolbar-button.active svg {
-  color: #0fc3ff !important;
-  fill: #0fc3ff !important;
+body.tadaza-ascii-scene .left-chat-box-bar .chat-box-toolbar-button.active i,
+body.tadaza-ascii-scene .left-chat-box-bar .chat-box-toolbar-button.active svg {
+  color: var(--sc-accent) !important;
+  fill: var(--sc-accent) !important;
   opacity: 1 !important;
 }
 
@@ -409,37 +426,37 @@ body.tadaza-theme-hawaiian .left-chat-box-bar .chat-box-toolbar-button.active sv
    -------------------------------------------------------------------------- */
 
 /* Thread list contact names & text */
-body.tadaza-theme-hawaiian .conv-item-title__name,
-body.tadaza-theme-hawaiian .conv-item-title,
-body.tadaza-theme-hawaiian [class*="conv-item-title"],
-body.tadaza-theme-hawaiian [class*="conv-title"],
-body.tadaza-theme-hawaiian [class*="conv-name"],
-body.tadaza-theme-hawaiian .conv-title-name {
+body.tadaza-ascii-scene .conv-item-title__name,
+body.tadaza-ascii-scene .conv-item-title,
+body.tadaza-ascii-scene [class*="conv-item-title"],
+body.tadaza-ascii-scene [class*="conv-title"],
+body.tadaza-ascii-scene [class*="conv-name"],
+body.tadaza-ascii-scene .conv-title-name {
   color: #ffffff !important;
   font-weight: 600 !important;
 }
 
-body.tadaza-theme-hawaiian .conv-message,
-body.tadaza-theme-hawaiian [class*="conv-message"],
-body.tadaza-theme-hawaiian [class*="z-conv-message"],
-body.tadaza-theme-hawaiian .conv-item-message,
-body.tadaza-theme-hawaiian [class*="preview-message"] {
-  color: #9fc7d5 !important;
+body.tadaza-ascii-scene .conv-message,
+body.tadaza-ascii-scene [class*="conv-message"],
+body.tadaza-ascii-scene [class*="z-conv-message"],
+body.tadaza-ascii-scene .conv-item-message,
+body.tadaza-ascii-scene [class*="preview-message"] {
+  color: var(--sc-text-2) !important;
 }
 
-body.tadaza-theme-hawaiian [class*="time"],
-body.tadaza-theme-hawaiian [class*="send-time"],
-body.tadaza-theme-hawaiian [class*="chat-timestamp"] {
-  color: #729ba9 !important;
+body.tadaza-ascii-scene [class*="time"],
+body.tadaza-ascii-scene [class*="send-time"],
+body.tadaza-ascii-scene [class*="chat-timestamp"] {
+  color: var(--sc-text-3) !important;
 }
 
 /* Conversation List Items - Zero out all gray borders/outlines */
-body.tadaza-theme-hawaiian .conv-item,
-body.tadaza-theme-hawaiian [class*="conv-item"],
-body.tadaza-theme-hawaiian .conversation-item,
-body.tadaza-theme-hawaiian [class*="conversation-item"],
-body.tadaza-theme-hawaiian .conv-item-padding,
-body.tadaza-theme-hawaiian [class*="conv-item-padding"] {
+body.tadaza-ascii-scene .conv-item,
+body.tadaza-ascii-scene [class*="conv-item"],
+body.tadaza-ascii-scene .conversation-item,
+body.tadaza-ascii-scene [class*="conversation-item"],
+body.tadaza-ascii-scene .conv-item-padding,
+body.tadaza-ascii-scene [class*="conv-item-padding"] {
   border: none !important;
   border-color: transparent !important;
   outline: none !important;
@@ -450,16 +467,16 @@ body.tadaza-theme-hawaiian [class*="conv-item-padding"] {
   -webkit-focus-ring-color: transparent !important;
 }
 
-body.tadaza-theme-hawaiian .conv-item:hover,
-body.tadaza-theme-hawaiian .conv-item:focus,
-body.tadaza-theme-hawaiian .conv-item:active,
-body.tadaza-theme-hawaiian .conv-item:focus-visible,
-body.tadaza-theme-hawaiian [class*="conv-item"]:hover,
-body.tadaza-theme-hawaiian [class*="conv-item"]:focus,
-body.tadaza-theme-hawaiian [class*="conv-item"]:active,
-body.tadaza-theme-hawaiian [class*="conv-item"]:focus-visible,
-body.tadaza-theme-hawaiian .conv-item.active,
-body.tadaza-theme-hawaiian [class*="conv-item"].active {
+body.tadaza-ascii-scene .conv-item:hover,
+body.tadaza-ascii-scene .conv-item:focus,
+body.tadaza-ascii-scene .conv-item:active,
+body.tadaza-ascii-scene .conv-item:focus-visible,
+body.tadaza-ascii-scene [class*="conv-item"]:hover,
+body.tadaza-ascii-scene [class*="conv-item"]:focus,
+body.tadaza-ascii-scene [class*="conv-item"]:active,
+body.tadaza-ascii-scene [class*="conv-item"]:focus-visible,
+body.tadaza-ascii-scene .conv-item.active,
+body.tadaza-ascii-scene [class*="conv-item"].active {
   border: none !important;
   border-color: transparent !important;
   outline: none !important;
@@ -470,90 +487,90 @@ body.tadaza-theme-hawaiian [class*="conv-item"].active {
   background: rgba(255, 255, 255, 0.08) !important;
 }
 
-body.tadaza-theme-hawaiian .conv-item.selected,
-body.tadaza-theme-hawaiian [class*="conv-item"][class*="selected"],
-body.tadaza-theme-hawaiian .chat-list-item-selected {
+body.tadaza-ascii-scene .conv-item.selected,
+body.tadaza-ascii-scene [class*="conv-item"][class*="selected"],
+body.tadaza-ascii-scene .chat-list-item-selected {
   border: none !important;
-  border-left: 3px solid #0fc3ff !important;
+  border-left: 3px solid var(--sc-accent) !important;
   outline: none !important;
   outline-width: 0 !important;
   box-shadow: none !important;
-  background: rgba(15, 195, 255, 0.16) !important;
+  background: rgba(var(--sc-accent-rgb), 0.16) !important;
 }
 
-body.tadaza-theme-hawaiian .conv-item-padding:before {
+body.tadaza-ascii-scene .conv-item-padding:before {
   display: none !important;
   border: none !important;
 }
 
 /* Search bar in conversation list */
-body.tadaza-theme-hawaiian input#contact-search-input,
-body.tadaza-theme-hawaiian [class*="search-input"] {
+body.tadaza-ascii-scene input#contact-search-input,
+body.tadaza-ascii-scene [class*="search-input"] {
   background: rgba(255, 255, 255, 0.1) !important;
   color: #ffffff !important;
   border: 1px solid rgba(255, 255, 255, 0.14) !important;
   border-radius: 8px !important;
 }
 
-body.tadaza-theme-hawaiian input#contact-search-input::placeholder,
-body.tadaza-theme-hawaiian [class*="search-input"]::placeholder {
-  color: #729ba9 !important;
+body.tadaza-ascii-scene input#contact-search-input::placeholder,
+body.tadaza-ascii-scene [class*="search-input"]::placeholder {
+  color: var(--sc-text-3) !important;
 }
 
 /* Thread list tabs ('Tất cả', 'Chưa đọc', 'Phân loại') */
-body.tadaza-theme-hawaiian .tab-redesign,
-body.tadaza-theme-hawaiian [class*="tab-redesign"],
-body.tadaza-theme-hawaiian [class*="tab-item"] {
-  color: #92bac8 !important;
+body.tadaza-ascii-scene .tab-redesign,
+body.tadaza-ascii-scene [class*="tab-redesign"],
+body.tadaza-ascii-scene [class*="tab-item"] {
+  color: var(--sc-text-2) !important;
 }
 
-body.tadaza-theme-hawaiian .tab-redesign.active,
-body.tadaza-theme-hawaiian [class*="tab-item"].active,
-body.tadaza-theme-hawaiian [class*="tab-item"][class*="active"],
-body.tadaza-theme-hawaiian [class*="tab-redesign"][class*="selected"] {
+body.tadaza-ascii-scene .tab-redesign.active,
+body.tadaza-ascii-scene [class*="tab-item"].active,
+body.tadaza-ascii-scene [class*="tab-item"][class*="active"],
+body.tadaza-ascii-scene [class*="tab-redesign"][class*="selected"] {
   color: #ffffff !important;
   font-weight: 700 !important;
-  border-bottom-color: #0fc3ff !important;
+  border-bottom-color: var(--sc-accent) !important;
 }
 
 /* Header title and icons */
-body.tadaza-theme-hawaiian .header-title *,
-body.tadaza-theme-hawaiian [class*="chat-header"] *,
-body.tadaza-theme-hawaiian .main-title-container * {
+body.tadaza-ascii-scene .header-title *,
+body.tadaza-ascii-scene [class*="chat-header"] *,
+body.tadaza-ascii-scene .main-title-container * {
   color: #ffffff !important;
 }
 
-body.tadaza-theme-hawaiian .header-title svg,
-body.tadaza-theme-hawaiian [class*="chat-header"] svg,
-body.tadaza-theme-hawaiian .main-title-container svg,
-body.tadaza-theme-hawaiian [class*="chat-header"] i {
-  color: #c4e9f5 !important;
-  fill: #c4e9f5 !important;
+body.tadaza-ascii-scene .header-title svg,
+body.tadaza-ascii-scene [class*="chat-header"] svg,
+body.tadaza-ascii-scene .main-title-container svg,
+body.tadaza-ascii-scene [class*="chat-header"] i {
+  color: var(--sc-text-2) !important;
+  fill: var(--sc-text-2) !important;
 }
 
 /* Right Sidebar typography & buttons */
-body.tadaza-theme-hawaiian aside *,
-body.tadaza-theme-hawaiian #chatInfoGeneral *,
-body.tadaza-theme-hawaiian [class*="chat-info"] *,
-body.tadaza-theme-hawaiian #sideBodyScrollBox * {
-  color: #d6eef5;
+body.tadaza-ascii-scene aside *,
+body.tadaza-ascii-scene #chatInfoGeneral *,
+body.tadaza-ascii-scene [class*="chat-info"] *,
+body.tadaza-ascii-scene #sideBodyScrollBox * {
+  color: var(--sc-text);
 }
 
-body.tadaza-theme-hawaiian [class*="section__header"],
-body.tadaza-theme-hawaiian [class*="section__header--title"],
-body.tadaza-theme-hawaiian [class*="section-title"],
-body.tadaza-theme-hawaiian [class*="chat-info"] h3,
-body.tadaza-theme-hawaiian [class*="chat-info"] h4 {
+body.tadaza-ascii-scene [class*="section__header"],
+body.tadaza-ascii-scene [class*="section__header--title"],
+body.tadaza-ascii-scene [class*="section-title"],
+body.tadaza-ascii-scene [class*="chat-info"] h3,
+body.tadaza-ascii-scene [class*="chat-info"] h4 {
   color: #ffffff !important;
   font-weight: 600 !important;
 }
 
 /* Unified Clean Buttons in Sidebar & Modals */
-body.tadaza-theme-hawaiian aside button,
-body.tadaza-theme-hawaiian #chatInfoGeneral button,
-body.tadaza-theme-hawaiian [class*="chat-info"] button,
-body.tadaza-theme-hawaiian .chat-info__btn,
-body.tadaza-theme-hawaiian [class*="action-btn"] {
+body.tadaza-ascii-scene aside button,
+body.tadaza-ascii-scene #chatInfoGeneral button,
+body.tadaza-ascii-scene [class*="chat-info"] button,
+body.tadaza-ascii-scene .chat-info__btn,
+body.tadaza-ascii-scene [class*="action-btn"] {
   background: rgba(255, 255, 255, 0.1) !important;
   color: #ffffff !important;
   border: 1px solid rgba(255, 255, 255, 0.18) !important;
@@ -561,75 +578,75 @@ body.tadaza-theme-hawaiian [class*="action-btn"] {
   transition: all 0.2s ease !important;
 }
 
-body.tadaza-theme-hawaiian aside button:hover,
-body.tadaza-theme-hawaiian #chatInfoGeneral button:hover,
-body.tadaza-theme-hawaiian [class*="chat-info"] button:hover {
-  background: rgba(15, 195, 255, 0.25) !important;
-  border-color: rgba(15, 195, 255, 0.5) !important;
+body.tadaza-ascii-scene aside button:hover,
+body.tadaza-ascii-scene #chatInfoGeneral button:hover,
+body.tadaza-ascii-scene [class*="chat-info"] button:hover {
+  background: rgba(var(--sc-accent-rgb), 0.25) !important;
+  border-color: rgba(var(--sc-accent-rgb), 0.5) !important;
 }
 
 /* Right Sidebar Circular Tool Buttons ("Tắt thông báo", "Ghim hội thoại", "Tạo nhóm") */
-body.tadaza-theme-hawaiian .header-info__tool,
-body.tadaza-theme-hawaiian .header-info__tool__button {
+body.tadaza-ascii-scene .header-info__tool,
+body.tadaza-ascii-scene .header-info__tool__button {
   background: transparent !important;
 }
 
-body.tadaza-theme-hawaiian .header-info__tool .z--btn--v2,
-body.tadaza-theme-hawaiian .header-info__tool button,
-body.tadaza-theme-hawaiian .header-info__tool [class*="btn"],
-body.tadaza-theme-hawaiian .header-info__tool .--full-rounded,
-body.tadaza-theme-hawaiian .header-info__tool [class*="full-rounded"],
-body.tadaza-theme-hawaiian .header-info__edit-alias,
-body.tadaza-theme-hawaiian .header-info__icon,
-body.tadaza-theme-hawaiian .edit-alias-icon {
-  background: rgba(15, 195, 255, 0.18) !important;
-  border: 1px solid rgba(15, 195, 255, 0.4) !important;
-  color: #0fc3ff !important;
+body.tadaza-ascii-scene .header-info__tool .z--btn--v2,
+body.tadaza-ascii-scene .header-info__tool button,
+body.tadaza-ascii-scene .header-info__tool [class*="btn"],
+body.tadaza-ascii-scene .header-info__tool .--full-rounded,
+body.tadaza-ascii-scene .header-info__tool [class*="full-rounded"],
+body.tadaza-ascii-scene .header-info__edit-alias,
+body.tadaza-ascii-scene .header-info__icon,
+body.tadaza-ascii-scene .edit-alias-icon {
+  background: rgba(var(--sc-accent-rgb), 0.18) !important;
+  border: 1px solid rgba(var(--sc-accent-rgb), 0.4) !important;
+  color: var(--sc-accent) !important;
   border-radius: 999px !important;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25) !important;
   transition: all 0.2s ease !important;
 }
 
-body.tadaza-theme-hawaiian .header-info__tool .z--btn--v2:hover,
-body.tadaza-theme-hawaiian .header-info__tool button:hover,
-body.tadaza-theme-hawaiian .header-info__tool [class*="btn"]:hover,
-body.tadaza-theme-hawaiian .header-info__edit-alias:hover {
-  background: rgba(15, 195, 255, 0.35) !important;
-  border-color: #0fc3ff !important;
-  box-shadow: 0 0 14px rgba(15, 195, 255, 0.5) !important;
+body.tadaza-ascii-scene .header-info__tool .z--btn--v2:hover,
+body.tadaza-ascii-scene .header-info__tool button:hover,
+body.tadaza-ascii-scene .header-info__tool [class*="btn"]:hover,
+body.tadaza-ascii-scene .header-info__edit-alias:hover {
+  background: rgba(var(--sc-accent-rgb), 0.35) !important;
+  border-color: var(--sc-accent) !important;
+  box-shadow: 0 0 14px rgba(var(--sc-accent-rgb), 0.5) !important;
 }
 
-body.tadaza-theme-hawaiian .header-info__tool i,
-body.tadaza-theme-hawaiian .header-info__tool svg,
-body.tadaza-theme-hawaiian .header-info__tool [class*="fa-"],
-body.tadaza-theme-hawaiian .header-info__edit-alias i,
-body.tadaza-theme-hawaiian .header-info__edit-alias svg {
-  color: #0fc3ff !important;
-  fill: #0fc3ff !important;
+body.tadaza-ascii-scene .header-info__tool i,
+body.tadaza-ascii-scene .header-info__tool svg,
+body.tadaza-ascii-scene .header-info__tool [class*="fa-"],
+body.tadaza-ascii-scene .header-info__edit-alias i,
+body.tadaza-ascii-scene .header-info__edit-alias svg {
+  color: var(--sc-accent) !important;
+  fill: var(--sc-accent) !important;
 }
 
-body.tadaza-theme-hawaiian .header-info__tool [class*="div-12"],
-body.tadaza-theme-hawaiian .header-info__tool span,
-body.tadaza-theme-hawaiian .header-info__tool p {
-  color: #c4e9f5 !important;
+body.tadaza-ascii-scene .header-info__tool [class*="div-12"],
+body.tadaza-ascii-scene .header-info__tool span,
+body.tadaza-ascii-scene .header-info__tool p {
+  color: var(--sc-text-2) !important;
   font-weight: 500 !important;
 }
 
 /* Right Sidebar "Xem thêm" Button (under "Thông tin kinh doanh") */
-body.tadaza-theme-hawaiian aside button.view-more__full,
-body.tadaza-theme-hawaiian aside .view-more__full,
-body.tadaza-theme-hawaiian #chatInfoGeneral .view-more__full,
-body.tadaza-theme-hawaiian .view-more__full,
-body.tadaza-theme-hawaiian .view-more__btn,
-body.tadaza-theme-hawaiian [class*="view-more"] button,
-body.tadaza-theme-hawaiian [class*="view-more"].z--btn--v2,
-body.tadaza-theme-hawaiian [class*="view-more"] [class*="btn"],
-body.tadaza-theme-hawaiian .chat-info-general button,
-body.tadaza-theme-hawaiian .chat-info-general .z--btn--v2,
-body.tadaza-theme-hawaiian [class*="friend-profile"] button,
-body.tadaza-theme-hawaiian [class*="user-profile"] button {
-  background: rgba(15, 195, 255, 0.22) !important;
-  border: 1px solid rgba(15, 195, 255, 0.45) !important;
+body.tadaza-ascii-scene aside button.view-more__full,
+body.tadaza-ascii-scene aside .view-more__full,
+body.tadaza-ascii-scene #chatInfoGeneral .view-more__full,
+body.tadaza-ascii-scene .view-more__full,
+body.tadaza-ascii-scene .view-more__btn,
+body.tadaza-ascii-scene [class*="view-more"] button,
+body.tadaza-ascii-scene [class*="view-more"].z--btn--v2,
+body.tadaza-ascii-scene [class*="view-more"] [class*="btn"],
+body.tadaza-ascii-scene .chat-info-general button,
+body.tadaza-ascii-scene .chat-info-general .z--btn--v2,
+body.tadaza-ascii-scene [class*="friend-profile"] button,
+body.tadaza-ascii-scene [class*="user-profile"] button {
+  background: rgba(var(--sc-accent-rgb), 0.22) !important;
+  border: 1px solid rgba(var(--sc-accent-rgb), 0.45) !important;
   border-radius: 8px !important;
   color: #ffffff !important;
   font-weight: 600 !important;
@@ -638,47 +655,47 @@ body.tadaza-theme-hawaiian [class*="user-profile"] button {
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5) !important;
 }
 
-body.tadaza-theme-hawaiian .view-more__full:hover,
-body.tadaza-theme-hawaiian [class*="view-more"] button:hover,
-body.tadaza-theme-hawaiian [class*="view-more"].z--btn--v2:hover,
-body.tadaza-theme-hawaiian .chat-info-general button:hover,
-body.tadaza-theme-hawaiian .chat-info-general .z--btn--v2:hover {
-  background: rgba(15, 195, 255, 0.38) !important;
-  border-color: #0fc3ff !important;
-  box-shadow: 0 0 12px rgba(15, 195, 255, 0.45) !important;
+body.tadaza-ascii-scene .view-more__full:hover,
+body.tadaza-ascii-scene [class*="view-more"] button:hover,
+body.tadaza-ascii-scene [class*="view-more"].z--btn--v2:hover,
+body.tadaza-ascii-scene .chat-info-general button:hover,
+body.tadaza-ascii-scene .chat-info-general .z--btn--v2:hover {
+  background: rgba(var(--sc-accent-rgb), 0.38) !important;
+  border-color: var(--sc-accent) !important;
+  box-shadow: 0 0 12px rgba(var(--sc-accent-rgb), 0.45) !important;
   color: #ffffff !important;
 }
 
 /* Chat Input field */
-body.tadaza-theme-hawaiian .rich-input,
-body.tadaza-theme-hawaiian [id^="richInput"],
-body.tadaza-theme-hawaiian #input_chat {
+body.tadaza-ascii-scene .rich-input,
+body.tadaza-ascii-scene [id^="richInput"],
+body.tadaza-ascii-scene #input_chat {
   color: #ffffff !important;
   background: transparent !important;
 }
 
-body.tadaza-theme-hawaiian .rich-input::placeholder,
-body.tadaza-theme-hawaiian [id^="richInput"]::placeholder,
-body.tadaza-theme-hawaiian #input_chat::placeholder {
-  color: #729ba9 !important;
+body.tadaza-ascii-scene .rich-input::placeholder,
+body.tadaza-ascii-scene [id^="richInput"]::placeholder,
+body.tadaza-ascii-scene #input_chat::placeholder {
+  color: var(--sc-text-3) !important;
 }
 
-body.tadaza-theme-hawaiian [class*="chat-box-input__tools"],
-body.tadaza-theme-hawaiian [class*="chat-input__tools"] {
+body.tadaza-ascii-scene [class*="chat-box-input__tools"],
+body.tadaza-ascii-scene [class*="chat-input__tools"] {
   background: transparent !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
 }
 
-body.tadaza-theme-hawaiian [class*="chat-box-input__tools__btn"],
-body.tadaza-theme-hawaiian [class*="chat-box-input-button"],
-body.tadaza-theme-hawaiian [class*="chat-input-menu"] i,
-body.tadaza-theme-hawaiian [class*="chat-input-menu"] svg {
-  color: #a0c7d5 !important;
-  fill: #a0c7d5 !important;
+body.tadaza-ascii-scene [class*="chat-box-input__tools__btn"],
+body.tadaza-ascii-scene [class*="chat-box-input-button"],
+body.tadaza-ascii-scene [class*="chat-input-menu"] i,
+body.tadaza-ascii-scene [class*="chat-input-menu"] svg {
+  color: var(--sc-text-2) !important;
+  fill: var(--sc-text-2) !important;
 }
 
-body.tadaza-theme-hawaiian [class*="chat-box-input__tools__btn"]:hover,
-body.tadaza-theme-hawaiian [class*="chat-box-input-button"]:hover {
+body.tadaza-ascii-scene [class*="chat-box-input__tools__btn"]:hover,
+body.tadaza-ascii-scene [class*="chat-box-input-button"]:hover {
   color: #ffffff !important;
   fill: #ffffff !important;
 }
@@ -688,96 +705,96 @@ body.tadaza-theme-hawaiian [class*="chat-box-input-button"]:hover {
    Fix "White Text on White Background" completely
    -------------------------------------------------------------------------- */
 
-body.tadaza-theme-hawaiian [class*="message-content"],
-body.tadaza-theme-hawaiian [class*="msg-content"],
-body.tadaza-theme-hawaiian [class*="bubble-content"] {
+body.tadaza-ascii-scene [class*="message-content"],
+body.tadaza-ascii-scene [class*="msg-content"],
+body.tadaza-ascii-scene [class*="bubble-content"] {
   backdrop-filter: blur(14px) !important;
   -webkit-backdrop-filter: blur(14px) !important;
   border-radius: 18px !important;
 }
 
 /* Incoming Friend Messages */
-body.tadaza-theme-hawaiian .card--friend [class*="message-content"],
-body.tadaza-theme-hawaiian [class*="friend-message"] [class*="message-content"],
-body.tadaza-theme-hawaiian .chat-message:not(.me) .card,
-body.tadaza-theme-hawaiian .chat-message:not(.me) .card-bubble,
-body.tadaza-theme-hawaiian .chat-message:not(.me) .card-content,
-body.tadaza-theme-hawaiian .white-message,
-body.tadaza-theme-hawaiian .card.card--friend,
-body.tadaza-theme-hawaiian .card--friend .card-bubble,
-body.tadaza-theme-hawaiian .card--friend .card-message {
-  background: rgba(10, 44, 58, 0.88) !important;
+body.tadaza-ascii-scene .card--friend [class*="message-content"],
+body.tadaza-ascii-scene [class*="friend-message"] [class*="message-content"],
+body.tadaza-ascii-scene .chat-message:not(.me) .card,
+body.tadaza-ascii-scene .chat-message:not(.me) .card-bubble,
+body.tadaza-ascii-scene .chat-message:not(.me) .card-content,
+body.tadaza-ascii-scene .white-message,
+body.tadaza-ascii-scene .card.card--friend,
+body.tadaza-ascii-scene .card--friend .card-bubble,
+body.tadaza-ascii-scene .card--friend .card-message {
+  background: rgba(var(--sc-glass-light-rgb), 0.88) !important;
   color: #ffffff !important;
-  border: 1px solid rgba(130, 220, 240, 0.28) !important;
+  border: 1px solid rgba(var(--sc-accent2-rgb), 0.28) !important;
   box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35) !important;
 }
 
-body.tadaza-theme-hawaiian .card--friend [class*="message-content"] *:not(.tadaza-code-card *):not(.CodeMirror *):not(.tadaza-inline-code):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]),
-body.tadaza-theme-hawaiian [class*="friend-message"] [class*="message-content"] *:not(.tadaza-code-card *):not(.CodeMirror *):not(.tadaza-inline-code):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]),
-body.tadaza-theme-hawaiian .chat-message:not(.me) .card *:not(.tadaza-code-card *):not(.CodeMirror *):not(.tadaza-inline-code):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]),
-body.tadaza-theme-hawaiian .white-message *:not(.tadaza-code-card *):not(.CodeMirror *):not(.tadaza-inline-code):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]) {
+body.tadaza-ascii-scene .card--friend [class*="message-content"] *:not(.tadaza-code-card *):not(.CodeMirror *):not(.tadaza-inline-code):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]),
+body.tadaza-ascii-scene [class*="friend-message"] [class*="message-content"] *:not(.tadaza-code-card *):not(.CodeMirror *):not(.tadaza-inline-code):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]),
+body.tadaza-ascii-scene .chat-message:not(.me) .card *:not(.tadaza-code-card *):not(.CodeMirror *):not(.tadaza-inline-code):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]),
+body.tadaza-ascii-scene .white-message *:not(.tadaza-code-card *):not(.CodeMirror *):not(.tadaza-inline-code):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]) {
   color: #ffffff !important;
 }
 
 /* Message Wrappers - Reset outer wrappers to prevent nested borders */
-body.tadaza-theme-hawaiian .chat-item,
-body.tadaza-theme-hawaiian .chat-message {
+body.tadaza-ascii-scene .chat-item,
+body.tadaza-ascii-scene .chat-message {
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
 }
 
 /* Incoming Friend Messages - Single Outer Border */
-body.tadaza-theme-hawaiian .chat-message:not(.me) .card,
-body.tadaza-theme-hawaiian .chat-message:not(.me) .card-bubble,
-body.tadaza-theme-hawaiian .card--friend > [class*="message-content"],
-body.tadaza-theme-hawaiian .card--friend > .card-bubble,
-body.tadaza-theme-hawaiian .card--friend > .card-message,
-body.tadaza-theme-hawaiian .card--friend.card--file,
-body.tadaza-theme-hawaiian .card--friend > .card--file,
-body.tadaza-theme-hawaiian .card--friend > .file-message,
-body.tadaza-theme-hawaiian .white-message {
-  background: rgba(10, 44, 58, 0.88) !important;
+body.tadaza-ascii-scene .chat-message:not(.me) .card,
+body.tadaza-ascii-scene .chat-message:not(.me) .card-bubble,
+body.tadaza-ascii-scene .card--friend > [class*="message-content"],
+body.tadaza-ascii-scene .card--friend > .card-bubble,
+body.tadaza-ascii-scene .card--friend > .card-message,
+body.tadaza-ascii-scene .card--friend.card--file,
+body.tadaza-ascii-scene .card--friend > .card--file,
+body.tadaza-ascii-scene .card--friend > .file-message,
+body.tadaza-ascii-scene .white-message {
+  background: rgba(var(--sc-glass-light-rgb), 0.88) !important;
   color: #ffffff !important;
-  border: 1px solid rgba(130, 220, 240, 0.3) !important;
+  border: 1px solid rgba(var(--sc-accent2-rgb), 0.3) !important;
   border-radius: 14px !important;
   box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35) !important;
   overflow: hidden !important;
 }
 
 /* Outgoing My Messages - Single Outer Border */
-body.tadaza-theme-hawaiian .chat-message.me .card,
-body.tadaza-theme-hawaiian .chat-message.me .card-bubble,
-body.tadaza-theme-hawaiian .card--me > [class*="message-content"],
-body.tadaza-theme-hawaiian .card--me > .card-bubble,
-body.tadaza-theme-hawaiian .card--me > .card-message,
-body.tadaza-theme-hawaiian .card--me.card--file,
-body.tadaza-theme-hawaiian .card--me > .card--file,
-body.tadaza-theme-hawaiian .card--me > .file-message,
-body.tadaza-theme-hawaiian .blue-message {
-  background: linear-gradient(135deg, rgba(16, 150, 190, 0.92), rgba(12, 115, 150, 0.96)) !important;
+body.tadaza-ascii-scene .chat-message.me .card,
+body.tadaza-ascii-scene .chat-message.me .card-bubble,
+body.tadaza-ascii-scene .card--me > [class*="message-content"],
+body.tadaza-ascii-scene .card--me > .card-bubble,
+body.tadaza-ascii-scene .card--me > .card-message,
+body.tadaza-ascii-scene .card--me.card--file,
+body.tadaza-ascii-scene .card--me > .card--file,
+body.tadaza-ascii-scene .card--me > .file-message,
+body.tadaza-ascii-scene .blue-message {
+  background: linear-gradient(135deg, rgba(var(--sc-accent-deep-rgb), 0.92), rgba(var(--sc-accent-deeper-rgb), 0.96)) !important;
   color: #ffffff !important;
   border: 1px solid rgba(255, 255, 255, 0.35) !important;
   border-radius: 14px !important;
-  box-shadow: 0 6px 22px rgba(4, 40, 52, 0.35) !important;
+  box-shadow: 0 6px 22px rgba(var(--sc-glass-rgb), 0.35) !important;
   overflow: hidden !important;
 }
 
-body.tadaza-theme-hawaiian .card--me [class*="message-content"] *:not(.tadaza-code-card *):not(.CodeMirror *):not(.tadaza-inline-code):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]),
-body.tadaza-theme-hawaiian .chat-message.me .card *:not(.tadaza-code-card *):not(.CodeMirror *):not(.tadaza-inline-code):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]),
-body.tadaza-theme-hawaiian .blue-message *:not(.tadaza-code-card *):not(.CodeMirror *):not(.tadaza-inline-code):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]) {
+body.tadaza-ascii-scene .card--me [class*="message-content"] *:not(.tadaza-code-card *):not(.CodeMirror *):not(.tadaza-inline-code):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]),
+body.tadaza-ascii-scene .chat-message.me .card *:not(.tadaza-code-card *):not(.CodeMirror *):not(.tadaza-inline-code):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]),
+body.tadaza-ascii-scene .blue-message *:not(.tadaza-code-card *):not(.CodeMirror *):not(.tadaza-inline-code):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]) {
   color: #ffffff !important;
 }
 
 /* Loading skeleton & spinner safeguards - ensure loading is never blocked or hidden */
-body.tadaza-theme-hawaiian .loading-msg,
-body.tadaza-theme-hawaiian .chat-loading,
-body.tadaza-theme-hawaiian .z-chat-loading,
-body.tadaza-theme-hawaiian .z-chat-loading-pined,
-body.tadaza-theme-hawaiian .loadingDefault,
-body.tadaza-theme-hawaiian [class*="loading-msg"],
-body.tadaza-theme-hawaiian [class*="chat-loading"],
-body.tadaza-theme-hawaiian [class*="loading-spinner"] {
+body.tadaza-ascii-scene .loading-msg,
+body.tadaza-ascii-scene .chat-loading,
+body.tadaza-ascii-scene .z-chat-loading,
+body.tadaza-ascii-scene .z-chat-loading-pined,
+body.tadaza-ascii-scene .loadingDefault,
+body.tadaza-ascii-scene [class*="loading-msg"],
+body.tadaza-ascii-scene [class*="chat-loading"],
+body.tadaza-ascii-scene [class*="loading-spinner"] {
   display: flex !important;
   opacity: 1 !important;
   visibility: visible !important;
@@ -785,39 +802,39 @@ body.tadaza-theme-hawaiian [class*="loading-spinner"] {
 }
 
 /* File Preview Card & Containers - Remove all inner nested borders */
-body.tadaza-theme-hawaiian .file-message,
-body.tadaza-theme-hawaiian .file-message-v2,
-body.tadaza-theme-hawaiian .file-message__container,
-body.tadaza-theme-hawaiian .file-message__content-container,
-body.tadaza-theme-hawaiian .file-message__content,
-body.tadaza-theme-hawaiian .file-message__content-info-container,
-body.tadaza-theme-hawaiian .card-content-file,
-body.tadaza-theme-hawaiian .card--file,
-body.tadaza-theme-hawaiian .card.card--file,
-body.tadaza-theme-hawaiian .card-bubble,
-body.tadaza-theme-hawaiian .file-preview,
-body.tadaza-theme-hawaiian .file-preview__main,
-body.tadaza-theme-hawaiian .card-send-file {
+body.tadaza-ascii-scene .file-message,
+body.tadaza-ascii-scene .file-message-v2,
+body.tadaza-ascii-scene .file-message__container,
+body.tadaza-ascii-scene .file-message__content-container,
+body.tadaza-ascii-scene .file-message__content,
+body.tadaza-ascii-scene .file-message__content-info-container,
+body.tadaza-ascii-scene .card-content-file,
+body.tadaza-ascii-scene .card--file,
+body.tadaza-ascii-scene .card.card--file,
+body.tadaza-ascii-scene .card-bubble,
+body.tadaza-ascii-scene .file-preview,
+body.tadaza-ascii-scene .file-preview__main,
+body.tadaza-ascii-scene .card-send-file {
   background: transparent !important;
   border: none !important;
   border-radius: 0 !important;
   box-shadow: none !important;
 }
 
-body.tadaza-theme-hawaiian .file-message *:not(.CodeMirror *):not(.tadaza-code-card *):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]),
-body.tadaza-theme-hawaiian .file-preview *:not(.CodeMirror *):not(.tadaza-code-card *):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]),
-body.tadaza-theme-hawaiian .card-send-file *:not(.CodeMirror *):not(.tadaza-code-card *):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]) {
-  color: #d8f3fa !important;
+body.tadaza-ascii-scene .file-message *:not(.CodeMirror *):not(.tadaza-code-card *):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]),
+body.tadaza-ascii-scene .file-preview *:not(.CodeMirror *):not(.tadaza-code-card *):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]),
+body.tadaza-ascii-scene .card-send-file *:not(.CodeMirror *):not(.tadaza-code-card *):not(code):not(pre):not([class*="hl-"]):not([class*="cm-"]) {
+  color: var(--sc-text) !important;
 }
 
 /* File name & title (Crisp White with shadow) */
-body.tadaza-theme-hawaiian .file-message__content-title,
-body.tadaza-theme-hawaiian .file-name,
-body.tadaza-theme-hawaiian .card-title,
-body.tadaza-theme-hawaiian .cb-info-file-item__file-name,
-body.tadaza-theme-hawaiian [class*="file-name"],
-body.tadaza-theme-hawaiian [class*="file-title"],
-body.tadaza-theme-hawaiian [class*="file-message__content-title"] {
+body.tadaza-ascii-scene .file-message__content-title,
+body.tadaza-ascii-scene .file-name,
+body.tadaza-ascii-scene .card-title,
+body.tadaza-ascii-scene .cb-info-file-item__file-name,
+body.tadaza-ascii-scene [class*="file-name"],
+body.tadaza-ascii-scene [class*="file-title"],
+body.tadaza-ascii-scene [class*="file-message__content-title"] {
   color: #ffffff !important;
   font-weight: 600 !important;
   font-size: 14px !important;
@@ -826,45 +843,45 @@ body.tadaza-theme-hawaiian [class*="file-message__content-title"] {
 }
 
 /* File size and status (Đã có trên máy, size, ticks) */
-body.tadaza-theme-hawaiian .file-message__content-info-size,
-body.tadaza-theme-hawaiian .card-size,
-body.tadaza-theme-hawaiian .file-size,
-body.tadaza-theme-hawaiian .cb-info-file-item__file-size,
-body.tadaza-theme-hawaiian [class*="file-message__content-info"],
-body.tadaza-theme-hawaiian [class*="file-message__content-info-size"],
-body.tadaza-theme-hawaiian [class*="tick-text"],
-body.tadaza-theme-hawaiian [class*="file-progress-no"] {
-  color: #8ec2d2 !important;
+body.tadaza-ascii-scene .file-message__content-info-size,
+body.tadaza-ascii-scene .card-size,
+body.tadaza-ascii-scene .file-size,
+body.tadaza-ascii-scene .cb-info-file-item__file-size,
+body.tadaza-ascii-scene [class*="file-message__content-info"],
+body.tadaza-ascii-scene [class*="file-message__content-info-size"],
+body.tadaza-ascii-scene [class*="tick-text"],
+body.tadaza-ascii-scene [class*="file-progress-no"] {
+  color: var(--sc-text-2) !important;
   font-size: 12px !important;
   border: none !important;
 }
 
 /* Status icon checkmark (Đã có trên máy) */
-body.tadaza-theme-hawaiian [class*="file-message__content-info-tick-text--status-downloaded"],
-body.tadaza-theme-hawaiian [class*="status-downloaded"] {
+body.tadaza-ascii-scene [class*="file-message__content-info-tick-text--status-downloaded"],
+body.tadaza-ascii-scene [class*="status-downloaded"] {
   color: #38ef7d !important;
 }
 
 /* Action icons on file card (View, Open folder, Download) - Clean small buttons */
-body.tadaza-theme-hawaiian .file-message__actions-icon,
-body.tadaza-theme-hawaiian .file-action-item i,
-body.tadaza-theme-hawaiian .file-actions-row__wrap,
-body.tadaza-theme-hawaiian .file-actions-row__icon,
-body.tadaza-theme-hawaiian [class*="file-message__actions-icon"],
-body.tadaza-theme-hawaiian [class*="file-action-item"] i {
-  background: rgba(15, 195, 255, 0.16) !important;
-  border: 1px solid rgba(15, 195, 255, 0.35) !important;
-  color: #e6f7fa !important;
-  fill: #e6f7fa !important;
+body.tadaza-ascii-scene .file-message__actions-icon,
+body.tadaza-ascii-scene .file-action-item i,
+body.tadaza-ascii-scene .file-actions-row__wrap,
+body.tadaza-ascii-scene .file-actions-row__icon,
+body.tadaza-ascii-scene [class*="file-message__actions-icon"],
+body.tadaza-ascii-scene [class*="file-action-item"] i {
+  background: rgba(var(--sc-accent-rgb), 0.16) !important;
+  border: 1px solid rgba(var(--sc-accent-rgb), 0.35) !important;
+  color: var(--sc-text) !important;
+  fill: var(--sc-text) !important;
   border-radius: 6px !important;
   transition: all 0.15s ease !important;
 }
 
-body.tadaza-theme-hawaiian .file-message__actions-icon:hover,
-body.tadaza-theme-hawaiian .file-action-item i:hover,
-body.tadaza-theme-hawaiian .file-actions-row__wrap:hover {
-  background: rgba(15, 195, 255, 0.35) !important;
-  border-color: #0fc3ff !important;
+body.tadaza-ascii-scene .file-message__actions-icon:hover,
+body.tadaza-ascii-scene .file-action-item i:hover,
+body.tadaza-ascii-scene .file-actions-row__wrap:hover {
+  background: rgba(var(--sc-accent-rgb), 0.35) !important;
+  border-color: var(--sc-accent) !important;
   color: #ffffff !important;
   fill: #ffffff !important;
 }
@@ -875,9 +892,9 @@ body.tadaza-theme-hawaiian .file-actions-row__wrap:hover {
    -------------------------------------------------------------------------- */
 
 /* Code Card Container in chat messages */
-body.tadaza-theme-hawaiian .tadaza-code-card {
-  background: rgba(3, 16, 25, 0.92) !important;
-  border: 1px solid rgba(15, 195, 255, 0.3) !important;
+body.tadaza-ascii-scene .tadaza-code-card {
+  background: rgba(var(--sc-glass-deep-rgb), 0.92) !important;
+  border: 1px solid rgba(var(--sc-accent-rgb), 0.3) !important;
   border-radius: 10px !important;
   box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45) !important;
   margin: 8px 0 !important;
@@ -885,17 +902,17 @@ body.tadaza-theme-hawaiian .tadaza-code-card {
   text-align: left !important;
 }
 
-body.tadaza-theme-hawaiian .tadaza-code-header {
+body.tadaza-ascii-scene .tadaza-code-header {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
-  background: rgba(2, 10, 16, 0.75) !important;
+  background: rgba(var(--sc-glass-deep-rgb), 0.75) !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
   padding: 6px 12px !important;
 }
 
-body.tadaza-theme-hawaiian .tadaza-code-lang,
-body.tadaza-theme-hawaiian .tadaza-code-lang-badge {
+body.tadaza-ascii-scene .tadaza-code-lang,
+body.tadaza-ascii-scene .tadaza-code-lang-badge {
   color: #38bdf8 !important;
   font-weight: 700 !important;
   letter-spacing: 0.5px !important;
@@ -903,65 +920,65 @@ body.tadaza-theme-hawaiian .tadaza-code-lang-badge {
   font-size: 11px !important;
 }
 
-body.tadaza-theme-hawaiian .tadaza-code-copy-btn {
+body.tadaza-ascii-scene .tadaza-code-copy-btn {
   background: rgba(255, 255, 255, 0.08) !important;
   border: 1px solid rgba(255, 255, 255, 0.16) !important;
-  color: #e2f1f8 !important;
+  color: var(--sc-text) !important;
   border-radius: 5px !important;
   padding: 3px 8px !important;
   font-size: 11.5px !important;
   transition: all 0.15s ease !important;
 }
 
-body.tadaza-theme-hawaiian .tadaza-code-copy-btn:hover {
-  background: rgba(15, 195, 255, 0.22) !important;
-  border-color: #0fc3ff !important;
+body.tadaza-ascii-scene .tadaza-code-copy-btn:hover {
+  background: rgba(var(--sc-accent-rgb), 0.22) !important;
+  border-color: var(--sc-accent) !important;
   color: #ffffff !important;
 }
 
-body.tadaza-theme-hawaiian .tadaza-code-copy-btn.copied {
+body.tadaza-ascii-scene .tadaza-code-copy-btn.copied {
   background: #238636 !important;
   border-color: #2ea043 !important;
   color: #ffffff !important;
 }
 
 /* Code Pre and Content */
-body.tadaza-theme-hawaiian .tadaza-code-pre,
-body.tadaza-theme-hawaiian .file-preview__content,
-body.tadaza-theme-hawaiian .file-preview__content pre,
-body.tadaza-theme-hawaiian .file-preview__main pre,
-body.tadaza-theme-hawaiian .file-message pre,
-body.tadaza-theme-hawaiian .card--file pre,
-body.tadaza-theme-hawaiian pre.CodeMirror-line {
-  background: rgba(2, 9, 14, 0.88) !important;
-  color: #e2f1f8 !important;
+body.tadaza-ascii-scene .tadaza-code-pre,
+body.tadaza-ascii-scene .file-preview__content,
+body.tadaza-ascii-scene .file-preview__content pre,
+body.tadaza-ascii-scene .file-preview__main pre,
+body.tadaza-ascii-scene .file-message pre,
+body.tadaza-ascii-scene .card--file pre,
+body.tadaza-ascii-scene pre.CodeMirror-line {
+  background: rgba(var(--sc-glass-deep-rgb), 0.88) !important;
+  color: var(--sc-text) !important;
   font-family: 'JetBrains Mono', 'Fira Code', 'Geist Mono', Consolas, monospace !important;
   font-size: 12.5px !important;
   line-height: 1.55 !important;
   border: none !important;
-  border-bottom: 1px solid rgba(130, 220, 240, 0.2) !important;
+  border-bottom: 1px solid rgba(var(--sc-accent2-rgb), 0.2) !important;
 }
 
-body.tadaza-theme-hawaiian .tadaza-code-content,
-body.tadaza-theme-hawaiian .tadaza-code-line,
-body.tadaza-theme-hawaiian .line-code {
-  color: #e2f1f8 !important;
+body.tadaza-ascii-scene .tadaza-code-content,
+body.tadaza-ascii-scene .tadaza-code-line,
+body.tadaza-ascii-scene .line-code {
+  color: var(--sc-text) !important;
 }
 
 /* Line numbers */
-body.tadaza-theme-hawaiian .line-num,
-body.tadaza-theme-hawaiian .CodeMirror-linenumber {
-  color: #557b8b !important;
+body.tadaza-ascii-scene .line-num,
+body.tadaza-ascii-scene .CodeMirror-linenumber {
+  color: var(--sc-text-3) !important;
   opacity: 0.85 !important;
   user-select: none !important;
 }
 
 /* Inline Code Snippets */
-body.tadaza-theme-hawaiian .tadaza-inline-code,
-body.tadaza-theme-hawaiian code:not(pre code) {
-  background: rgba(15, 195, 255, 0.16) !important;
+body.tadaza-ascii-scene .tadaza-inline-code,
+body.tadaza-ascii-scene code:not(pre code) {
+  background: rgba(var(--sc-accent-rgb), 0.16) !important;
   color: #ff7b72 !important;
-  border: 1px solid rgba(15, 195, 255, 0.3) !important;
+  border: 1px solid rgba(var(--sc-accent-rgb), 0.3) !important;
   border-radius: 4px !important;
   padding: 2px 6px !important;
   font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace !important;
@@ -971,174 +988,174 @@ body.tadaza-theme-hawaiian code:not(pre code) {
 }
 
 /* Rich text input / composer code formatting */
-body.tadaza-theme-hawaiian .rich-text-input code,
-body.tadaza-theme-hawaiian .rich-input code,
-body.tadaza-theme-hawaiian .chat-input-container code,
-body.tadaza-theme-hawaiian [contenteditable] code {
-  background: rgba(15, 195, 255, 0.18) !important;
+body.tadaza-ascii-scene .rich-text-input code,
+body.tadaza-ascii-scene .rich-input code,
+body.tadaza-ascii-scene .chat-input-container code,
+body.tadaza-ascii-scene [contenteditable] code {
+  background: rgba(var(--sc-accent-rgb), 0.18) !important;
   color: #ff7b72 !important;
-  border: 1px solid rgba(15, 195, 255, 0.35) !important;
+  border: 1px solid rgba(var(--sc-accent-rgb), 0.35) !important;
   border-radius: 4px !important;
   padding: 1px 5px !important;
   font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace !important;
   font-size: 0.9em !important;
 }
 
-body.tadaza-theme-hawaiian .rich-text-input pre,
-body.tadaza-theme-hawaiian .rich-input pre,
-body.tadaza-theme-hawaiian .chat-input-container pre,
-body.tadaza-theme-hawaiian [contenteditable] pre {
-  background: rgba(3, 16, 25, 0.85) !important;
-  color: #e2f1f8 !important;
-  border: 1px solid rgba(15, 195, 255, 0.25) !important;
+body.tadaza-ascii-scene .rich-text-input pre,
+body.tadaza-ascii-scene .rich-input pre,
+body.tadaza-ascii-scene .chat-input-container pre,
+body.tadaza-ascii-scene [contenteditable] pre {
+  background: rgba(var(--sc-glass-deep-rgb), 0.85) !important;
+  color: var(--sc-text) !important;
+  border: 1px solid rgba(var(--sc-accent-rgb), 0.25) !important;
   border-radius: 6px !important;
   padding: 8px !important;
   font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace !important;
 }
 
 /* TADaZa Syntax Highlighting (hl-*) */
-body.tadaza-theme-hawaiian .hl-keyword {
+body.tadaza-ascii-scene .hl-keyword {
   color: #cba6f7 !important;
   font-weight: 700 !important;
 }
-body.tadaza-theme-hawaiian .hl-string {
+body.tadaza-ascii-scene .hl-string {
   color: #a6e3a1 !important;
 }
-body.tadaza-theme-hawaiian .hl-number {
+body.tadaza-ascii-scene .hl-number {
   color: #fab387 !important;
   font-weight: 600 !important;
 }
-body.tadaza-theme-hawaiian .hl-boolean {
+body.tadaza-ascii-scene .hl-boolean {
   color: #f38ba8 !important;
   font-weight: 700 !important;
 }
-body.tadaza-theme-hawaiian .hl-comment {
+body.tadaza-ascii-scene .hl-comment {
   color: #6c7086 !important;
   font-style: italic !important;
 }
-body.tadaza-theme-hawaiian .hl-function {
+body.tadaza-ascii-scene .hl-function {
   color: #89b4fa !important;
   font-weight: 600 !important;
 }
-body.tadaza-theme-hawaiian .hl-operator {
+body.tadaza-ascii-scene .hl-operator {
   color: #89dceb !important;
 }
-body.tadaza-theme-hawaiian .hl-punctuation {
+body.tadaza-ascii-scene .hl-punctuation {
   color: #9399b2 !important;
 }
 
 /* CodeMirror Syntax Tokens (cm-*) - Zalo Snippets / File Previews */
-body.tadaza-theme-hawaiian .cm-keyword,
-body.tadaza-theme-hawaiian span.cm-keyword {
+body.tadaza-ascii-scene .cm-keyword,
+body.tadaza-ascii-scene span.cm-keyword {
   color: #cba6f7 !important;
   font-weight: 700 !important;
 }
-body.tadaza-theme-hawaiian .cm-string,
-body.tadaza-theme-hawaiian span.cm-string,
-body.tadaza-theme-hawaiian .cm-string-2,
-body.tadaza-theme-hawaiian span.cm-string-2 {
+body.tadaza-ascii-scene .cm-string,
+body.tadaza-ascii-scene span.cm-string,
+body.tadaza-ascii-scene .cm-string-2,
+body.tadaza-ascii-scene span.cm-string-2 {
   color: #a6e3a1 !important;
 }
-body.tadaza-theme-hawaiian .cm-number,
-body.tadaza-theme-hawaiian span.cm-number {
+body.tadaza-ascii-scene .cm-number,
+body.tadaza-ascii-scene span.cm-number {
   color: #fab387 !important;
   font-weight: 600 !important;
 }
-body.tadaza-theme-hawaiian .cm-comment,
-body.tadaza-theme-hawaiian span.cm-comment {
+body.tadaza-ascii-scene .cm-comment,
+body.tadaza-ascii-scene span.cm-comment {
   color: #6c7086 !important;
   font-style: italic !important;
 }
-body.tadaza-theme-hawaiian .cm-def,
-body.tadaza-theme-hawaiian span.cm-def {
+body.tadaza-ascii-scene .cm-def,
+body.tadaza-ascii-scene span.cm-def {
   color: #89b4fa !important;
   font-weight: 600 !important;
 }
-body.tadaza-theme-hawaiian .cm-variable,
-body.tadaza-theme-hawaiian span.cm-variable {
+body.tadaza-ascii-scene .cm-variable,
+body.tadaza-ascii-scene span.cm-variable {
   color: #cdd6f4 !important;
 }
-body.tadaza-theme-hawaiian .cm-variable-2,
-body.tadaza-theme-hawaiian span.cm-variable-2 {
+body.tadaza-ascii-scene .cm-variable-2,
+body.tadaza-ascii-scene span.cm-variable-2 {
   color: #94e2d5 !important;
 }
-body.tadaza-theme-hawaiian .cm-variable-3,
-body.tadaza-theme-hawaiian span.cm-variable-3 {
+body.tadaza-ascii-scene .cm-variable-3,
+body.tadaza-ascii-scene span.cm-variable-3 {
   color: #f5c2e7 !important;
 }
-body.tadaza-theme-hawaiian .cm-type,
-body.tadaza-theme-hawaiian span.cm-type {
+body.tadaza-ascii-scene .cm-type,
+body.tadaza-ascii-scene span.cm-type {
   color: #f9e2af !important;
   font-weight: 600 !important;
 }
-body.tadaza-theme-hawaiian .cm-property,
-body.tadaza-theme-hawaiian span.cm-property {
+body.tadaza-ascii-scene .cm-property,
+body.tadaza-ascii-scene span.cm-property {
   color: #89b4fa !important;
 }
-body.tadaza-theme-hawaiian .cm-operator,
-body.tadaza-theme-hawaiian span.cm-operator {
+body.tadaza-ascii-scene .cm-operator,
+body.tadaza-ascii-scene span.cm-operator {
   color: #89dceb !important;
 }
-body.tadaza-theme-hawaiian .cm-atom,
-body.tadaza-theme-hawaiian span.cm-atom,
-body.tadaza-theme-hawaiian .cm-builtin,
-body.tadaza-theme-hawaiian span.cm-builtin {
+body.tadaza-ascii-scene .cm-atom,
+body.tadaza-ascii-scene span.cm-atom,
+body.tadaza-ascii-scene .cm-builtin,
+body.tadaza-ascii-scene span.cm-builtin {
   color: #f38ba8 !important;
   font-weight: 600 !important;
 }
-body.tadaza-theme-hawaiian .cm-tag,
-body.tadaza-theme-hawaiian span.cm-tag {
+body.tadaza-ascii-scene .cm-tag,
+body.tadaza-ascii-scene span.cm-tag {
   color: #f38ba8 !important;
   font-weight: 700 !important;
 }
-body.tadaza-theme-hawaiian .cm-attribute,
-body.tadaza-theme-hawaiian span.cm-attribute {
+body.tadaza-ascii-scene .cm-attribute,
+body.tadaza-ascii-scene span.cm-attribute {
   color: #fab387 !important;
 }
-body.tadaza-theme-hawaiian .cm-meta,
-body.tadaza-theme-hawaiian span.cm-meta {
+body.tadaza-ascii-scene .cm-meta,
+body.tadaza-ascii-scene span.cm-meta {
   color: #f9e2af !important;
 }
-body.tadaza-theme-hawaiian .cm-bracket,
-body.tadaza-theme-hawaiian span.cm-bracket {
+body.tadaza-ascii-scene .cm-bracket,
+body.tadaza-ascii-scene span.cm-bracket {
   color: #9399b2 !important;
 }
-body.tadaza-theme-hawaiian .CodeMirror {
-  background: rgba(3, 16, 25, 0.94) !important;
-  color: #e2f1f8 !important;
+body.tadaza-ascii-scene .CodeMirror {
+  background: rgba(var(--sc-glass-deep-rgb), 0.94) !important;
+  color: var(--sc-text) !important;
   border-radius: 8px !important;
-  border: 1px solid rgba(15, 195, 255, 0.25) !important;
+  border: 1px solid rgba(var(--sc-accent-rgb), 0.25) !important;
 }
-body.tadaza-theme-hawaiian .CodeMirror-gutters {
-  background: rgba(2, 10, 16, 0.8) !important;
+body.tadaza-ascii-scene .CodeMirror-gutters {
+  background: rgba(var(--sc-glass-deep-rgb), 0.8) !important;
   border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 
 /* Reaction pill badge on messages */
-body.tadaza-theme-hawaiian .card-send-time,
-body.tadaza-theme-hawaiian .card-with-reaction-v2,
-body.tadaza-theme-hawaiian [class*="card-with-reaction"],
-body.tadaza-theme-hawaiian [class*="react-list"] {
+body.tadaza-ascii-scene .card-send-time,
+body.tadaza-ascii-scene .card-with-reaction-v2,
+body.tadaza-ascii-scene [class*="card-with-reaction"],
+body.tadaza-ascii-scene [class*="react-list"] {
   background: transparent !important;
   border: none !important;
 }
 
 /* Call Notification Cards - Reset wrappers so only 1 single pill border exists */
-body.tadaza-theme-hawaiian .call-msg-wrapper,
-body.tadaza-theme-hawaiian [class*="call-msg-wrapper"],
-body.tadaza-theme-hawaiian .chat-item:has(.call-msg),
-body.tadaza-theme-hawaiian .chat-message:has(.call-msg),
-body.tadaza-theme-hawaiian .card:has(.call-msg),
-body.tadaza-theme-hawaiian .card:has(.call-message),
-body.tadaza-theme-hawaiian .chat-message:has(.call-message) {
+body.tadaza-ascii-scene .call-msg-wrapper,
+body.tadaza-ascii-scene [class*="call-msg-wrapper"],
+body.tadaza-ascii-scene .chat-item:has(.call-msg),
+body.tadaza-ascii-scene .chat-message:has(.call-msg),
+body.tadaza-ascii-scene .card:has(.call-msg),
+body.tadaza-ascii-scene .card:has(.call-message),
+body.tadaza-ascii-scene .chat-message:has(.call-message) {
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
 }
 
 /* Only the actual .call-msg / .call-message has border & background */
-body.tadaza-theme-hawaiian .call-msg,
-body.tadaza-theme-hawaiian .call-message {
+body.tadaza-ascii-scene .call-msg,
+body.tadaza-ascii-scene .call-message {
   border-radius: 14px !important;
   box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35) !important;
   backdrop-filter: blur(16px) !important;
@@ -1146,68 +1163,68 @@ body.tadaza-theme-hawaiian .call-message {
 }
 
 /* Callee / Incoming call (Left side) */
-body.tadaza-theme-hawaiian .call-msg.--callee,
-body.tadaza-theme-hawaiian .call-message.call-message--callee,
-body.tadaza-theme-hawaiian [class*="call-message"][class*="callee"],
-body.tadaza-theme-hawaiian [class*="call-msg"][class*="callee"] {
-  background: rgba(10, 44, 58, 0.9) !important;
-  border: 1px solid rgba(130, 220, 240, 0.35) !important;
+body.tadaza-ascii-scene .call-msg.--callee,
+body.tadaza-ascii-scene .call-message.call-message--callee,
+body.tadaza-ascii-scene [class*="call-message"][class*="callee"],
+body.tadaza-ascii-scene [class*="call-msg"][class*="callee"] {
+  background: rgba(var(--sc-glass-light-rgb), 0.9) !important;
+  border: 1px solid rgba(var(--sc-accent2-rgb), 0.35) !important;
 }
 
 /* Caller / Outgoing call (Right side) */
-body.tadaza-theme-hawaiian .call-msg.--caller,
-body.tadaza-theme-hawaiian .call-message.call-message--caller,
-body.tadaza-theme-hawaiian [class*="call-message"][class*="caller"],
-body.tadaza-theme-hawaiian [class*="call-msg"][class*="caller"] {
-  background: linear-gradient(135deg, rgba(16, 140, 180, 0.92), rgba(10, 105, 138, 0.96)) !important;
-  border: 1px solid rgba(130, 220, 240, 0.45) !important;
+body.tadaza-ascii-scene .call-msg.--caller,
+body.tadaza-ascii-scene .call-message.call-message--caller,
+body.tadaza-ascii-scene [class*="call-message"][class*="caller"],
+body.tadaza-ascii-scene [class*="call-msg"][class*="caller"] {
+  background: linear-gradient(135deg, rgba(var(--sc-accent-deep-rgb), 0.92), rgba(var(--sc-accent-deeper-rgb), 0.96)) !important;
+  border: 1px solid rgba(var(--sc-accent2-rgb), 0.45) !important;
 }
 
 /* Remove all nested borders inside call messages */
-body.tadaza-theme-hawaiian .call-msg *,
-body.tadaza-theme-hawaiian .call-message * {
+body.tadaza-ascii-scene .call-msg *,
+body.tadaza-ascii-scene .call-message * {
   border: none !important;
   box-shadow: none !important;
 }
 
-body.tadaza-theme-hawaiian .call-message__title-wrapper,
-body.tadaza-theme-hawaiian .call-msg__title,
-body.tadaza-theme-hawaiian [class*="call-message"] [class*="title"],
-body.tadaza-theme-hawaiian [class*="call-msg"] [class*="title"] {
+body.tadaza-ascii-scene .call-message__title-wrapper,
+body.tadaza-ascii-scene .call-msg__title,
+body.tadaza-ascii-scene [class*="call-message"] [class*="title"],
+body.tadaza-ascii-scene [class*="call-msg"] [class*="title"] {
   color: #ffffff !important;
   font-weight: 600 !important;
   font-size: 13.5px !important;
 }
 
-body.tadaza-theme-hawaiian .call-message__content-container,
-body.tadaza-theme-hawaiian .call-msg__content,
-body.tadaza-theme-hawaiian .call-message__content-txt-wrapper,
-body.tadaza-theme-hawaiian [class*="call-message"] [class*="content"],
-body.tadaza-theme-hawaiian [class*="call-msg"] [class*="content"] {
-  color: #d6eef5 !important;
+body.tadaza-ascii-scene .call-message__content-container,
+body.tadaza-ascii-scene .call-msg__content,
+body.tadaza-ascii-scene .call-message__content-txt-wrapper,
+body.tadaza-ascii-scene [class*="call-message"] [class*="content"],
+body.tadaza-ascii-scene [class*="call-msg"] [class*="content"] {
+  color: var(--sc-text) !important;
   font-size: 13px !important;
 }
 
-body.tadaza-theme-hawaiian .call-message__icon-wrapper,
-body.tadaza-theme-hawaiian .call-msg__content__icon,
-body.tadaza-theme-hawaiian [class*="call-msg"] i,
-body.tadaza-theme-hawaiian [class*="call-message"] i,
-body.tadaza-theme-hawaiian [class*="call-msg"] svg,
-body.tadaza-theme-hawaiian [class*="call-message"] svg {
+body.tadaza-ascii-scene .call-message__icon-wrapper,
+body.tadaza-ascii-scene .call-msg__content__icon,
+body.tadaza-ascii-scene [class*="call-msg"] i,
+body.tadaza-ascii-scene [class*="call-message"] i,
+body.tadaza-ascii-scene [class*="call-msg"] svg,
+body.tadaza-ascii-scene [class*="call-message"] svg {
   color: #38ef7d !important;
   fill: #38ef7d !important;
 }
 
 /* Button "Gọi lại" - High contrast glassmorphic pill button */
-body.tadaza-theme-hawaiian .call-message__callback-wrapper,
-body.tadaza-theme-hawaiian .call-msg__callback,
-body.tadaza-theme-hawaiian .call-message__callback-wrapper button,
-body.tadaza-theme-hawaiian .call-msg__callback button,
-body.tadaza-theme-hawaiian .call-message button,
-body.tadaza-theme-hawaiian .call-msg button,
-body.tadaza-theme-hawaiian [class*="call-card"] button,
-body.tadaza-theme-hawaiian .card-call__btn,
-body.tadaza-theme-hawaiian [class*="call-msg"] [class*="callback"] {
+body.tadaza-ascii-scene .call-message__callback-wrapper,
+body.tadaza-ascii-scene .call-msg__callback,
+body.tadaza-ascii-scene .call-message__callback-wrapper button,
+body.tadaza-ascii-scene .call-msg__callback button,
+body.tadaza-ascii-scene .call-message button,
+body.tadaza-ascii-scene .call-msg button,
+body.tadaza-ascii-scene [class*="call-card"] button,
+body.tadaza-ascii-scene .card-call__btn,
+body.tadaza-ascii-scene [class*="call-msg"] [class*="callback"] {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -1226,41 +1243,41 @@ body.tadaza-theme-hawaiian [class*="call-msg"] [class*="callback"] {
   transition: all 0.2s ease !important;
 }
 
-body.tadaza-theme-hawaiian .call-message__callback-wrapper:hover,
-body.tadaza-theme-hawaiian .call-msg__callback:hover,
-body.tadaza-theme-hawaiian .call-message__callback-wrapper button:hover,
-body.tadaza-theme-hawaiian .call-msg__callback button:hover,
-body.tadaza-theme-hawaiian .call-message button:hover,
-body.tadaza-theme-hawaiian .call-msg button:hover,
-body.tadaza-theme-hawaiian [class*="call-msg"] [class*="callback"]:hover {
-  background: rgba(15, 195, 255, 0.4) !important;
-  border-color: #0fc3ff !important;
+body.tadaza-ascii-scene .call-message__callback-wrapper:hover,
+body.tadaza-ascii-scene .call-msg__callback:hover,
+body.tadaza-ascii-scene .call-message__callback-wrapper button:hover,
+body.tadaza-ascii-scene .call-msg__callback button:hover,
+body.tadaza-ascii-scene .call-message button:hover,
+body.tadaza-ascii-scene .call-msg button:hover,
+body.tadaza-ascii-scene [class*="call-msg"] [class*="callback"]:hover {
+  background: rgba(var(--sc-accent-rgb), 0.4) !important;
+  border-color: var(--sc-accent) !important;
   color: #ffffff !important;
-  box-shadow: 0 0 12px rgba(15, 195, 255, 0.5) !important;
+  box-shadow: 0 0 12px rgba(var(--sc-accent-rgb), 0.5) !important;
 }
 
-body.tadaza-theme-hawaiian .call-message__callback-wrapper *,
-body.tadaza-theme-hawaiian .call-msg__callback *,
-body.tadaza-theme-hawaiian .card-call__btn *,
-body.tadaza-theme-hawaiian [class*="call-msg"] [class*="callback"] * {
+body.tadaza-ascii-scene .call-message__callback-wrapper *,
+body.tadaza-ascii-scene .call-msg__callback *,
+body.tadaza-ascii-scene .card-call__btn *,
+body.tadaza-ascii-scene [class*="call-msg"] [class*="callback"] * {
   color: #ffffff !important;
   font-weight: 600 !important;
 }
 
-body.tadaza-theme-hawaiian .call-msg__separator,
-body.tadaza-theme-hawaiian .call-message__separator {
+body.tadaza-ascii-scene .call-msg__separator,
+body.tadaza-ascii-scene .call-message__separator {
   margin: 6px 0 !important;
   border-top: 1px solid rgba(255, 255, 255, 0.15) !important;
   width: 100% !important;
 }
 
 /* Date divider badge */
-body.tadaza-theme-hawaiian .chat-date,
-body.tadaza-theme-hawaiian [class*="chat-date"] {
-  background: rgba(4, 28, 38, 0.65) !important;
+body.tadaza-ascii-scene .chat-date,
+body.tadaza-ascii-scene [class*="chat-date"] {
+  background: rgba(var(--sc-glass-rgb), 0.65) !important;
   backdrop-filter: blur(10px) !important;
   -webkit-backdrop-filter: blur(10px) !important;
-  color: #a0c7d5 !important;
+  color: var(--sc-text-2) !important;
   border: 1px solid rgba(255, 255, 255, 0.12) !important;
   border-radius: 12px !important;
 }
@@ -1268,44 +1285,44 @@ body.tadaza-theme-hawaiian [class*="chat-date"] {
 /* --------------------------------------------------------------------------
    7. Landing Page & Empty State Screen (High Visibility)
    -------------------------------------------------------------------------- */
-body.tadaza-theme-hawaiian .empty-view,
-body.tadaza-theme-hawaiian .z-empty-view,
-body.tadaza-theme-hawaiian .conv-list-empty-wrapper,
-body.tadaza-theme-hawaiian .qm-empty-hint,
-body.tadaza-theme-hawaiian [class*="empty-view"],
-body.tadaza-theme-hawaiian [class*="emptyScreen"],
-body.tadaza-theme-hawaiian .chat-empty-container {
+body.tadaza-ascii-scene .empty-view,
+body.tadaza-ascii-scene .z-empty-view,
+body.tadaza-ascii-scene .conv-list-empty-wrapper,
+body.tadaza-ascii-scene .qm-empty-hint,
+body.tadaza-ascii-scene [class*="empty-view"],
+body.tadaza-ascii-scene [class*="emptyScreen"],
+body.tadaza-ascii-scene .chat-empty-container {
   background: transparent !important;
 }
 
-body.tadaza-theme-hawaiian .empty-view *,
-body.tadaza-theme-hawaiian .z-empty-view *,
-body.tadaza-theme-hawaiian .conv-list-empty-wrapper *,
-body.tadaza-theme-hawaiian .qm-empty-hint *,
-body.tadaza-theme-hawaiian [class*="empty-view"] *,
-body.tadaza-theme-hawaiian [class*="emptyScreen"] *,
-body.tadaza-theme-hawaiian .chat-empty-container * {
+body.tadaza-ascii-scene .empty-view *,
+body.tadaza-ascii-scene .z-empty-view *,
+body.tadaza-ascii-scene .conv-list-empty-wrapper *,
+body.tadaza-ascii-scene .qm-empty-hint *,
+body.tadaza-ascii-scene [class*="empty-view"] *,
+body.tadaza-ascii-scene [class*="emptyScreen"] *,
+body.tadaza-ascii-scene .chat-empty-container * {
   color: #ffffff !important;
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6) !important;
 }
 
-body.tadaza-theme-hawaiian .empty-view [class*="sub-text"],
-body.tadaza-theme-hawaiian .z-empty-view [class*="sub-text"],
-body.tadaza-theme-hawaiian .qm-empty-hint__txt,
-body.tadaza-theme-hawaiian [class*="empty-view"] p,
-body.tadaza-theme-hawaiian [class*="emptyScreen"] p,
-body.tadaza-theme-hawaiian [class*="empty-view"] [class*="desc"],
-body.tadaza-theme-hawaiian [class*="empty"] [class*="desc"],
-body.tadaza-theme-hawaiian [class*="empty-hint"] {
-  color: #e2f7fc !important;
+body.tadaza-ascii-scene .empty-view [class*="sub-text"],
+body.tadaza-ascii-scene .z-empty-view [class*="sub-text"],
+body.tadaza-ascii-scene .qm-empty-hint__txt,
+body.tadaza-ascii-scene [class*="empty-view"] p,
+body.tadaza-ascii-scene [class*="emptyScreen"] p,
+body.tadaza-ascii-scene [class*="empty-view"] [class*="desc"],
+body.tadaza-ascii-scene [class*="empty"] [class*="desc"],
+body.tadaza-ascii-scene [class*="empty-hint"] {
+  color: var(--sc-text) !important;
   font-weight: 500 !important;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.85) !important;
   letter-spacing: 0.3px !important;
 }
 
 /* Ensure chat message view transparency allows Hawaiian Lagoon ASCII live aquarium to show */
-body.tadaza-theme-hawaiian .message-view__blur__overlay_noavatar,
-body.tadaza-theme-hawaiian .message-view__blur__overlay,
+body.tadaza-ascii-scene .message-view__blur__overlay_noavatar,
+body.tadaza-ascii-scene .message-view__blur__overlay,
 .message-view__blur__overlay_noavatar,
 .message-view__blur__overlay {
   background: transparent !important;

@@ -131,7 +131,26 @@
     }
   }
 
-  let activeTab = 'theme'; // 'theme' | 'privacy' | 'translate'
+  let activeTab = 'theme'; // see TADAZA_TABS
+
+  const TADAZA_TABS = [
+    { id: 'theme', label: 'Giao diện', title: 'Giao diện',
+      icon: '<circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/>' },
+    { id: 'privacy', label: 'Riêng tư', title: 'Riêng tư',
+      icon: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>' },
+    { id: 'translate', label: 'Dịch nhanh', title: 'Dịch tin nhắn',
+      icon: '<path d="M5 8l6 6"/><path d="M4 14l6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="M22 22l-5-10-5 10"/><path d="M14 18h6"/>' },
+    { id: 'markdown', label: 'Markdown', title: 'Markdown & Code',
+      icon: '<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>' },
+    { id: 'quick_parser', label: 'VietQR & Vận đơn', title: 'Nhận diện thông minh',
+      icon: '<rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>' },
+    { id: 'floating_chat', label: 'Chat nổi', title: 'Bong bóng chat nổi',
+      icon: '<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>' },
+    { id: 'profiles', label: 'Tài khoản', title: 'Đa tài khoản',
+      icon: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>' },
+    { id: 'system', label: 'Hệ thống', title: 'Hệ thống & Linux',
+      icon: '<rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>' }
+  ];
 
   function renderDrawerContent() {
     const drawer = document.getElementById('tadaza-drawer');
@@ -143,82 +162,44 @@
     const p = currentConfig.privacy;
     const tr = currentConfig.translate;
 
+    const tabDef = TADAZA_TABS.find(x => x.id === activeTab) || TADAZA_TABS[0];
+
     drawer.innerHTML = `
-      <div class="tadaza-header">
-        <div class="tadaza-title-wrap">
-          <span class="tadaza-badge">LINUX</span>
-          <h2 class="tadaza-title">TADaZa Control Center</h2>
+      <div class="tadaza-sidebar">
+        <div class="tadaza-brand">
+          <div class="tadaza-brand-logo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 11a2 2 0 0 1 2-2h1a2 2 0 0 0 2-2 2 2 0 0 1 4 0 2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v1a2 2 0 0 0 2 2 2 2 0 0 1 0 4 2 2 0 0 0-2 2v1a2 2 0 0 1-2 2h-1a2 2 0 0 0-2 2 2 2 0 0 1-4 0 2 2 0 0 0-2-2H6a2 2 0 0 1-2-2v-1a2 2 0 0 0-2-2 2 2 0 0 1 0-4 2 2 0 0 0 2-2z"/>
+            </svg>
+          </div>
+          <div class="tadaza-brand-text">
+            <span class="tadaza-brand-name">TADaZa</span>
+            <span class="tadaza-brand-sub">Tiện ích Zalo Linux</span>
+          </div>
         </div>
-        <button class="tadaza-close-btn" id="tadaza-close" title="Đóng">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
+        <div class="tadaza-tabs">
+          ${TADAZA_TABS.map(tab => `
+            <button class="tadaza-tab-btn ${activeTab === tab.id ? 'active' : ''}" data-tab="${tab.id}" title="${tab.title}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${tab.icon}</svg>
+              <span>${tab.label}</span>
+            </button>
+          `).join('')}
+        </div>
       </div>
 
-      <div class="tadaza-tabs">
-        <button class="tadaza-tab-btn ${activeTab === 'theme' ? 'active' : ''}" data-tab="theme">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle>
-            <circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle>
-            <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle>
-            <circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle>
-            <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"></path>
-          </svg>
-          <span>Giao diện</span>
-        </button>
-        <button class="tadaza-tab-btn ${activeTab === 'privacy' ? 'active' : ''}" data-tab="privacy">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-          </svg>
-          <span>Riêng tư</span>
-        </button>
-        <button class="tadaza-tab-btn ${activeTab === 'translate' ? 'active' : ''}" data-tab="translate">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M5 8l6 6"></path>
-            <path d="M4 14l6-6 2-3"></path>
-            <path d="M2 5h12"></path>
-            <path d="M7 2h1"></path>
-            <path d="M22 22l-5-10-5 10"></path>
-            <path d="M14 18h6"></path>
-          </svg>
-          <span>Dịch thuật</span>
-        </button>
-        <button class="tadaza-tab-btn ${activeTab === 'markdown' ? 'active' : ''}" data-tab="markdown">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="16 18 22 12 16 6"></polyline>
-            <polyline points="8 6 2 12 8 18"></polyline>
-          </svg>
-          <span>Markdown & Code</span>
-        </button>
-        <button class="tadaza-tab-btn ${activeTab === 'quick_parser' ? 'active' : ''}" data-tab="quick_parser">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="5" width="20" height="14" rx="2"></rect>
-            <line x1="2" y1="10" x2="22" y2="10"></line>
-          </svg>
-          <span>Trích xuất & VietQR</span>
-        </button>
-        <button class="tadaza-tab-btn ${activeTab === 'floating_chat' ? 'active' : ''}" data-tab="floating_chat">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
-            <circle cx="12" cy="12" r="3" fill="#89b4fa" stroke="none"></circle>
-          </svg>
-          <span>Chat Head nổi</span>
-        </button>
-        <button class="tadaza-tab-btn ${activeTab === 'profiles' ? 'active' : ''}" data-tab="profiles">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-            <circle cx="9" cy="7" r="4"></circle>
-            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-          </svg>
-          <span>Đa tài khoản</span>
-        </button>
-      </div>
-
-      <div class="tadaza-content">
-        ${renderTabContent()}
+      <div class="tadaza-main">
+        <div class="tadaza-header">
+          <h2 class="tadaza-title">${tabDef.title}</h2>
+          <button class="tadaza-close-btn" id="tadaza-close" title="Đóng">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <div class="tadaza-content">
+          ${renderTabContent()}
+        </div>
       </div>
     `;
 
@@ -255,7 +236,7 @@
       const themeFps = t.theme_fps || t.hawaiian_fps || 20;
       return `
         <div class="tadaza-section">
-          <h3 class="tadaza-section-title">Chế độ hiển thị (Theme)</h3>
+          <h3 class="tadaza-section-title">Chế độ màu</h3>
           <div class="tadaza-item tadaza-item-col">
             <div class="tadaza-btn-group" id="group-theme-mode">
               <button class="tadaza-btn-choice ${t.mode === 'light' ? 'active' : ''}" data-mode="light">
@@ -276,7 +257,7 @@
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
                 </svg>
-                <span>Tối (Dark)</span>
+                <span>Tối</span>
               </button>
               <button class="tadaza-btn-choice ${t.mode === 'system' ? 'active' : ''}" data-mode="system">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -287,16 +268,14 @@
                 <span>Hệ thống</span>
               </button>
             </div>
-            <div class="tadaza-item-desc">Đồng bộ tự động theo theme tối của hệ điều hành hoặc chọn màu tối chuyên sâu.</div>
           </div>
         </div>
 
         <div class="tadaza-section">
-          <h3 class="tadaza-section-title">Phông chữ & Cỡ chữ</h3>
+          <h3 class="tadaza-section-title">Phông chữ</h3>
           <div class="tadaza-item">
             <div class="tadaza-item-info">
-              <span class="tadaza-item-title">Kiểu phông chữ</span>
-              <span class="tadaza-item-desc">Tối ưu hiển thị tiếng Việt sắc nét</span>
+              <span class="tadaza-item-title">Kiểu chữ</span>
             </div>
             <select class="tadaza-select" id="select-font">
               ${FONT_OPTIONS.map(opt => `<option value="${opt.value}" ${t.font_family === opt.value ? 'selected' : ''}>${opt.label}</option>`).join('')}
@@ -305,8 +284,7 @@
 
           <div class="tadaza-item tadaza-item-col">
             <div class="tadaza-item-info">
-              <span class="tadaza-item-title">Kích thước chữ tin nhắn</span>
-              <span class="tadaza-item-desc">Điều chỉnh từ 12px đến 22px</span>
+              <span class="tadaza-item-title">Cỡ chữ tin nhắn</span>
             </div>
             <div class="tadaza-range-wrap">
               <input type="range" class="tadaza-range" id="range-fontsize" min="12" max="22" value="${t.font_size || 14}">
@@ -316,16 +294,16 @@
         </div>
 
         <div class="tadaza-section">
-          <h3 class="tadaza-section-title">Hình nền cuộc trò chuyện</h3>
+          <h3 class="tadaza-section-title">Hình nền trò chuyện</h3>
           <div class="tadaza-item tadaza-item-col">
-            <div style="display:flex; gap:8px;">
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
               <button class="tadaza-action-btn" id="btn-choose-wallpaper">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
                   <circle cx="8.5" cy="8.5" r="1.5"></circle>
                   <polyline points="21 15 16 10 5 21"></polyline>
                 </svg>
-                <span>Chọn ảnh nền từ máy</span>
+                <span>Chọn ảnh…</span>
               </button>
               ${t.wallpaper ? '<button class="tadaza-action-btn secondary" id="btn-clear-wallpaper">Xóa nền</button>' : ''}
             </div>
@@ -340,50 +318,33 @@
         </div>
 
         <div class="tadaza-section">
-          <h3 class="tadaza-section-title" style="display:flex; align-items:center; gap:8px;">
-            <span>Hệ sinh thái động (Ecosystem Themes)</span>
-            <span style="font-size:10px; padding:2px 7px; border-radius:8px; background:linear-gradient(135deg, #10b981, #0fc3ff); color:#fff; font-weight:700;">ASCII LIVE</span>
+          <h3 class="tadaza-section-title">
+            <span>Nền động</span>
+            <span class="tadaza-pill live">LIVE</span>
           </h3>
-          <div class="tadaza-item-desc" style="margin-bottom:8px;">
-            Mô phỏng hệ sinh thái sống động theo phong cách ASCII Art & kính mờ thủy sinh học.
-          </div>
+          <div class="tadaza-item-desc">Hoạt ảnh ASCII phía sau khung chat, tự giảm FPS khi Zalo không được chọn.</div>
 
           <div class="tadaza-theme-grid" id="tadaza-theme-presets-grid">
-            <div class="tadaza-theme-card ${activePreset === 'hawaiian' ? 'active' : ''}" data-preset="hawaiian">
-              <div class="tadaza-theme-preview hawaiian">🏝️</div>
-              <div class="tadaza-theme-card-title">
-                <span>Hawaiian Lagoon</span>
-                <span class="tadaza-theme-card-tag">SAN HÔ</span>
+            ${[
+              ['hawaiian', '🏝️', 'Hawaiian Lagoon', 'Đại dương'],
+              ['koi', '🎏', 'Hồ Sen Cá Koi', 'Hồ sen'],
+              ['galaxy', '🚀', 'Dải Ngân Hà', 'Vũ trụ'],
+              ['arctic', '🐧', 'Bắc Cực', 'Băng tuyết'],
+              ['spring', '🌸', 'Mùa Xuân', 'Hoa đào'],
+              ['none', '⚪', 'Mặc định', 'Tắt']
+            ].map(([id, icon, name, tag]) => `
+              <div class="tadaza-theme-card ${activePreset === id || (id === 'koi' && activePreset === 'rainforest') || (id === 'galaxy' && activePreset === 'bioforest') ? 'active' : ''}" data-preset="${id}">
+                <div class="tadaza-theme-preview ${id}">${icon}</div>
+                <div class="tadaza-theme-card-title">
+                  <span>${name}</span>
+                  <span class="tadaza-theme-card-tag">${tag}</span>
+                </div>
               </div>
-            </div>
-
-            <div class="tadaza-theme-card ${activePreset === 'rainforest' ? 'active' : ''}" data-preset="rainforest">
-              <div class="tadaza-theme-preview rainforest">🌧️</div>
-              <div class="tadaza-theme-card-title">
-                <span>Cơn Mưa Nhiệt Đới</span>
-                <span class="tadaza-theme-card-tag">MƯA RỪNG</span>
-              </div>
-            </div>
-
-            <div class="tadaza-theme-card ${activePreset === 'bioforest' ? 'active' : ''}" data-preset="bioforest">
-              <div class="tadaza-theme-preview bioforest">🌿</div>
-              <div class="tadaza-theme-card-title">
-                <span>Rừng Ánh Sáng Đêm</span>
-                <span class="tadaza-theme-card-tag">PHÁT QUANG</span>
-              </div>
-            </div>
-
-            <div class="tadaza-theme-card ${activePreset === 'none' ? 'active' : ''}" data-preset="none">
-              <div class="tadaza-theme-preview none">⚪</div>
-              <div class="tadaza-theme-card-title">
-                <span>Mặc định</span>
-                <span class="tadaza-theme-card-tag">OFF</span>
-              </div>
-            </div>
+            `).join('')}
           </div>
 
           ${activePreset !== 'none' ? `
-            <div class="tadaza-item tadaza-item-col sub-item" style="margin-top:12px;">
+            <div class="tadaza-item tadaza-item-col">
               <div class="tadaza-item-info">
                 <span class="tadaza-item-title">Độ rõ hình nền</span>
                 <span class="tadaza-item-desc">Độ mờ / trong suốt của hoạt ảnh nền</span>
@@ -394,16 +355,16 @@
               </div>
             </div>
 
-            <div class="tadaza-item sub-item">
+            <div class="tadaza-item">
               <div class="tadaza-item-info">
-                <span class="tadaza-item-title">Tốc độ khung hình (FPS)</span>
-                <span class="tadaza-item-desc">Tự động giảm còn 5 FPS khi chuyển cửa sổ để tiết kiệm pin</span>
+                <span class="tadaza-item-title">Tốc độ khung hình</span>
+                <span class="tadaza-item-desc">Giảm còn 5 FPS khi chuyển sang cửa sổ khác</span>
               </div>
               <select class="tadaza-select" id="select-dynamic-theme-fps">
-                <option value="15" ${themeFps === 15 ? 'selected' : ''}>15 FPS (Cực mát máy)</option>
-                <option value="20" ${themeFps === 20 ? 'selected' : ''}>20 FPS (Khuyên dùng - Chuẩn)</option>
-                <option value="30" ${themeFps === 30 ? 'selected' : ''}>30 FPS (Mượt mà tối đa)</option>
-                <option value="10" ${themeFps === 10 ? 'selected' : ''}>10 FPS (Tiết kiệm pin)</option>
+                <option value="15" ${themeFps === 15 ? 'selected' : ''}>15 FPS (mát máy)</option>
+                <option value="20" ${themeFps === 20 ? 'selected' : ''}>20 FPS (khuyên dùng)</option>
+                <option value="30" ${themeFps === 30 ? 'selected' : ''}>30 FPS (mượt nhất)</option>
+                <option value="10" ${themeFps === 10 ? 'selected' : ''}>10 FPS (tiết kiệm pin)</option>
               </select>
             </div>
           ` : ''}
@@ -414,7 +375,7 @@
     if (activeTab === 'privacy') {
       return `
         <div class="tadaza-section">
-          <h3 class="tadaza-section-title">Chống nhìn trộm (Anti-peeping)</h3>
+          <h3 class="tadaza-section-title">Chống nhìn trộm</h3>
           <div class="tadaza-item">
             <div class="tadaza-item-info">
               <span class="tadaza-item-title">Bật chống nhìn trộm</span>
@@ -496,12 +457,17 @@
           </div>
         </div>
 
+      `;
+    }
+
+    if (activeTab === 'system') {
+      return `
         <div class="tadaza-section">
-          <h3 class="tadaza-section-title">Hệ thống & Cập nhật</h3>
+          <h3 class="tadaza-section-title">Cửa sổ & cập nhật</h3>
           <div class="tadaza-item">
             <div class="tadaza-item-info">
-              <span class="tadaza-item-title">Thu nhỏ xuống khay khi bấm nút đóng (X)</span>
-              <span class="tadaza-item-desc">Mặc định tắt (bấm X để thoát hẳn Zalo). Bật để thu nhỏ xuống khay Tray.</span>
+              <span class="tadaza-item-title">Thu nhỏ xuống khay khi đóng</span>
+              <span class="tadaza-item-desc">Bấm X sẽ ẩn Zalo xuống khay hệ thống thay vì thoát hẳn</span>
             </div>
             <label class="tadaza-switch">
               <input type="checkbox" id="toggle-close-to-tray" ${(currentConfig.system && currentConfig.system.close_to_tray) ? 'checked' : ''}>
@@ -514,25 +480,22 @@
               <span class="tadaza-item-title">Kiểm tra cập nhật</span>
               <span class="tadaza-item-desc" id="tadaza-update-status">Kiểm tra phiên bản mới nhất từ GitHub Releases</span>
             </div>
-            <button class="tadaza-action-btn" id="btn-check-update" style="white-space:nowrap; padding:6px 12px; font-size:12px;">
+            <button class="tadaza-action-btn secondary" id="btn-check-update">
               Kiểm tra ngay
             </button>
           </div>
         </div>
 
         <div class="tadaza-section">
-          <h3 class="tadaza-section-title">Linux: Bộ gõ &amp; Hiển thị</h3>
-          <div class="tadaza-item" style="display:block;">
-            <div class="tadaza-item-info">
-              <span class="tadaza-item-title">Tình trạng hệ thống</span>
-              <span class="tadaza-item-desc" id="tadaza-linux-diag" style="white-space:pre-line;">Đang kiểm tra...</span>
-            </div>
+          <h3 class="tadaza-section-title">Bộ gõ & hiển thị</h3>
+          <div class="tadaza-item tadaza-item-col">
+            <ul class="tadaza-diag" id="tadaza-linux-diag"><li class="info"><span class="dot"></span><span>Đang kiểm tra…</span></li></ul>
           </div>
 
           <div class="tadaza-item">
             <div class="tadaza-item-info">
               <span class="tadaza-item-title">Chế độ hiển thị</span>
-              <span class="tadaza-item-desc">X11 (XWayland): gõ tiếng Việt ổn định trên mọi môi trường. Wayland gốc: nét hơn khi scale lẻ, nhưng trên GNOME bộ gõ sẽ không hoạt động (giới hạn của Electron 22).</span>
+              <span class="tadaza-item-desc">X11 gõ tiếng Việt ổn định. Wayland gốc nét hơn nhưng không gõ được tiếng Việt trên GNOME.</span>
             </div>
             <select class="tadaza-select" id="select-display-mode">
               <option value="x11" ${sys.display_mode !== 'wayland' ? 'selected' : ''}>X11 (khuyên dùng)</option>
@@ -543,32 +506,32 @@
           <div class="tadaza-item">
             <div class="tadaza-item-info">
               <span class="tadaza-item-title">Tỉ lệ hiển thị (HiDPI)</span>
-              <span class="tadaza-item-desc">Dùng khi chữ bị mờ hoặc quá nhỏ ở chế độ X11 với màn hình scale lẻ.</span>
+              <span class="tadaza-item-desc">Dùng khi chữ bị mờ hoặc quá nhỏ trên màn hình scale lẻ</span>
             </div>
             <select class="tadaza-select" id="select-scale-factor">
               ${[0, 1, 1.25, 1.5, 1.75, 2].map(v => `<option value="${v}" ${Number(sys.scale_factor || 0) === v ? 'selected' : ''}>${v === 0 ? 'Tự động' : Math.round(v * 100) + '%'}</option>`).join('')}
             </select>
           </div>
 
-          <div class="tadaza-item" id="tadaza-relaunch-row" style="display:none;">
-            <div class="tadaza-item-info">
-              <span class="tadaza-item-title">Cần khởi động lại</span>
-              <span class="tadaza-item-desc">Thay đổi chế độ hiển thị / tỉ lệ có hiệu lực sau khi mở lại Zalo.</span>
-            </div>
-            <button class="tadaza-action-btn" id="btn-relaunch-zalo" style="white-space:nowrap; padding:6px 12px; font-size:12px;">
-              Khởi động lại
-            </button>
-          </div>
 
           <div class="tadaza-item">
             <div class="tadaza-item-info">
               <span class="tadaza-item-title">Số tin chưa đọc trên Dock &amp; khay</span>
-              <span class="tadaza-item-desc">Hiện số đỏ trên biểu tượng Zalo ở Ubuntu Dock / Dash to Dock / KDE Plasma và ở khay hệ thống.</span>
+              <span class="tadaza-item-desc">Ubuntu Dock, Dash to Dock, KDE Plasma và khay hệ thống</span>
             </div>
             <label class="tadaza-switch">
               <input type="checkbox" id="toggle-unread-badge" ${sys.unread_badge !== false ? 'checked' : ''}>
               <span class="tadaza-slider"></span>
             </label>
+          </div>
+          <div class="tadaza-item" id="tadaza-relaunch-row" hidden>
+            <div class="tadaza-item-info">
+              <span class="tadaza-item-title">Cần khởi động lại</span>
+              <span class="tadaza-item-desc">Thay đổi hiển thị có hiệu lực sau khi mở lại Zalo</span>
+            </div>
+            <button class="tadaza-action-btn" id="btn-relaunch-zalo" >
+              Khởi động lại
+            </button>
           </div>
         </div>
       `;
@@ -577,7 +540,7 @@
     if (activeTab === 'translate') {
       return `
         <div class="tadaza-section">
-          <h3 class="tadaza-section-title">Dịch nhanh tin nhắn tại chỗ</h3>
+          <h3 class="tadaza-section-title">Dịch tại chỗ</h3>
           <div class="tadaza-item">
             <div class="tadaza-item-info">
               <span class="tadaza-item-title">Bật tiện ích dịch nhanh</span>
@@ -599,13 +562,16 @@
             </select>
           </div>
 
+        </div>
+
+        <div class="tadaza-section">
+          <h3 class="tadaza-section-title">Cách dùng</h3>
           <div class="tadaza-item tadaza-item-col">
-            <span class="tadaza-item-title">Cách sử dụng:</span>
-            <div class="tadaza-item-desc">
-              1. Rê chuột vào bất kỳ tin nhắn nào trong cuộc trò chuyện.<br>
-              2. Nhấn vào nút dịch thuật xuất hiện ở góc tin nhắn.<br>
-              3. Bản dịch sẽ xuất hiện trực tiếp ngay dưới tin nhắn.
-            </div>
+            <ol class="tadaza-steps tadaza-item-desc">
+              <li>Rê chuột vào tin nhắn bất kỳ</li>
+              <li>Bấm nút dịch ở góc tin nhắn</li>
+              <li>Bản dịch hiện ngay bên dưới</li>
+            </ol>
           </div>
         </div>
       `;
@@ -615,10 +581,10 @@
       const m = currentConfig.markdown || {};
       return `
         <div class="tadaza-section">
-          <h3 class="tadaza-section-title">Hỗ trợ Markdown & Mã nguồn (Code)</h3>
+          <h3 class="tadaza-section-title">Hiển thị</h3>
           <div class="tadaza-item">
             <div class="tadaza-item-info">
-              <span class="tadaza-item-title">Bật hiển thị Code & Markdown</span>
+              <span class="tadaza-item-title">Hiển thị Markdown & code</span>
               <span class="tadaza-item-desc">Tự động nhận diện block code \`\`\` và hiển thị dạng thẻ đẹp mắt</span>
             </div>
             <label class="tadaza-switch">
@@ -629,7 +595,7 @@
 
           <div class="tadaza-item sub-item ${!m.enabled ? 'tadaza-item-disabled' : ''}">
             <div class="tadaza-item-info">
-              <span class="tadaza-item-title">Tô màu cú pháp (Syntax Highlight)</span>
+              <span class="tadaza-item-title">Tô màu cú pháp</span>
               <span class="tadaza-item-desc">Tô màu từ khóa, chuỗi, hàm cho JS, Python, Go, Rust, C++...</span>
             </div>
             <label class="tadaza-switch">
@@ -640,7 +606,7 @@
 
           <div class="tadaza-item sub-item ${!m.enabled ? 'tadaza-item-disabled' : ''}">
             <div class="tadaza-item-info">
-              <span class="tadaza-item-title">Định dạng chữ nội dòng (Inline)</span>
+              <span class="tadaza-item-title">Định dạng trong dòng</span>
               <span class="tadaza-item-desc">Hỗ trợ \`code\`, **in đậm**, *nghiêng*, ~~gạch ngang~~</span>
             </div>
             <label class="tadaza-switch">
@@ -651,17 +617,17 @@
         </div>
 
         <div class="tadaza-section">
-          <h3 class="tadaza-section-title">Code Studio nhanh</h3>
+          <h3 class="tadaza-section-title">Code Studio</h3>
           <div class="tadaza-item tadaza-item-col">
-            <button class="tadaza-action-btn" id="btn-open-code-studio" style="width: 100%; justify-content: center; height: 38px;">
+            <button class="tadaza-action-btn block" id="btn-open-code-studio">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="16 18 22 12 16 6"></polyline>
                 <polyline points="8 6 2 12 8 18"></polyline>
               </svg>
-              <span style="font-weight: 600;">Mở Code & Markdown Studio (Ctrl+Shift+M)</span>
+              <span>Mở Code Studio</span><span style="opacity:.7; font-weight:500;">Ctrl+Shift+M</span>
             </button>
-            <div class="tadaza-item-desc" style="margin-top: 8px;">
-              Tạo ảnh snippet phong cách macOS (Carbon) độ nét cao Retina 2x để gửi ngay vào Zalo hoặc chèn mã vào ô chat.
+            <div class="tadaza-item-desc">
+              Tạo ảnh code đẹp (độ nét 2x) để gửi vào Zalo, hoặc chèn code vào ô chat.
             </div>
           </div>
         </div>
@@ -672,10 +638,10 @@
       const qp = currentConfig.quick_parser || {};
       return `
         <div class="tadaza-section">
-          <h3 class="tadaza-section-title">Nhận diện & Trích xuất thông minh</h3>
+          <h3 class="tadaza-section-title">Tự động nhận diện</h3>
           <div class="tadaza-item">
             <div class="tadaza-item-info">
-              <span class="tadaza-item-title">Bật Quick Parser</span>
+              <span class="tadaza-item-title">Bật nhận diện thông minh</span>
               <span class="tadaza-item-desc">Tự động nhận diện STK ngân hàng, mã vận đơn, số điện thoại</span>
             </div>
             <label class="tadaza-switch">
@@ -686,8 +652,8 @@
 
           <div class="tadaza-item sub-item ${!qp.enabled ? 'tadaza-item-disabled' : ''}">
             <div class="tadaza-item-info">
-              <span class="tadaza-item-title">Trích xuất STK & Tạo VietQR</span>
-              <span class="tadaza-item-desc">Hiện nút tạo mã QR chuẩn VietQR (quét chuyển tiền ngay)</span>
+              <span class="tadaza-item-title">Số tài khoản → VietQR</span>
+              <span class="tadaza-item-desc">Tạo mã QR chuyển khoản từ STK trong tin nhắn</span>
             </div>
             <label class="tadaza-switch">
               <input type="checkbox" id="toggle-qp-bank" ${qp.enabled && qp.auto_detect_bank ? 'checked' : ''} ${!qp.enabled ? 'disabled' : ''}>
@@ -697,8 +663,8 @@
 
           <div class="tadaza-item sub-item ${!qp.enabled ? 'tadaza-item-disabled' : ''}">
             <div class="tadaza-item-info">
-              <span class="tadaza-item-title">Tra cứu mã vận đơn</span>
-              <span class="tadaza-item-desc">Tự động nhận diện đơn Shopee Express (SPX), GHTK, ViettelPost, J&T</span>
+              <span class="tadaza-item-title">Mã vận đơn</span>
+              <span class="tadaza-item-desc">SPX, GHTK, ViettelPost, J&T — bấm để tra cứu</span>
             </div>
             <label class="tadaza-switch">
               <input type="checkbox" id="toggle-qp-tracking" ${qp.enabled && qp.auto_detect_tracking ? 'checked' : ''} ${!qp.enabled ? 'disabled' : ''}>
@@ -708,8 +674,8 @@
 
           <div class="tadaza-item sub-item ${!qp.enabled ? 'tadaza-item-disabled' : ''}">
             <div class="tadaza-item-info">
-              <span class="tadaza-item-title">Nhận diện Số điện thoại</span>
-              <span class="tadaza-item-desc">Hiện nút bấm 1-click Copy số điện thoại nhanh</span>
+              <span class="tadaza-item-title">Số điện thoại</span>
+              <span class="tadaza-item-desc">Hiện nút sao chép nhanh</span>
             </div>
             <label class="tadaza-switch">
               <input type="checkbox" id="toggle-qp-phone" ${qp.enabled && qp.auto_detect_phone ? 'checked' : ''} ${!qp.enabled ? 'disabled' : ''}>
@@ -735,11 +701,11 @@
       const conv = getActiveConversation();
       return `
         <div class="tadaza-section">
-          <h3 class="tadaza-section-title">Bong bóng chat rời (Desktop Floating PiP)</h3>
+          <h3 class="tadaza-section-title">Bong bóng chat</h3>
           <div class="tadaza-item">
             <div class="tadaza-item-info">
-              <span class="tadaza-item-title">Bật Bong bóng chat rời</span>
-              <span class="tadaza-item-desc">Hiện biểu tượng ghim Chat Head trên thanh tiêu đề cuộc trò chuyện</span>
+              <span class="tadaza-item-title">Bật bong bóng chat nổi</span>
+              <span class="tadaza-item-desc">Thêm nút ghim trên thanh tiêu đề cuộc trò chuyện</span>
             </div>
             <label class="tadaza-switch">
               <input type="checkbox" id="toggle-fc-enabled" ${fc.enabled ? 'checked' : ''}>
@@ -749,8 +715,8 @@
 
           <div class="tadaza-item sub-item ${!fc.enabled ? 'tadaza-item-disabled' : ''}">
             <div class="tadaza-item-info">
-              <span class="tadaza-item-title">Tự động thu nhỏ khi click ra ngoài</span>
-              <span class="tadaza-item-desc">Tự động thu về bong bóng tròn nhỏ khi chuyển sang ứng dụng khác</span>
+              <span class="tadaza-item-title">Tự thu nhỏ khi rời cửa sổ</span>
+              <span class="tadaza-item-desc">Thu về bong bóng tròn khi chuyển sang ứng dụng khác</span>
             </div>
             <label class="tadaza-switch">
               <input type="checkbox" id="toggle-fc-auto-collapse" ${fc.enabled && fc.auto_collapse_blur ? 'checked' : ''} ${!fc.enabled ? 'disabled' : ''}>
@@ -762,15 +728,15 @@
         <div class="tadaza-section">
           <h3 class="tadaza-section-title">Thao tác nhanh</h3>
           <div class="tadaza-item tadaza-item-col">
-            <button class="tadaza-action-btn" id="btn-pin-current-chat" style="width: 100%; justify-content: center; height: 38px;">
+            <button class="tadaza-action-btn block" id="btn-pin-current-chat">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
                 <circle cx="12" cy="12" r="3" fill="#89b4fa" stroke="none"></circle>
               </svg>
-              <span style="font-weight: 600;">Ghim cuộc trò chuyện hiện tại ra Bong bóng</span>
+              <span>Ghim cuộc trò chuyện hiện tại</span>
             </button>
-            <div class="tadaza-item-desc" style="margin-top: 8px;">
-              ${conv ? `Đang mở: <b>${escapeHtml(conv.name)}</b>` : 'Hãy mở một cuộc trò chuyện để ghim nhanh ra góc màn hình desktop!'}
+            <div class="tadaza-item-desc">
+              ${conv ? `Đang mở: <b>${escapeHtml(conv.name)}</b>` : 'Mở một cuộc trò chuyện để ghim ra màn hình.'}
             </div>
           </div>
         </div>
@@ -784,36 +750,40 @@
 
       return `
         <div class="tadaza-section">
-          <h3 class="tadaza-section-title">Hệ thống Đa tài khoản (Profiles)</h3>
+          <h3 class="tadaza-section-title">Đang dùng</h3>
+          <div class="tadaza-item">
+            <div class="tadaza-item-info">
+              <span class="tadaza-item-title">${escapeHtml(curName)}</span>
+              <span class="tadaza-item-desc">Mỗi tài khoản có dữ liệu và phiên đăng nhập riêng</span>
+            </div>
+            <span class="tadaza-pill success"><span class="profile-dot"></span>Đang chạy</span>
+          </div>
           <div class="tadaza-item tadaza-item-col">
-            <div class="tadaza-item-desc" style="line-height: 1.6;">
-              Lưu trữ nhiều phiên đăng nhập Zalo độc lập (Tài khoản cá nhân, Tài khoản bán hàng, Công việc) ngay trên ứng dụng máy tính, không cần mở Zalo Web trên trình duyệt.
-            </div>
-            <div style="margin-top: 10px; padding: 10px 14px; border-radius: 10px; background: rgba(0, 104, 255, 0.08); border: 1px solid rgba(0, 104, 255, 0.2); display: flex; align-items: center; justify-content: space-between;">
-              <div style="font-size: 13px;">Tài khoản hiện tại: <b style="color: #0068ff;">${escapeHtml(curName)}</b></div>
-              <span class="tadaza-profile-badge-active"><span class="profile-dot"></span> Đang chạy</span>
-            </div>
-            <button class="tadaza-action-btn" id="btn-open-profiles-modal-from-drawer" style="width: 100%; justify-content: center; height: 40px; margin-top: 12px; font-weight: 600; background: #0068ff; color: white;">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <button class="tadaza-action-btn block" id="btn-open-profiles-modal-from-drawer">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                 <circle cx="9" cy="7" r="4"></circle>
                 <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
                 <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
               </svg>
-              <span>Mở Bảng Quản lý Đa tài khoản</span>
+              <span>Quản lý tài khoản</span><span style="opacity:.7; font-weight:500;">Ctrl+Shift+P</span>
             </button>
           </div>
         </div>
 
         <div class="tadaza-section">
-          <h3 class="tadaza-section-title">Tính năng nổi bật</h3>
-          <div class="tadaza-item tadaza-item-col">
-            <span class="tadaza-item-title">⚡ 1. Chuyển đổi 1-Click (Quick Switch)</span>
-            <div class="tadaza-item-desc">Hoán đổi phiên làm việc và khởi động lại vào tài khoản mới chỉ trong 1-2 giây, dữ liệu tin nhắn tách biệt tuyệt đối an toàn.</div>
+          <h3 class="tadaza-section-title">Có thể làm gì</h3>
+          <div class="tadaza-item">
+            <div class="tadaza-item-info">
+              <span class="tadaza-item-title">Chuyển tài khoản</span>
+              <span class="tadaza-item-desc">Khởi động lại vào tài khoản khác trong vài giây, tin nhắn tách biệt</span>
+            </div>
           </div>
-          <div class="tadaza-item tadaza-item-col" style="margin-top: 8px;">
-            <span class="tadaza-item-title">🚀 2. Mở song song (Dual Windows)</span>
-            <div class="tadaza-item-desc">Mở đồng thời 2 hoặc nhiều cửa sổ Zalo cạnh nhau trên màn hình để vừa chat cá nhân vừa trả lời khách hàng cùng lúc!</div>
+          <div class="tadaza-item">
+            <div class="tadaza-item-info">
+              <span class="tadaza-item-title">Mở song song</span>
+              <span class="tadaza-item-desc">Chạy nhiều cửa sổ Zalo cùng lúc, mỗi cửa sổ một tài khoản</span>
+            </div>
           </div>
         </div>
       `;
@@ -1041,6 +1011,9 @@
         });
       }
 
+    }
+
+    if (activeTab === 'system') {
       const closeToTray = drawer.querySelector('#toggle-close-to-tray');
       if (closeToTray) {
         closeToTray.addEventListener('change', () => {
@@ -1070,29 +1043,29 @@
       // Linux: input method / display backend / badge
       const diagEl = drawer.querySelector('#tadaza-linux-diag');
       if (diagEl && window.electronAPI && window.electronAPI.invoke) {
+        const row = (cls, text) => `<li class="${cls}"><span class="dot"></span><span>${escapeHtml(text)}</span></li>`;
         window.electronAPI.invoke('tadaza:linux-diagnostics').then(d => {
           if (!d || d.error) {
-            diagEl.textContent = 'Không đọc được thông tin hệ thống' + (d && d.error ? ': ' + d.error : '');
+            diagEl.innerHTML = row('warn', 'Không đọc được thông tin hệ thống' + (d && d.error ? ': ' + d.error : ''));
             return;
           }
           const imName = d.inputMethod === 'fcitx' ? 'Fcitx5' : d.inputMethod === 'ibus' ? 'IBus' : null;
-          const imLine = imName
-            ? `${d.gtkImModuleFound === false ? '⚠️' : '✅'} Bộ gõ: ${imName} (GTK_IM_MODULE=${d.gtkImModule || 'mặc định'}${d.gtkImModuleSource === 'auto' ? ', tự cấu hình' : ''})`
-            : '⚠️ Không thấy ibus/fcitx5 đang chạy — hãy cài ibus-bamboo, ibus-unikey hoặc fcitx5-unikey';
-          const lines = [
-            `🖥️ Phiên: ${d.session === 'wayland' ? 'Wayland' : 'X11'}${d.desktop ? ' · ' + d.desktop : ''} → Zalo đang chạy ${d.displayMode === 'wayland' ? 'Wayland gốc' : 'X11/XWayland'}`,
-            imLine,
-            `${d.pipewireCapture ? '✅ Chia sẻ màn hình qua PipeWire (xdg-desktop-portal)' : '✅ Chia sẻ màn hình qua X11'}`,
-            `🔴 Badge: ${d.desktopFileId || '?'}${d.scaleFactor ? ' · Tỉ lệ ép ' + Math.round(d.scaleFactor * 100) + '%' : ''}`
-          ].concat((d.warnings || []).map(w => '⚠️ ' + w));
-          diagEl.textContent = lines.join('\n');
+          const items = [
+            row('ok', `Phiên ${d.session === 'wayland' ? 'Wayland' : 'X11'}${d.desktop ? ' (' + d.desktop + ')' : ''} — Zalo chạy ${d.displayMode === 'wayland' ? 'Wayland gốc' : 'X11'}`),
+            imName
+              ? row(d.gtkImModuleFound === false ? 'warn' : 'ok', `Bộ gõ ${imName} — GTK_IM_MODULE=${d.gtkImModule || 'mặc định'}`)
+              : row('warn', 'Chưa thấy bộ gõ — cài ibus-bamboo, ibus-unikey hoặc fcitx5-unikey'),
+            row('ok', d.pipewireCapture ? 'Chia sẻ màn hình qua PipeWire' : 'Chia sẻ màn hình qua X11'),
+            row('info', `Badge dock: ${d.desktopFileId || '?'}${d.scaleFactor ? ' · tỉ lệ ' + Math.round(d.scaleFactor * 100) + '%' : ''}`)
+          ].concat((d.warnings || []).map(w => row('warn', w)));
+          diagEl.innerHTML = items.join('');
         }).catch(e => {
-          diagEl.textContent = 'Không đọc được thông tin hệ thống: ' + e.message;
+          diagEl.innerHTML = row('warn', 'Không đọc được thông tin hệ thống: ' + e.message);
         });
       }
 
       const relaunchRow = drawer.querySelector('#tadaza-relaunch-row');
-      const showRelaunch = () => { if (relaunchRow) relaunchRow.style.display = ''; };
+      const showRelaunch = () => { if (relaunchRow) relaunchRow.hidden = false; };
 
       const displayMode = drawer.querySelector('#select-display-mode');
       if (displayMode) {
