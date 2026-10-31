@@ -1,6 +1,6 @@
 node_modules/
-dist/
-build/
+/dist/
+/build/
 *.AppImage
 *.deb
 *.rpm
@@ -10,3 +10,18 @@ package-lock.json
 __pycache__/
 *.pyc
 *.pyo
+
+# Zalo's own code is not part of this repo. `npm run zalo:prepare` downloads the official
+# installer and assembles zalo_source/; only our files in it are tracked.
+/zalo_source/*
+!/zalo_source/bootstrap.js
+!/zalo_source/linux_compat/
+!/zalo_source/native/
+/zalo_source/native/*
+!/zalo_source/native/nativelibs/
+/zalo_source/native/nativelibs/*
+!/zalo_source/native/nativelibs/sqlite3/
+/zalo_source/native/nativelibs/sqlite3/*
+!/zalo_source/native/nativelibs/sqlite3/binding/
+/zalo_source/native/nativelibs/sqlite3/binding/*
+!/zalo_source/native/nativelibs/sqlite3/binding/napi-v6-linux-x64/

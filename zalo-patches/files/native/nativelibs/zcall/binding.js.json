@@ -1,0 +1,11 @@
+{
+ "path": "native/nativelibs/zcall/binding.js",
+ "base_sha256": "0f15095f1714262481c1526410113a7a75cbd463de1b9b77d949106359f31cb2",
+ "result_sha256": "3e426fe3d9f94466b0d5c06f9601bbe97c1ec66a58971035bd0ed29087c46c8a",
+ "edits": [
+  {
+   "find": "/zcall_mac.node');\r\n    }else{\r\n        return {",
+   "replace": "/zcall_mac.node');\r\n    }else if(process.platform === 'linux'){\r\n        return require('../../../linux_compat/mocks/zcall.js');\r\n    }else{\r\n        return {"
+  }
+ ]
+}

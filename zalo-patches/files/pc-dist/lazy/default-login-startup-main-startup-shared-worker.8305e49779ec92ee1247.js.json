@@ -1,0 +1,19 @@
+{
+ "path": "pc-dist/lazy/default-login-startup-main-startup-shared-worker.8305e49779ec92ee1247.js",
+ "base_sha256": "40b2553271f0d9d8d8e512c20025d1f8bb07afdbfdad1a32a2558143577c9992",
+ "result_sha256": "64c00c2c23ea0a605d56de37d64ef78e72f9a15a05c19d12c66090e0d38260ca",
+ "edits": [
+  {
+   "find": "abelFromDrive=async e=>{return(await(async()=>{const e=await",
+   "replace": "abelFromDrive=async e=>{try{const m=await(async()=>{const e=await"
+  },
+  {
+   "find": "atDrivePath)(t):t]})})())[e].label},this.initializeDefault",
+   "replace": "atDrivePath)(t):t]})})();const item=m[e]||m[\"/\"]||m[\"C:\"]||m[0];return(item&&item.label)?item.label:\"Root\"}catch(err){return\"Root\"}},this.initializeDefault"
+  },
+  {
+   "find": ")?n:r?h?this.fromDB(s,h):h:h?this.fromDB(s,h):n}async _sqlFind(e",
+   "replace": ")?n:r?h?this.fromDB(s,h):n:h?this.fromDB(s,h):n}async _sqlFind(e"
+  }
+ ]
+}

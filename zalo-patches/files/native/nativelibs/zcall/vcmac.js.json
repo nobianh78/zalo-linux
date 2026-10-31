@@ -1,0 +1,11 @@
+{
+ "path": "native/nativelibs/zcall/vcmac.js",
+ "base_sha256": "3851280c403ad363ada2dafe59e34bd99b83209a4de1614b384e5cbfadada3a4",
+ "result_sha256": "d21f1129ae0ef85a417543603fff78ef6794af44013bb34bf9fbf8e5116f684b",
+ "edits": [
+  {
+   "find": ".openRender.bind(this);\r\n\t}\t\r\n\r\n\t///////////inco",
+   "replace": ".openRender.bind(this);\r\n\t\t// Bind all methods to this for Electron context bridge serialization\r\n\t\tconst proto = Object.getPrototypeOf(this);\r\n\t\tfor (const name of Object.getOwnPropertyNames(proto)) {\r\n\t\t\tif (typeof this[name] === 'function' && name !== 'constructor') {\r\n\t\t\t\tthis[name] = this[name].bind(this);\r\n\t\t\t}\r\n\t\t}\r\n\t}\t\r\n\r\n\t///////////inco"
+  }
+ ]
+}

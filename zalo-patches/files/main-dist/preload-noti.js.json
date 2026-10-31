@@ -1,0 +1,19 @@
+{
+ "path": "main-dist/preload-noti.js",
+ "base_sha256": "feef327452ebdf338b2fd1868bb05eef00ed5e35736f9fcb7fec316dd7bf37af",
+ "result_sha256": "6b280311a2d546b2d333dd0c141cfa819b5dde8b0c27037636e5194650c9dd86",
+ "edits": [
+  {
+   "find": "(e,t){e.exports=require(\"..\\\\native\\\\nativelibs\")},EZmK:function(e,t,n){",
+   "replace": "(e,t){e.exports=require(\"../native/nativelibs\")},EZmK:function(e,t,n){"
+  },
+  {
+   "find": " Windows\");const t=ft();return t.startsWith(e)?t:B.join(e,c.c,c.d,B.se",
+   "replace": " Windows\");const t=ft();return (!e||typeof e!==\"string\"||t.startsWith(e))?t:B.join(e,c.c,c.d,B.se"
+  },
+  {
+   "find": "urn t?`${t[1]}\\\\`:null},i=e=>Object(r.gethomeDirSync)().startsWith(e),o=e=>e.endsWith(\":\\\\\")?",
+   "replace": "urn t?`${t[1]}\\\\`:null},i=e=>(!e||typeof e!==\"string\"||e===\"/\"||Object(r.gethomeDirSync)().startsWith(e)),o=e=>e.endsWith(\":\\\\\")?"
+  }
+ ]
+}

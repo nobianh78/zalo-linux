@@ -1,0 +1,23 @@
+{
+ "path": "main-dist/preload-render.js",
+ "base_sha256": "ddb4b1f086e512ea02fd3d0cf03aa8854b019729dfca7d6f85364b2dc4410551",
+ "result_sha256": "a3b945e1ad4dfa290468274a0988f41a0d2337e1f60e62a97abca3a2f6864bc3",
+ "edits": [
+  {
+   "find": "(e,t){e.exports=require(\"..\\\\native\\\\nativelibs\")},EZmK:function(e,t,n){",
+   "replace": "(e,t){e.exports=require(\"../native/nativelibs\")},EZmK:function(e,t,n){"
+  },
+  {
+   "find": " Windows\");const t=ft();return t.startsWith(e)?t:D.join(e,c.c,c.d,D.se",
+   "replace": " Windows\");const t=ft();return (!e||typeof e!==\"string\"||t.startsWith(e))?t:D.join(e,c.c,c.d,D.se"
+  },
+  {
+   "find": "urn t?`${t[1]}\\\\`:null},i=e=>Object(r.gethomeDirSync)().startsWith(e),o=e=>e.endsWith(\":\\\\\")?",
+   "replace": "urn t?`${t[1]}\\\\`:null},i=e=>(!e||typeof e!==\"string\"||e===\"/\"||Object(r.gethomeDirSync)().startsWith(e)),o=e=>e.endsWith(\":\\\\\")?"
+  },
+  {
+   "find": ":r,ensureDirSync:a}}});\n//# sourceMappingURL=sou",
+   "replace": ":r,ensureDirSync:a}}});\n\n// --- TADaZa Bridge Preload Hook ---\ntry {\n  const electron = require('electron');\n  if (electron && electron.contextBridge && electron.ipcRenderer) {\n    electron.contextBridge.exposeInMainWorld('tadazaBridge', {\n      getConfig: () => electron.ipcRenderer.invoke('tadaza:get-config'),\n      saveConfig: (cfg) => electron.ipcRenderer.invoke('tadaza:save-config', cfg),\n      translate: (args) => electron.ipcRenderer.invoke('tadaza:translate', args),\n      chooseWallpaper: () => electron.ipcRenderer.invoke('tadaza:choose-wallpaper'),\n      copyImage: (dataUri) => electron.ipcRenderer.invoke('tadaza:copy-image', dataUri),\n      openExternal: (url) => electron.ipcRenderer.invoke('tadaza:open-external', url),\n      pinChatHead: (chatData) => electron.ipcRenderer.invoke('tadaza:chathead-pin', chatData),\n      unpinChatHead: (chatId) => electron.ipcRenderer.invoke('tadaza:chathead-unpin', chatId),\n      syncChatHead: (data) => electron.ipcRenderer.send('tadaza:chathead-sync-from-main', data),\n      onChatHeadSend: (cb) => {\n        electron.ipcRenderer.on('tadaza:chathead-send-to-main', (event, data) => {\n          if (typeof cb === 'function') cb(data);\n        });\n      },\n      onChatHeadStateChanged: (cb) => {\n        electron.ipcRenderer.on('tadaza:chathead-state-changed', (event, state) => {\n          if (typeof cb === 'function') cb(state);\n        });\n      },\n      // Multi-Account Profiles Bridge\n      getProfiles: () => electron.ipcRenderer.invoke('tadaza:get-profiles'),\n      addProfile: (name) => electron.ipcRenderer.invoke('tadaza:add-profile', { name }),\n      renameProfile: (profileId, newName) => electron.ipcRenderer.invoke('tadaza:rename-profile', { profileId, newName }),\n      updateProfileInfo: (info) => electron.ipcRenderer.invoke('tadaza:update-profile-info', info),\n      deleteProfile: (profileId, deleteFiles) => electron.ipcRenderer.invoke('tadaza:delete-profile', { profileId, deleteFiles }),\n      switchProfile: (profileId) => electron.ipcRenderer.invoke('tadaza:switch-profile', { profileId }),\n      launchDualProfile: (profileId) => electron.ipcRenderer.invoke('tadaza:launch-dual-profile', { profileId }),\n      onConfigChanged: (cb) => {\n        electron.ipcRenderer.on('tadaza:config-changed', (event, cfg) => {\n          if (typeof cb === 'function') cb(cfg);\n        });\n      }\n    });\n  }\n} catch (e) {\n  console.warn('[TADaZa Preload] Failed to register tadazaBridge:', e.message);\n}\n\n//# sourceMappingURL=sou"
+  }
+ ]
+}

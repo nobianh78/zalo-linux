@@ -1,0 +1,35 @@
+{
+ "path": "main-dist/utility-process-sqlite.js",
+ "base_sha256": "77379a875f6603bf3fcc78d636ae0b1be12f46f12149f83b463bb99428a28f17",
+ "result_sha256": "0a2d8d7f8b61a0c6e7dab223e8ba04603153208fd2dc8bd868b3a028102a163e",
+ "edits": [
+  {
+   "find": "__ZaBUNDLENAME__=\"utilit",
+   "replace": "try { require(\"fs\").writeFileSync(\"/tmp/sqlite_uproc_started_\" + process.pid, \"PID: \" + process.pid + \"\\n\"); } catch(e){}\ntry {\n  const fs = require('fs');\n  process.on('unhandledRejection', (reason, promise) => {\n    const msg = `[REJECTION] ${new Date().toISOString()} ${reason && reason.stack ? reason.stack : reason}\\n`;\n    console.error('[CRITICAL UNHANDLED REJECTION in utility-process-sqlite.js]', reason);\n    try { fs.appendFileSync('/tmp/sqlite_uproc_error.log', msg); } catch(e){}\n  });\n  process.on('uncaughtException', (error) => {\n    const msg = `[UNCAUGHT] ${new Date().toISOString()} ${error && error.stack ? error.stack : error}\\n`;\n    console.error('[CRITICAL UNCAUGHT EXCEPTION in utility-process-sqlite.js]', error);\n    try { fs.appendFileSync('/tmp/sqlite_uproc_error.log', msg); } catch(e){}\n  });\n} catch(e){}\n__ZaBUNDLENAME__=\"utilit"
+  },
+  {
+   "find": "(e,t){e.exports=require(\"..\\\\native\\\\nativelibs\")},EhhY:function(e,t,n){",
+   "replace": "(e,t){e.exports=require(\"../native/nativelibs\")},EhhY:function(e,t,n){"
+  },
+  {
+   "find": " Windows\");const t=Je();return t.startsWith(e)?t:g.join(e,c.MIGRATED_P",
+   "replace": " Windows\");const t=Je();return (!e||typeof e!==\"string\"||t.startsWith(e))?t:g.join(e,c.MIGRATED_P"
+  },
+  {
+   "find": "urn t?t[1].toUpperCase()+\":\":null},a=e=>{const t=e.match(",
+   "replace": "urn t?t[1].toUpperCase()+\":\":\"/\"},a=e=>{const t=e.match("
+  },
+  {
+   "find": "urn t?`${t[1]}\\\\`:null},c=e=>Object(i.gethomeDirSync)().startsWith(e),u=e=>(Object(r.b)(!0,\"i",
+   "replace": "urn t?`${t[1]}\\\\`:null},c=e=>(!e||typeof e!==\"string\"||e===\"/\"||Object(i.gethomeDirSync)().startsWith(e)),u=e=>(Object(r.b)(!0,\"i"
+  },
+  {
+   "find": "ughtException\",((e,t)=>{const n=Pt();n.zsymb(21,",
+   "replace": "ughtException\",((e,t)=>{console.error(\"[SQLITE_UPROC_UNCAUGHT_EXCEPTION]\",e);try{const fs=require(\"fs\");fs.appendFileSync(\"/tmp/sqlite_uproc_error.log\",`[EXCEPTION] ${new Date().toISOString()} ${e&&e.stack?e.stack:e}\\n`)}catch(err){}const n=Pt();n.zsymb(21,"
+  },
+  {
+   "find": "gPMuum\",\"stack\",e.stack),e.code&&D.m.includes(e.code)||setTimeout((()=>{const t={type:It.b,data:{type:It.a,data:{reason:e.message||e.code}}};Object(s.b)(t),process.exit(1)}),5e3)}));(async()=>{Pt().zsym",
+   "replace": "gPMuum\",\"stack\",e.stack)}));(async()=>{Pt().zsym"
+  }
+ ]
+}

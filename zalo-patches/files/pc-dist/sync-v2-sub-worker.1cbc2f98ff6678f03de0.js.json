@@ -1,0 +1,27 @@
+{
+ "path": "pc-dist/sync-v2-sub-worker.1cbc2f98ff6678f03de0.js",
+ "base_sha256": "011db0294ffdd0ef91fdb60dfd355570e3a91a0ead957e91922d4dd4901d8749",
+ "result_sha256": "d8fab4cf7d00ca8fe126178842d204f46c600e5018104f6de8ad6c353a44fdd5",
+ "edits": [
+  {
+   "find": " Windows\");const t=Ze();return t.startsWith(e)?t:f.join(e,l.c,l.d,f.se",
+   "replace": " Windows\");const t=Ze();return (!e||typeof e!==\"string\"||t.startsWith(e))?t:f.join(e,l.c,l.d,f.se"
+  },
+  {
+   "find": "urn t?t[1].toUpperCase()+\":\":null},o=e=>{const t=e.match(",
+   "replace": "urn t?t[1].toUpperCase()+\":\":\"/\"},o=e=>{const t=e.match("
+  },
+  {
+   "find": "urn t?`${t[1]}\\\\`:null},l=e=>Object(i.gethomeDirSync)().startsWith(e),c=e=>(Object(a.b)(!0,\"i",
+   "replace": "urn t?`${t[1]}\\\\`:null},l=e=>(!e||typeof e!==\"string\"||e===\"/\"||Object(i.gethomeDirSync)().startsWith(e)),c=e=>(Object(a.b)(!0,\"i"
+  },
+  {
+   "find": "urn t?t[1].toUpperCase()+\":\":null},i=e=>{const t=e.match(",
+   "replace": "urn t?t[1].toUpperCase()+\":\":\"/\"},i=e=>{const t=e.match("
+  },
+  {
+   "find": ")?i:a?u?this.fromDB(n,u):u:u?this.fromDB(n,u):i}async _sqlFind(e",
+   "replace": ")?i:a?u?this.fromDB(n,u):i:u?this.fromDB(n,u):i}async _sqlFind(e"
+  }
+ ]
+}

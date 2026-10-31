@@ -1,0 +1,23 @@
+{
+ "path": "main-dist/utility-process-media.js",
+ "base_sha256": "b08fda899d5533e1718a92b13a0a2adff55bfaf93e34b53ddeb4d58402462937",
+ "result_sha256": "8f5a5918f7bd43c19d24edd8a52c7a1deaba5085774909a7a57ff09c1872d998",
+ "edits": [
+  {
+   "find": "(e,t){e.exports=require(\"..\\\\native\\\\nativelibs\")},EhhY:function(e,t,n){",
+   "replace": "(e,t){e.exports=require(\"../native/nativelibs\")},EhhY:function(e,t,n){"
+  },
+  {
+   "find": " Windows\");const t=Qe();return t.startsWith(e)?t:g.join(e,c.MIGRATED_P",
+   "replace": " Windows\");const t=Qe();return (!e||typeof e!==\"string\"||t.startsWith(e))?t:g.join(e,c.MIGRATED_P"
+  },
+  {
+   "find": "urn t?t[1].toUpperCase()+\":\":null},a=e=>{const t=e.match(",
+   "replace": "urn t?t[1].toUpperCase()+\":\":\"/\"},a=e=>{const t=e.match("
+  },
+  {
+   "find": "urn t?`${t[1]}\\\\`:null},c=e=>Object(i.gethomeDirSync)().startsWith(e),u=e=>(Object(r.b)(!0,\"i",
+   "replace": "urn t?`${t[1]}\\\\`:null},c=e=>(!e||typeof e!==\"string\"||e===\"/\"||Object(i.gethomeDirSync)().startsWith(e)),u=e=>(Object(r.b)(!0,\"i"
+  }
+ ]
+}

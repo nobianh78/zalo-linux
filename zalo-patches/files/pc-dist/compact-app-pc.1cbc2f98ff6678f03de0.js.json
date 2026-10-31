@@ -1,0 +1,23 @@
+{
+ "path": "pc-dist/compact-app-pc.1cbc2f98ff6678f03de0.js",
+ "base_sha256": "6f1f33873f856072b667da7044d59995cdc3c537a60562057f7a437507673696",
+ "result_sha256": "b75c9d36a23c553e4477da64aae603da865477cad114fe0253eb1eba7fcc0743",
+ "edits": [
+  {
+   "find": " Windows\");const t=Ze();return t.startsWith(e)?t:f.join(e,l.c,l.d,f.se",
+   "replace": " Windows\");const t=Ze();return (!e||typeof e!==\"string\"||t.startsWith(e))?t:f.join(e,l.c,l.d,f.se"
+  },
+  {
+   "find": "urn t?t[1].toUpperCase()+\":\":null},o=e=>{const t=e.match(",
+   "replace": "urn t?t[1].toUpperCase()+\":\":\"/\"},o=e=>{const t=e.match("
+  },
+  {
+   "find": "urn t?`${t[1]}\\\\`:null},l=e=>Object(i.gethomeDirSync)().startsWith(e),c=e=>(Object(a.b)(!0,\"i",
+   "replace": "urn t?`${t[1]}\\\\`:null},l=e=>(!e||typeof e!==\"string\"||e===\"/\"||Object(i.gethomeDirSync)().startsWith(e)),c=e=>(Object(a.b)(!0,\"i"
+  },
+  {
+   "find": "urn t?t[1].toUpperCase()+\":\":null},i=e=>{const t=e.match(",
+   "replace": "urn t?t[1].toUpperCase()+\":\":\"/\"},i=e=>{const t=e.match("
+  }
+ ]
+}

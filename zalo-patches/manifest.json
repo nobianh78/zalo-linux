@@ -1,0 +1,59 @@
+{
+  "zalo_version": "26.10.10",
+  "installer": {
+    "url": "https://res-download-pc.zadn.vn/win/ZaloSetup-26.10.10.exe",
+    "sha256": "8f8059620f92e5e1ad9423429e79c92e092b4fd33245ffb66c195a25994a97d7",
+    "size": 213188944
+  },
+  "overlay": [
+    "bootstrap.js",
+    "linux_compat",
+    "native/nativelibs/sqlite3/binding/napi-v6-linux-x64"
+  ],
+  "remove": [
+    "native/nativelibs/db-cross-v4/prebuilt",
+    "native/nativelibs/file-utilities/ia32",
+    "native/nativelibs/file-utilities/x64",
+    "native/nativelibs/file-utils/darwin",
+    "native/nativelibs/file-utils/darwin-arm",
+    "native/nativelibs/file-utils/ia32",
+    "native/nativelibs/file-utils/x64",
+    "native/nativelibs/mp4thumb/win32",
+    "native/nativelibs/sqlite3/binding/napi-v6-win32-ia32",
+    "native/nativelibs/v8-profiles/profiler_electron1.8_win32_ia32.node",
+    "native/nativelibs/win-utils/ia32",
+    "native/nativelibs/zcall/zcall_ia32.node",
+    "native/nativelibs/zfile/win32",
+    "native/nativelibs/zfile/win64",
+    "native/nativelibs/zimage/ia32",
+    "native/nativelibs/zjxl/build",
+    "native/nativelibs/zwalker/win32-ia32-msvc",
+    "native/nativelibs/zwalker/win32-x64-msvc"
+  ],
+  "patched": [
+    "main-dist/compact-app-preload.js",
+    "main-dist/compact-app.js",
+    "main-dist/main.js",
+    "main-dist/mainless-worker.js",
+    "main-dist/preload-noti.js",
+    "main-dist/preload-render.js",
+    "main-dist/preload-shared-worker.js",
+    "main-dist/preload-sqlite.js",
+    "main-dist/utility-process-media.js",
+    "main-dist/utility-process-sqlite.js",
+    "native/nativelibs/db-cross-v4/dist/binding.js",
+    "native/nativelibs/index.js",
+    "native/nativelibs/sqlite3/sqlite3.js",
+    "native/nativelibs/v8-profiles/index.js",
+    "native/nativelibs/zcall/binding.js",
+    "native/nativelibs/zcall/index.js",
+    "native/nativelibs/zcall/vcmac.js",
+    "native/nativelibs/zwalker/index.js",
+    "pc-dist/compact-app-pc.1cbc2f98ff6678f03de0.js",
+    "pc-dist/lazy/default-login-main-startup-shared-worker-znotification.6f212c65a88af76818c5.js",
+    "pc-dist/lazy/default-login-startup-main-startup-shared-worker.8305e49779ec92ee1247.js",
+    "pc-dist/lazy/main-startup.88ecc330054698a13502.js",
+    "pc-dist/search-worker.1cbc2f98ff6678f03de0.js",
+    "pc-dist/sync-v2-sub-worker.1cbc2f98ff6678f03de0.js"
+  ]
+}

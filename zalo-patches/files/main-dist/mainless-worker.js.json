@@ -1,0 +1,11 @@
+{
+ "path": "main-dist/mainless-worker.js",
+ "base_sha256": "18c9d7647e90377d4b056364997f1b74b0b6f28b710a68400238b3d248c03d70",
+ "result_sha256": "1dc10f38fefe37141f1cbcd63f1b9b2a67af75fb344adfcd8f6d43e6bf250ae8",
+ "edits": [
+  {
+   "find": "(e,t){e.exports=require(\"..\\\\native\\\\nativelibs\")},\"Ec/M\":function(e,t,n",
+   "replace": "(e,t){e.exports=require(\"../native/nativelibs\")},\"Ec/M\":function(e,t,n"
+  }
+ ]
+}

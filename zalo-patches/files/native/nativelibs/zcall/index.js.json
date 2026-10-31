@@ -1,0 +1,11 @@
+{
+ "path": "native/nativelibs/zcall/index.js",
+ "base_sha256": "8afbdebab3378f3dcebc7b65dfbb2ba9702faf29a1fb7cec19b5228634ae6fab",
+ "result_sha256": "2ac28e5719fcff1f4e8f1aa0fed85902c36081d9244bdafcdac94cb756ddaa04",
+ "edits": [
+  {
+   "find": ".bindCanvas.bind(this);\r\n\t}\r\n\tbindCanvas(localCa",
+   "replace": ".bindCanvas.bind(this);\r\n\t\t// Bind all methods to this for Electron context bridge serialization\r\n\t\tconst proto = Object.getPrototypeOf(this);\r\n\t\tfor (const name of Object.getOwnPropertyNames(proto)) {\r\n\t\t\tif (typeof this[name] === 'function' && name !== 'constructor') {\r\n\t\t\t\tthis[name] = this[name].bind(this);\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tbindCanvas(localCa"
+  }
+ ]
+}
